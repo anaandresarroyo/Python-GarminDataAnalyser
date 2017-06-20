@@ -1,4 +1,4 @@
-# Use python analyse fitness data recorded with a Garmin Forerunner 35 watch 
+# Use Python to analyse fitness data recorded with a Garmin Forerunner 35 watch 
 
 Work in progress.
 
