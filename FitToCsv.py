@@ -6,70 +6,128 @@ Reads many Garmin .fit file saves all the "record" message data into many CSV fi
 """
 import os
 from fitparse import FitFile
-import numpy as np
 import pandas as pd
 
-def TimestampToElapsed(timestamp,units='s'):
-    """Convert a timestamp Pandas Series to a 
-    Pandas Series of the elapsed time"""
-    # the Garmin Forerunner 35 takes data every 1 second so in most cases the 
-    # elapsed time will be the same as the row index
-    timedelta = timestamp-timestamp[0]
-    elapsed_time = timedelta.astype('timedelta64[s]') # in seconds
-    # don't use 'timedelta64[m]' because it only returns the minute component of the 
-    # timestamp and doesn't take into account the seconds as fractions of a minute
-    if units == 'm':
-        # convert from seconds to minutes
-        elapsed_time = elapsed_time/60 
-    return elapsed_time
+def FitToDataFrame(file_paths,desired_messages=['record'],verbose=True):
+    """Reads all the desired_messages from the .fit files and 
+    generates a dictionary of Pandas DataFrame 
+        
+    Arguments:
+    file_paths : list of strings
+        The file paths to read. If single string converto to list.
+    desired_messages : list of strings (optional)
+        The types of messages to read. If single string converto to list.
+        If the list list has more than 1 element choose only the first one.
+    verbose : bool (optional)
+        If True (default), print progress    
     
+    Output:
+    data_pd_dict: dictionary
+        keys: strings
+            File name without extension and including desired_message
+        values: Pandas DataFrames 
+            Contain the data read from the desired_messages of the file
+    """
 
-folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/'
+    if type(file_paths) is str:
+        file_paths = [file_paths]
+    if type(desired_messages) is str:
+        desired_messages = [desired_messages]
+    if len(desired_messages) > 1:
+        desired_messages = desired_messages[0]
+        print "WARNING!!! Only the first element of desired_messages was used"
+        print
 
-file_names = []
-for file_name in os.listdir(folder_name):
-    file_names.append(file_name)
+    if verbose:
+        print "desired_messages = " + desired_messages[0]
+        print 
     
-# select which messages to read
-desired_messages = [
-#                    'session',
-#                    'activity',
-#                    'sport',
-#                    'lap',
-#                    'event',
-#                    'file_id',
-                    'record'
-                    ]
-
-
-for ifn, file_name in enumerate(file_names):
-    fitfile = FitFile(folder_name + file_name)
+    data_pd_dict = {}
+    for ifn, file_path in enumerate(file_paths):
+        (folder_path,file_name) = os.path.split(file_path)
+        dict_key = file_name.replace('.fit','_' + desired_messages[0])   
+        if verbose:
+            # print summary of file
+            print "Reading file %s / %s\r" % (ifn + 1, len(file_paths))
+            print file_name
+            print
+            
+        fitfile = FitFile(file_path)    
+        # Get all data messages that are of type desired_messages
+        for im, message in enumerate(fitfile.get_messages(desired_messages)):
+#            if message.name == 'record':
+                data_dict = {}
+                units_dict = {}
+                for message_data in message:                        
+                    data_dict[message_data.name] = message_data.value
+                    units_dict[message_data.name] = message_data.units    
+                    #TODO: Figure out a way to incorporate the units into the DataFrame
+                    
+                # Build a Pandas DataFrame with all the recorded data
+                if im == 0:
+                    data_pd = pd.DataFrame(data_dict, index=[im])                
+                else:
+                    data_pd.loc[im] = data_dict                             
+        
+        data_pd_dict[dict_key] = data_pd
+        #TODO: implement something to deal with duplicate file names
     
-    verbose = True;
-    
-    # Get all data messages that are of type desired_messages
-    for im, message in enumerate(fitfile.get_messages(desired_messages)):
-        if message.name == 'record':
-            data_dict = {}
-            units_dict = {}
-            for message_data in message:                        
-                data_dict[message_data.name] = message_data.value
-                units_dict[message_data.name] = message_data.units                
-                
-            # Build pandas dataframe with all the recorded data
-            if im == 0:
-                data_pd = pd.DataFrame(data_dict, index=[im])                
-            else:
-                data_pd.loc[im] = data_dict
-                           
-                          
-    elapsed_time = TimestampToElapsed(data_pd['timestamp'])
-    verbose = True    
-    if verbose == True:
-        # print summary of file
-        print "%s / %s\r" % (ifn + 1, len(file_names))
-        print file_name
+    if verbose:
         print 'Done!'
         print
+    return data_pd_dict
+    
+if __name__ == '__main__':
+
+    # select files to read    
+    folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/'
+    file_names = []
+    file_paths = []
+    for file_name in os.listdir(folder_path_read):
+        file_names.append(file_name)
+        file_paths.append(folder_path_read + file_name)
+        
+    # select where to save the csv files
+    # the files will be sorted into folders according to their sport
+    folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
+    
+    # initialise empty dictionary to count types of sports
+    sport_count = {}
+    
+    for ifn, file_path in enumerate(file_paths):
+        print "Reading file %s / %s\r" % (ifn + 1, len(file_paths))
+        # read session data to obtain the type of sport        
+        fitfile = FitFile(file_path)    
+        for im, message in enumerate(fitfile.get_messages('sport')):
+            sport = message.get_value('sport')
+            print 'sport = ' + sport
+            
+        if sport in sport_count.keys():
+            # if the sport is in sport_count dictionary, add 1
+            sport_count[sport] = sport_count[sport] + 1        
+        else:
+            # else add the message to message_count dictionary, set the value to 1
+            sport_count[sport] = 1
+            
+        # read record data into Pandas DataFrame
+        data_pd_dict = FitToDataFrame(file_path,desired_messages='record',verbose=False)   
+        
+        for key, val in data_pd_dict.items():
+            # save the Pandas DataFrame in the corresponding sport folder
+            file_path = folder_path_save + sport + '/' + key + '.csv'
+            # TODO: create the folder if it doesn't already exist
+            val.to_csv(file_path, sep=',', header=True, index=False)
+            # TODO: implement a safety check not to overwrite existing files
+            
+        print
+        
+    print 'Done!'
+    print
+    
+    # print the sport_count dictionary
+    print "sport: counts ----------"
+    print
+    for key, val in sport_count.items():
+        print "%s: %s" % (key, val)
 
     

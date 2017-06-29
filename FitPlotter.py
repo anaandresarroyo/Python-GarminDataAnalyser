@@ -29,43 +29,45 @@ rcParams.update({'ytick.major.width': 2})
 rcParams.update({'grid.linewidth': 1.5})
 #rcParams.update({'legend.frameon': False})
 
-folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/tests/Cycling/'
+folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit all/'
+#folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/tests/Cycling/'
 #folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/tests/Running/'
 
-#file_names = []
-#for file_name in os.listdir(folder_name):
-#    file_names.append(file_name)
-##    print file_name
+file_names = []
+for file_name in os.listdir(folder_name):
+    file_names.append(file_name)
+#    print file_name
 
-file_names = [
-#              '1736326674.fit', # probike
-#              '1738248352.fit',
-#              '1740125308.fit',
-#              '1748066969.fit',
-#              '1750027812.fit',
-#              '1755525793.fit',
-#              '1759345190.fit',
-#              '1767547532.fit',
-#              '1769462985.fit',
-#              '1771560728.fit',
-#              '1773319990.fit',
-#              '1779930535.fit',
-#              '1783461306.fit',
-#              '1784754409.fit',
-#              '1786757983.fit',
-#              '1793953245.fit',
-#              '1796497051.fit',
-#              '1800679832.fit',
-#              '1806473488.fit',
-#              '1810347567.fit',
-#              '1819685424.fit',
-              '1821550522.fit', # trek
-              '1823366347.fit',
-              ] # cycling
+#file_names = [
+##              '1736326674.fit', # probike
+##              '1738248352.fit',
+##              '1740125308.fit',
+##              '1748066969.fit',
+##              '1750027812.fit',
+##              '1755525793.fit',
+##              '1759345190.fit',
+##              '1767547532.fit',
+##              '1769462985.fit',
+##              '1771560728.fit',
+##              '1773319990.fit',
+##              '1779930535.fit',
+##              '1783461306.fit',
+##              '1784754409.fit',
+##              '1786757983.fit',
+##              '1793953245.fit',
+##              '1796497051.fit',
+##              '1800679832.fit',
+##              '1806473488.fit',
+##              '1810347567.fit',
+##              '1819685424.fit',
+#              '1821550522.fit', # trek
+#              '1823366347.fit',
+#              '1825126472.fit',
+#              ] # cycling
     
               
 plt.figure(figsize=(32,17))
-colour_map = pylab.get_cmap('Reds')
+colour_map = pylab.get_cmap('viridis')
 
 # select which messages to read
 desired_messages = [

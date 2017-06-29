@@ -58,12 +58,12 @@ file_names = [
 #desired_messages = range(300) # all message with codes up to 300
 desired_messages = [
                     'session',
-                    'activity',
-                    'sport',
-                    'lap',
-                    'event',
-                    'file_id',
-                    'record',
+#                    'activity',
+#                    'sport',
+#                    'lap',
+#                    'event',
+#                    'file_id',
+#                    'record',
                     ]
 
 
@@ -72,7 +72,7 @@ for ifn, file_name in enumerate(file_names):
     
     verbose = True;
     
-    # initialise empty array to count types of messages
+    # initialise empty dictionary to count types of messages
     message_count = {}
        
     # Get all data messages that are of type desired_messages
