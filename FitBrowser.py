@@ -7,10 +7,7 @@ Reads a Garmin .fit file and displays the messages and their type
 
 from fitparse import FitFile
 
-
-#folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/'
-#folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/Running/'
-folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/'
+folder_name = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit all/'
 
 #file_name = '1799291774.fit' # squash
 #file_name = '1804849333.fit' # running
@@ -63,7 +60,7 @@ desired_messages = [
 #                    'lap',
 #                    'event',
 #                    'file_id',
-#                    'record',
+                    'record',
                     ]
 
 
