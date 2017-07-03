@@ -8,6 +8,8 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
+#import numpy as np
+#from mpl_toolkits.basemap import Basemap
 
 from matplotlib import rcParams
 rcParams.update({'font.size': 36})
@@ -51,32 +53,50 @@ if __name__ == '__main__':
 
     folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
     folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
-#    sport = 'cycling'
-#    sport = 'running'
-    sport = 'walking'
-#    sport = 'training'
-    folder_path_read = folder_path_read + sport + '/'
+    sports = [
+             'walking',
+             'cycling',
+             'running',
+#             'training',
+             ]
+    sports_colours = [
+                     'g',                    
+                     'b',
+                     'r',
+#                     'k'
+                     ]
+             
 #    time_units = 'h'    
 #    time_units = 'min'
     time_units = 'sec'
     
     # select files to read    
     # TODO: open a pop up window for the user to select the files
-    file_names = ['1729258358_record.csv']
-    file_paths = []    
-    for file_name in file_names:
-        file_paths.append(folder_path_read + file_name)
-#    file_names = []
+
+#    file_names = ['1729258358_record.csv']
 #    file_paths = []    
-#    for file_name in os.listdir(folder_path_read):
-#        file_names.append(file_name)
+#    folder_path_read = folder_path_read + sports[2] + '/'
+#    for file_name in file_names:
 #        file_paths.append(folder_path_read + file_name)
+
+    file_names = []
+    file_paths = []    
+    file_colours = []
+    for isp, sport in enumerate(sports):
+        folder_path_sport = folder_path_read + sport + '/'
+        for file_name in os.listdir(folder_path_sport):
+            file_names.append(file_name)
+            file_paths.append(folder_path_sport + file_name)
+            file_colours.append(sports_colours[isp])
     
-#    plt.figure(figsize=(32,17))
+    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
     colour_map = pylab.get_cmap('Set1')
     
 #    file_paths = file_paths[15:19]
     for ifn, file_path in enumerate(file_paths):
+        verbose=True
+        if verbose:
+            print "%s / %s\r" % (ifn+1, len(file_paths))
         # read data from csv file
         df = pd.read_csv(file_path)
         df['timestamp']=pd.to_datetime(df['timestamp'])
@@ -90,11 +110,13 @@ if __name__ == '__main__':
         
         # Filter DataFrame
         # filter by quantile or by fixed speed?
-        indices = df['speed'] < df['speed'].quantile(0.95)
-#        indices = df['speed'] < 2 # m/s
-#        indices_2 = df['speed'] > 0.5/3.6 # m/s
+        indices = df['speed'] < df['speed'].quantile(1)
+#        indices = df['speed'] > df['speed'].quantile(0.5)
+#        indices_1 = df['speed'] < 2 # m/s
+#        indices_2 = df['speed'] > 2 # m/s
 #        indices = list(set(indices_1) & set(indices_2))
-        df_filtered = df.loc[indices,:]
+#        df_filtered = df.loc[indices,:]
+        df = df.loc[indices,:]
 #        df_filtered['speed']*df_filtered['distance']
 #        print df_filtered.shape
         
@@ -102,16 +124,16 @@ if __name__ == '__main__':
         calculated_distance = []
         previous_elapsed_time = 0.0
         previous_distance = 0.0
-        for ir, row in df_filtered.iterrows():
-            if ir > df_filtered.index[0]:
+        for ir, row in df.iterrows():
+            if ir > df.index[0]:
                 delta_time.append(row['elapsed_time'] - previous_elapsed_time)
                 calculated_distance.append(row['speed']*delta_time[-1] + previous_distance)
                 previous_distance = calculated_distance[-1]
             previous_elapsed_time = row['elapsed_time']
-#            calculated_distance = df_filtered['speed']*df_filtered['elapsed_time']
+#            calculated_distance = df['speed']*df['elapsed_time']
         
         # Investigate outliers with the difference between the mean and the median
-        stats = df_filtered.describe()
+        stats = df.describe()
         skewness = (stats.loc['mean']-stats.loc['50%'])/stats.loc['mean']*100 # skewness = (mean - median) / std
         skewness = pd.DataFrame(skewness)
         skewness = skewness.transpose()
@@ -121,25 +143,39 @@ if __name__ == '__main__':
             skewness_df = skewness_df.append(skewness,ignore_index=True)
             # TODO: sort out the row indices, they are all 0 now
         
+#        df
 #        plt.subplot(311)
 #        plt.plot(df['distance']/1000, df['elapsed_time'], label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
     
 #        plt.subplot(312)
-        plt.subplot(211)
+#        plt.subplot(211)
 #        plt.plot(df['distance']/1000, df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
 #        plt.plot(df['elapsed_time'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df_filtered['elapsed_time'], df_filtered['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-        plt.plot(df_filtered['elapsed_time'], df_filtered['distance'], label='raw distance')
-        plt.plot(df_filtered['elapsed_time'][1:], calculated_distance, label='new distance',)
-#        plt.plot(df_filtered['timestamp'], df_filtered['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        df_filtered.plot(y='speed')
+#        plt.plot(df['elapsed_time'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
+#        plt.plot(df['elapsed_time'], df['distance'], label='raw distance')
+#        plt.plot(df['elapsed_time'][1:], calculated_distance, label='new distance',)
+#        plt.plot(df['timestamp'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
+        df.plot(ax=axes[0,0], x='speed', y='heart_rate', 
+                kind='scatter', color=file_colours[ifn], edgecolors='none',
+                legend=False)        
+        axes[0,0].set_xlim([0,10])
+
+        df.plot(ax=axes[0,1], x='position_long', y='position_lat', 
+                kind='scatter', color=file_colours[ifn], edgecolors='none',
+                legend=False)
+        axes[0,1].set_xlim([0.05e7,0.25e7])
+        axes[0,1].set_ylim([6.226e8,6.238e8])
         
-#        plt.subplot(313)
-        plt.subplot(212)
-        plt.plot(df_filtered['elapsed_time'], df_filtered['speed'], label='speed', color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df['distance']/1000, df['heart_rate'], label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df['elapsed_time'], df['heart_rate'], label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df_filtered['elapsed_time'], df_filtered['heart_rate'], label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
+        plt.subplot(axes[1,0])
+        plt.hist(df['speed'], color=file_colours[ifn], alpha=0.3, normed=True, bins=100)
+        axes[1,0].set_xlabel('speed')
+        axes[1,0].set_xlim([0,10])
+
+        df.plot(ax=axes[1,1], x='distance', y='speed', 
+                kind='scatter', color=file_colours[ifn], edgecolors='none', 
+                legend=False)
+        axes[1,1].set_ylim([0,10])
+        
         
 #    print df.columns
 #    print(skewness_df.loc[:,['speed','heart_rate']])
@@ -155,13 +191,13 @@ if __name__ == '__main__':
 #    #plt.xlim([0,4.5])
     
 #    plt.subplot(312)
-    plt.subplot(211)
-    plt.legend(loc='upper left',fontsize=34)
+#    plt.subplot(211)
+#    plt.legend(loc='upper left',fontsize=34)
 #    plt.title(sport)
 #    plt.xlabel('distance (km)')
 #    plt.xlabel('elapsed time (' + time_units + ')')
 #    plt.ylabel('speed (km/h)')
-    #plt.xlim([0,4.5])
+#    plt.xlim([0,4.5])
 #    plt.ylim([0,60])
     
 #    plt.subplot(313)
@@ -171,6 +207,8 @@ if __name__ == '__main__':
 #    plt.ylabel('heart rate (bpm)')
     
 #    plt.xlim(['11-may-2017','16-may-2017'])
+#    axes[0].set_xlim([0,10])
+#    axes[1].set_xlim([0,10])
     plt.show()
     
 #    skewness_df.plot(y=['speed','heart_rate'])
@@ -187,4 +225,4 @@ if __name__ == '__main__':
 #df.plot(x='elapsed_time',y=['speed','heart_rate','distance'],subplots=True)
 #df.plot(x='distance',y=['speed','heart_rate','elapsed_time'],subplots=True)
 #sorted(df['heart_rate'].unique())
-#df_filtered['speed'].plot(kind='hist',bins=200,normed=True,alpha=0.3)
+#df['speed'].plot(kind='hist',bins=200,normed=True,alpha=0.3)
