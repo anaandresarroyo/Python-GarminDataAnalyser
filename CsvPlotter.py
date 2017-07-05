@@ -8,8 +8,9 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
-#import numpy as np
-#from mpl_toolkits.basemap import Basemap
+import mplleaflet
+import gmplot
+#import gmaps
 
 from matplotlib import rcParams
 rcParams.update({'font.size': 36})
@@ -54,17 +55,17 @@ if __name__ == '__main__':
     folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
     folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
     sports = [
-             'walking',
-             'cycling',
-             'running',
+#             'walking',
+#             'cycling',
+#             'running',
 #             'training',
+             'test',
              ]
-    sports_colours = [
-                     'g',                    
-                     'b',
-                     'r',
-#                     'k'
-                     ]
+    colours = {'walking':'g',
+               'cycling':'b',
+               'running':'r',
+               'training':'k',
+               'test':'k'}
              
 #    time_units = 'h'    
 #    time_units = 'min'
@@ -73,30 +74,31 @@ if __name__ == '__main__':
     # select files to read    
     # TODO: open a pop up window for the user to select the files
 
-#    file_names = ['1729258358_record.csv']
-#    file_paths = []    
-#    folder_path_read = folder_path_read + sports[2] + '/'
-#    for file_name in file_names:
-#        file_paths.append(folder_path_read + file_name)
-
+    
     file_names = []
     file_paths = []    
-    file_colours = []
-    for isp, sport in enumerate(sports):
+    file_sports = []
+    for sport in sports:
         folder_path_sport = folder_path_read + sport + '/'
         for file_name in os.listdir(folder_path_sport):
             file_names.append(file_name)
             file_paths.append(folder_path_sport + file_name)
-            file_colours.append(sports_colours[isp])
+            file_sports.append(sport)
     
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
+    
+#    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
     colour_map = pylab.get_cmap('Set1')
     
-#    file_paths = file_paths[15:19]
-    for ifn, file_path in enumerate(file_paths):
+    gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12)
+#    gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 12)
+#    fig=gmaps.Map()
+    
+    number_of_files = 2;
+    number_of_files = len(file_paths);
+    for file_path, sport, ifn in zip(file_paths, file_sports, range(number_of_files)):
         verbose=True
         if verbose:
-            print "%s / %s\r" % (ifn+1, len(file_paths))
+            print "%s / %s: %s" % (ifn+1, number_of_files, sport)
         # read data from csv file
         df = pd.read_csv(file_path)
         df['timestamp']=pd.to_datetime(df['timestamp'])
@@ -134,6 +136,8 @@ if __name__ == '__main__':
         
         # Investigate outliers with the difference between the mean and the median
         stats = df.describe()
+        print df['position_lat'].mean()
+        print df['position_long'].mean()
         skewness = (stats.loc['mean']-stats.loc['50%'])/stats.loc['mean']*100 # skewness = (mean - median) / std
         skewness = pd.DataFrame(skewness)
         skewness = skewness.transpose()
@@ -141,75 +145,60 @@ if __name__ == '__main__':
             skewness_df = skewness
         else:
             skewness_df = skewness_df.append(skewness,ignore_index=True)
-            # TODO: sort out the row indices, they are all 0 now
         
-#        df
-#        plt.subplot(311)
-#        plt.plot(df['distance']/1000, df['elapsed_time'], label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-    
-#        plt.subplot(312)
-#        plt.subplot(211)
-#        plt.plot(df['distance']/1000, df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df['elapsed_time'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df['elapsed_time'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-#        plt.plot(df['elapsed_time'], df['distance'], label='raw distance')
-#        plt.plot(df['elapsed_time'][1:], calculated_distance, label='new distance',)
-#        plt.plot(df['timestamp'], df['speed']*3.6, label=df['timestamp'][0], color=colour_map(1.*ifn/len(file_paths)))
-        df.plot(ax=axes[0,0], x='speed', y='heart_rate', 
-                kind='scatter', color=file_colours[ifn], edgecolors='none',
-                legend=False)        
-        axes[0,0].set_xlim([0,10])
+#        df.plot(ax=axes[0,0], x='speed', y='heart_rate', 
+#                kind='scatter', color=colours[sport], edgecolors='none',
+#                legend=False)        
+#        axes[0,0].set_xlim([0,10])
 
-        df.plot(ax=axes[0,1], x='position_long', y='position_lat', 
-                kind='scatter', color=file_colours[ifn], edgecolors='none',
-                legend=False)
-        axes[0,1].set_xlim([0.05e7,0.25e7])
-        axes[0,1].set_ylim([6.226e8,6.238e8])
+#        df.plot(ax=axes[0,1], x='position_long', y='position_lat', 
+#                kind='scatter', color=colours[sport], edgecolors='none',
+#                legend=False)
+#        axes[0,1].set_xlim([0.05e7,0.25e7])
+#        axes[0,1].set_ylim([6.226e8,6.238e8])
+#        garmin_layer = gmaps.symbol_layer(df['position_lat','position_long']*180/2**31,
+#                                          fill_color=colours[sport], scale=12)
+#        fig=gmaps.figure()
+#        fig.add_layer(garmin_layer)
+#        fig
+#        mplleaflet.display(fig=ax.figure)
         
-        plt.subplot(axes[1,0])
-        plt.hist(df['speed'], color=file_colours[ifn], alpha=0.3, normed=True, bins=100)
-        axes[1,0].set_xlabel('speed')
-        axes[1,0].set_xlim([0,10])
+#        df.plot(ax=axes[1,0], y='speed', 
+#                kind='hist', bins=100, normed=True, 
+#                color=colours[sport], edgecolor='none', alpha=0.3, 
+#                legend=False)
+#        axes[1,0].set_xlabel('speed')
+#        axes[1,0].set_xlim([0,10])
 
-        df.plot(ax=axes[1,1], x='distance', y='speed', 
-                kind='scatter', color=file_colours[ifn], edgecolors='none', 
-                legend=False)
-        axes[1,1].set_ylim([0,10])
+#        df.plot(ax=axes[1,1], x='distance', y='speed', 
+#                kind='scatter', color=colours[sport], edgecolors='none', 
+#                legend=False)
+#        axes[1,1].set_ylim([0,10])
+
+#        plt.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
+#        gmap.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
+        plt.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
+        gmap.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
+        # TODO: it doesn't work with "walking" data :( FIX IT!!
+#        gmap.scatter(df['position_lat']*180/2**31, df['position_long']*180/2**31, 'k', marker=True)
         
         
 #    print df.columns
 #    print(skewness_df.loc[:,['speed','heart_rate']])
+#    print(skewness_df.loc[:,['position_lat','position_long']])
     
 #    plt.subplot(311)
 #    plt.title(sport)
 #    if len(file_paths) <= 5:
 ##        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize=34)
 #        plt.legend(loc='upper left',fontsize=34)
-#    plt.ylabel('elapsed time (' + time_units + ')')
-#    plt.xlabel('distance (km)')
-#    #plt.ylim([0,25])
-#    #plt.xlim([0,4.5])
-    
-#    plt.subplot(312)
-#    plt.subplot(211)
-#    plt.legend(loc='upper left',fontsize=34)
-#    plt.title(sport)
-#    plt.xlabel('distance (km)')
-#    plt.xlabel('elapsed time (' + time_units + ')')
-#    plt.ylabel('speed (km/h)')
-#    plt.xlim([0,4.5])
-#    plt.ylim([0,60])
-    
-#    plt.subplot(313)
-#    plt.subplot(212)
-#    plt.xlabel('distance (km)')
-#    plt.xlabel('elapsed time (' + time_units + ')')
-#    plt.ylabel('heart rate (bpm)')
     
 #    plt.xlim(['11-may-2017','16-may-2017'])
 #    axes[0].set_xlim([0,10])
 #    axes[1].set_xlim([0,10])
-    plt.show()
+#    plt.show()
+#    mplleaflet.show(fig=ax.figure)
+    gmap.draw("mymap.html")
     
 #    skewness_df.plot(y=['speed','heart_rate'])
 
