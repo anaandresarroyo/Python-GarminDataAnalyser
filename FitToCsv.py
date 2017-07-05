@@ -9,6 +9,8 @@ from fitparse import FitFile
 import pandas as pd
 
 def FitToDataFrame(file_paths,desired_messages=['record'],verbose=True):
+    # TODO: make it for just one file so it outputs a single DataFrame and not dictionary
+    # TODO: make it for just one desired_messages
     """Reads all the desired_messages from the .fit files and 
     generates a dictionary of Pandas DataFrame 
         
@@ -81,10 +83,8 @@ if __name__ == '__main__':
 
     # select files to read    
     folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/'
-    file_names = []
     file_paths = []
     for file_name in os.listdir(folder_path_read):
-        file_names.append(file_name)
         file_paths.append(folder_path_read + file_name)
         
     # select where to save the csv files
@@ -98,11 +98,12 @@ if __name__ == '__main__':
         print "Reading file %s / %s\r" % (ifn + 1, len(file_paths))
         # read session data to obtain the type of sport        
         fitfile = FitFile(file_path)    
-        for im, message in enumerate(fitfile.get_messages('sport')):
+        for message in fitfile.get_messages('sport'):
             sport = message.get_value('sport')
             print 'sport = ' + sport
             
-        if sport in sport_count.keys():
+        if sport in sport_count.keys(): # TODO: sport_count (eliminate .keys())
+            # TODO: check out python counter data type
             # if the sport is in sport_count dictionary, add 1
             sport_count[sport] = sport_count[sport] + 1        
         else:
@@ -121,12 +122,10 @@ if __name__ == '__main__':
             
         print
         
-    print 'Done!'
-    print
+    print 'Done!\n'
     
     # print the sport_count dictionary
-    print "sport: counts ----------"
-    print
+    print "sport: counts ----------\n"
     for key, val in sport_count.items():
         print "%s: %s" % (key, val)
 

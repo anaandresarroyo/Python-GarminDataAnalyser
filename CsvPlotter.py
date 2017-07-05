@@ -55,11 +55,11 @@ if __name__ == '__main__':
     folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
     folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
     sports = [
-#             'walking',
-#             'cycling',
-#             'running',
+             'walking',
+             'cycling',
+             'running',
 #             'training',
-             'test',
+#             'test',
              ]
     colours = {'walking':'g',
                'cycling':'b',
@@ -75,13 +75,11 @@ if __name__ == '__main__':
     # TODO: open a pop up window for the user to select the files
 
     
-    file_names = []
     file_paths = []    
     file_sports = []
     for sport in sports:
         folder_path_sport = folder_path_read + sport + '/'
         for file_name in os.listdir(folder_path_sport):
-            file_names.append(file_name)
             file_paths.append(folder_path_sport + file_name)
             file_sports.append(sport)
     
@@ -178,7 +176,7 @@ if __name__ == '__main__':
 #        plt.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
 #        gmap.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
         plt.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
-        gmap.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
+        gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, color=colours[sport])
         # TODO: it doesn't work with "walking" data :( FIX IT!!
 #        gmap.scatter(df['position_lat']*180/2**31, df['position_long']*180/2**31, 'k', marker=True)
         
