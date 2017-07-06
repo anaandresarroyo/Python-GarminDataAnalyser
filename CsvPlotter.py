@@ -13,7 +13,7 @@ import gmplot
 #import gmaps
 
 from matplotlib import rcParams
-rcParams.update({'font.size': 36})
+rcParams.update({'font.size': 30})
 
 rcParams.update({'lines.linewidth': 5})
 rcParams.update({'axes.grid': True})
@@ -56,20 +56,20 @@ if __name__ == '__main__':
     folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
     sports = [
              'walking',
-             'cycling',
-             'running',
+#             'cycling',
+#             'running',
 #             'training',
 #             'test',
              ]
-    colours = {'walking':'g',
+    colours = {'walking':'k',
                'cycling':'b',
                'running':'r',
-               'training':'k',
+               'training':'g',
                'test':'k'}
              
 #    time_units = 'h'    
-#    time_units = 'min'
-    time_units = 'sec'
+    time_units = 'min'
+#    time_units = 'sec'
     
     # select files to read    
     # TODO: open a pop up window for the user to select the files
@@ -80,19 +80,24 @@ if __name__ == '__main__':
     for sport in sports:
         folder_path_sport = folder_path_read + sport + '/'
         for file_name in os.listdir(folder_path_sport):
+#        for file_name in reversed(os.listdir(folder_path_sport)):
             file_paths.append(folder_path_sport + file_name)
             file_sports.append(sport)
     
-    
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
+#    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(32,17), squeeze=True)
     colour_map = pylab.get_cmap('Set1')
     
-    gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12)
-#    gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 12)
+    plot_map=True
+    if plot_map:
+#        gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12)
+        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11)
 #    fig=gmaps.Map()
     
-    number_of_files = 2;
-    number_of_files = len(file_paths);
+    time_offset=0
+    number_of_files = 12
+#    number_of_files = len(file_paths);
     for file_path, sport, ifn in zip(file_paths, file_sports, range(number_of_files)):
         verbose=True
         if verbose:
@@ -173,10 +178,30 @@ if __name__ == '__main__':
 #                legend=False)
 #        axes[1,1].set_ylim([0,10])
 
+#        plt.plot(df['elapsed_time']+time_offset, 1/df['speed']*100/6,
+#                label=df['timestamp'][0], linewidth=2)
+#        plt.gca().invert_yaxis()
+#        plt.ylim([15,3])
+#        time_offset = df['elapsed_time'][-1] + time_offset
+#        plt.ylabel('pace (min/km)')
+#        plt.xlabel('time ('+time_units+')')
+        
+        plt.plot(df['elapsed_time'], df['distance'],
+                label=df['timestamp'][0], linewidth=2)
+#        plt.ylim([15,3])
+        time_offset = df['elapsed_time'][-1] + time_offset
+        plt.ylabel('speed (km/h)')
+        plt.xlabel('time ('+time_units+')')
+        
+#        df.plot(ax=axes[0,0], x='distance', y='speed', 
+#                kind='line', 
+#                label=df['timestamp'][0], legend=True)
+
 #        plt.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
 #        gmap.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
-        plt.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
-        gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, color=colours[sport])
+        if plot_map:
+#            plt.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
+            gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, color=colours[sport])
         # TODO: it doesn't work with "walking" data :( FIX IT!!
 #        gmap.scatter(df['position_lat']*180/2**31, df['position_long']*180/2**31, 'k', marker=True)
         
@@ -189,14 +214,15 @@ if __name__ == '__main__':
 #    plt.title(sport)
 #    if len(file_paths) <= 5:
 ##        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize=34)
-#        plt.legend(loc='upper left',fontsize=34)
+#    plt.legend(loc='upper right',fontsize=34)
     
 #    plt.xlim(['11-may-2017','16-may-2017'])
 #    axes[0].set_xlim([0,10])
 #    axes[1].set_xlim([0,10])
 #    plt.show()
 #    mplleaflet.show(fig=ax.figure)
-    gmap.draw("mymap.html")
+    if plot_map:
+        gmap.draw("mymap.html")
     
 #    skewness_df.plot(y=['speed','heart_rate'])
 
