@@ -54,7 +54,7 @@ def FitPrinter(file_path, desired_messages=range(250),
     
 if __name__ == '__main__':
     
-    file_path = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/1837541844.fit'
+    file_path = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/1837541844.fit'
     # TODO: ask for user input to select the file_path
     
     # Select which messages to read
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     FitPrinter(file_path, desired_messages, 
                verbose_message=False, verbose_summary=True)
     
-    desired_messages = input('Type desired message info. Enclose in quotation marks and choose from the options listed above.\n\n')
+    desired_messages = input('Type desired message for more info info. Enclose in quotation marks and choose from the options listed above.\n\n')
     print
 
     FitPrinter(file_path, desired_messages, 

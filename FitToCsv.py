@@ -145,10 +145,10 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
 if __name__ == '__main__':
 
     # Directory to read fit files from
-    path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/fit new/'
+    path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/'
         
     # Directory to save csv files in
-    path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
+    path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
     
     # Convert .fit files to .csv files
     FitToCsv(path_read, path_save, desired_message='record', 

@@ -52,8 +52,8 @@ def TimestampToElapsed(timestamp,units='sec'):
     
 if __name__ == '__main__':
 
-    folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
-    folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
+    folder_path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
+    folder_path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/figures/'
     sports = [
 #             'walking',
              'cycling',
