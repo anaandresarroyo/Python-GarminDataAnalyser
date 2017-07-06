@@ -55,8 +55,8 @@ if __name__ == '__main__':
     folder_path_read = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/csv/'
     folder_path_save = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Garmin/figures/'
     sports = [
-             'walking',
-#             'cycling',
+#             'walking',
+             'cycling',
 #             'running',
 #             'training',
 #             'test',
