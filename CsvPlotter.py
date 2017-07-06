@@ -102,7 +102,7 @@ if __name__ == '__main__':
         verbose=True
         if verbose:
             print "%s / %s: %s" % (ifn+1, number_of_files, sport)
-        # read data from csv file
+        # read data from .csv file
         df = pd.read_csv(file_path)
         df['timestamp']=pd.to_datetime(df['timestamp'])
         df=df.set_index(pd.to_datetime(df['timestamp']))

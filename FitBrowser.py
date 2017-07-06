@@ -2,7 +2,7 @@
 """
 @author: Ana Andres-Arroyo
 
-Reads a Garmin .fit file and displays the messages and their type
+Reads a Garmin .fit file and prints its information
 """
 import os
 from fitparse import FitFile
@@ -61,9 +61,15 @@ if __name__ == '__main__':
     desired_messages = range(250) # all message with codes up to 300    
     FitPrinter(file_path, desired_messages, 
                verbose_message=False, verbose_summary=True)
+               
+    while desired_messages!='exit':
+        print "Type the kind of message you would like to see more info from. " \
+              "(Choose from the options listed in the message counter.) " \
+              "(Type 'exit' to exit the while loop.)\n"
+        desired_messages = raw_input()
+        print
+        
+        FitPrinter(file_path, desired_messages, 
+                   verbose_message=True, verbose_summary=False)
     
-    desired_messages = input('Type desired message for more info info. Enclose in quotation marks and choose from the options listed above.\n\n')
-    print
-
-    FitPrinter(file_path, desired_messages, 
-               verbose_message=True, verbose_summary=False)
+    print 'THE END!'

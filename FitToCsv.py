@@ -23,7 +23,7 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
     
     Output:
     df: pandas DataFrame
-        Contain the data of the desired_message type read from of the fit file
+        Contain the data of the desired_message type read from of the .fit file
         
     """
     
@@ -73,7 +73,7 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
     desired_message : list of string (optional)
         The type of messages to read.
     subdirectories : bool (optional)
-        If True (default), place csv files in subdirectories according to their sport
+        If True (default), place .csv files in subdirectories according to their sport
     verbose : bool (optional)
         If True (default), print progress    
     
@@ -114,7 +114,7 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         
         # Get the file_name of the current file_path
         file_name = os.path.basename(file_path)
-        # Generate the file_name for the csv file
+        # Generate the file_name for the .csv file
         file_name = file_name[:-4] + '_' + desired_message + '.csv'
         if subdirectories: # Place files in subdirectories according to their sport
             # Create the directory for the corresponding sport if it doesn't already exist
@@ -130,7 +130,7 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         if os.path.exists(file_path_save):
             # TODO: ask for user input to overwrite or not
             print "Overwriting file " + file_name
-        # Save the Pandas DataFrame as a csv
+        # Save the Pandas DataFrame as a .csv file
         df.to_csv(file_path_save, sep=',', header=True, index=False)
         if verbose:
             print
@@ -144,10 +144,10 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
     
 if __name__ == '__main__':
 
-    # Directory to read fit files from
+    # Directory to read .fit files from
     path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/'
         
-    # Directory to save csv files in
+    # Directory to save .csv files in
     path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
     
     # Convert .fit files to .csv files
