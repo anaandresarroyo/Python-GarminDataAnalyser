@@ -4,33 +4,38 @@
 
 Reads a records .csv file and plots stuff
 """
+
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+#matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 import pylab
-import mplleaflet
 import gmplot
-#import gmaps
 
-from matplotlib import rcParams
-rcParams.update({'font.size': 30})
+matplotlib.rcParams.update({'font.size': 30})
 
-rcParams.update({'lines.linewidth': 5})
-rcParams.update({'axes.grid': True})
-rcParams.update({'axes.linewidth': 2})
-rcParams.update({'axes.axisbelow': True})
-rcParams.update({'axes.labelpad': 3})
-#rcParams.update({'axes.titlepad': 25})
+matplotlib.rcParams.update({'lines.linewidth': 5})
+matplotlib.rcParams.update({'axes.grid': True})
+matplotlib.rcParams.update({'axes.linewidth': 2})
+matplotlib.rcParams.update({'axes.axisbelow': True})
+matplotlib.rcParams.update({'axes.labelpad': 3})
+#matplotlib.rcParams.update({'axes.titlepad': 25})
 
-rcParams.update({'xtick.major.size': 15})
-rcParams.update({'ytick.major.size': 15})
-rcParams.update({'xtick.major.pad': 10})
-rcParams.update({'ytick.major.pad': 10})
-rcParams.update({'xtick.major.width': 2})
-rcParams.update({'ytick.major.width': 2})
+matplotlib.rcParams.update({'xtick.major.size': 15})
+matplotlib.rcParams.update({'ytick.major.size': 15})
+matplotlib.rcParams.update({'xtick.major.pad': 10})
+matplotlib.rcParams.update({'ytick.major.pad': 10})
+matplotlib.rcParams.update({'xtick.major.width': 2})
+matplotlib.rcParams.update({'ytick.major.width': 2})
 
-rcParams.update({'grid.linewidth': 1.5})
-#rcParams.update({'legend.frameon': False})
+matplotlib.rcParams.update({'grid.linewidth': 1.5})
+#matplotlib.rcParams.update({'legend.frameon': False})
+
+
 
 def TimestampToElapsed(timestamp,units='sec'):
     """Convert a timestamp pandas Series to a 
@@ -49,17 +54,68 @@ def TimestampToElapsed(timestamp,units='sec'):
         elapsed_time = elapsed_time/60/60 
     return elapsed_time
     
+
+
+def distance(origin_long, origin_lat, destination_long, destination_lat):
+    """Haversine formula.
+    """
+    
+    radius = 6371 # km
+    dlat = np.radians(destination_lat-origin_lat)
+    dlon = np.radians(destination_long-origin_long)
+    a = np.sin(dlat/2) * np.sin(dlat/2) + np.cos(np.radians(origin_lat)) \
+        * np.cos(np.radians(destination_lat)) * np.sin(dlon/2) * np.sin(dlon/2)
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
+    d = radius * c
+
+    return d
+    
+def haversine_np(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points
+    on the earth (specified in decimal degrees)
+
+    All args must be of equal length.    
+
+    """
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
+
+    c = 2 * np.arcsin(np.sqrt(a))
+    km = 6367 * c
+    return km
+    
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = (np.sin(dlat/2)**2 
+         + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2)
+    c = 2 * np.arcsin(np.sqrt(a)) 
+    km = 6367 * c
+    return km
+    
     
 if __name__ == '__main__':
 
-    folder_path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
-    folder_path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/figures/'
+    directory_path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
+    directory_path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/figures/'
     sports = [
 #             'walking',
-             'cycling',
+#             'cycling',
 #             'running',
 #             'training',
-#             'test',
+             'test',
              ]
     colours = {'walking':'k',
                'cycling':'b',
@@ -71,47 +127,47 @@ if __name__ == '__main__':
     time_units = 'min'
 #    time_units = 'sec'
     
-    # select files to read    
-    # TODO: open a pop up window for the user to select the files
-
+    plot_map=False
     
+    # ---------------------------------------
+    
+    # select files to read    
+    # TODO: open a pop up window for the user to select the files    
     file_paths = []    
     file_sports = []
     for sport in sports:
-        folder_path_sport = folder_path_read + sport + '/'
-        for file_name in os.listdir(folder_path_sport):
-#        for file_name in reversed(os.listdir(folder_path_sport)):
-            file_paths.append(folder_path_sport + file_name)
+        directory_path_sport = directory_path_read + sport + '/'
+#        for file_name in os.listdir(directory_path_sport):
+        for file_name in reversed(os.listdir(directory_path_sport)):
+            file_paths.append(directory_path_sport + file_name)
             file_sports.append(sport)
     
-    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
+#    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
-#    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(32,17), squeeze=True)
+#    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(32,17), squeeze=True)
     colour_map = pylab.get_cmap('Set1')
     
-    plot_map=True
+    
     if plot_map:
-#        gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12)
-        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11)
-#    fig=gmaps.Map()
+        gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12) # Cambridge 
+#        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
     
     time_offset=0
-    number_of_files = 12
+    number_of_files = 5
 #    number_of_files = len(file_paths);
     for file_path, sport, ifn in zip(file_paths, file_sports, range(number_of_files)):
         verbose=True
         if verbose:
             print "%s / %s: %s" % (ifn+1, number_of_files, sport)
-        # read data from .csv file
+        # Read data from .csv file
         df = pd.read_csv(file_path)
+        # Convert timestamp column from string to datetime
         df['timestamp']=pd.to_datetime(df['timestamp'])
+        # Set timestamp column as row indices
         df=df.set_index(pd.to_datetime(df['timestamp']))
        
         # Calculate elapsed time from the timestamp values
-#        df['elapsed_time'] = TimestampToElapsed(pd.to_datetime(df['timestamp']),units=time_units)
         df['elapsed_time'] = TimestampToElapsed(df['timestamp'],units=time_units)
-#        print df.shape
-#        print df.info()
         
         # Filter DataFrame
         # filter by quantile or by fixed speed?
@@ -135,19 +191,16 @@ if __name__ == '__main__':
                 calculated_distance.append(row['speed']*delta_time[-1] + previous_distance)
                 previous_distance = calculated_distance[-1]
             previous_elapsed_time = row['elapsed_time']
-#            calculated_distance = df['speed']*df['elapsed_time']
         
         # Investigate outliers with the difference between the mean and the median
-        stats = df.describe()
-        print df['position_lat'].mean()
-        print df['position_long'].mean()
-        skewness = (stats.loc['mean']-stats.loc['50%'])/stats.loc['mean']*100 # skewness = (mean - median) / std
-        skewness = pd.DataFrame(skewness)
-        skewness = skewness.transpose()
-        if ifn == 0:
-            skewness_df = skewness
-        else:
-            skewness_df = skewness_df.append(skewness,ignore_index=True)
+#        stats = df.describe()
+#        skewness = (stats.loc['mean']-stats.loc['50%'])/stats.loc['mean']*100 # skewness = (mean - median) / std
+#        skewness = pd.DataFrame(skewness)
+#        skewness = skewness.transpose()
+#        if ifn == 0:
+#            skewness_df = skewness
+#        else:
+#            skewness_df = skewness_df.append(skewness,ignore_index=True)
         
 #        df.plot(ax=axes[0,0], x='speed', y='heart_rate', 
 #                kind='scatter', color=colours[sport], edgecolors='none',
@@ -159,12 +212,7 @@ if __name__ == '__main__':
 #                legend=False)
 #        axes[0,1].set_xlim([0.05e7,0.25e7])
 #        axes[0,1].set_ylim([6.226e8,6.238e8])
-#        garmin_layer = gmaps.symbol_layer(df['position_lat','position_long']*180/2**31,
-#                                          fill_color=colours[sport], scale=12)
-#        fig=gmaps.figure()
-#        fig.add_layer(garmin_layer)
-#        fig
-#        mplleaflet.display(fig=ax.figure)
+
         
 #        df.plot(ax=axes[1,0], y='speed', 
 #                kind='hist', bins=100, normed=True, 
@@ -186,24 +234,63 @@ if __name__ == '__main__':
 #        plt.ylabel('pace (min/km)')
 #        plt.xlabel('time ('+time_units+')')
         
-        plt.plot(df['elapsed_time'], df['distance'],
-                label=df['timestamp'][0], linewidth=2)
-#        plt.ylim([15,3])
-        time_offset = df['elapsed_time'][-1] + time_offset
+        plt.subplot(221)
+        plt.plot(df['elapsed_time'], df['speed']*3.6,
+                label=os.path.basename(file_path), linewidth=2)
+#        plt.plot(df['elapsed_time'][1:], np.diff(df['speed']*20),
+#                label=os.path.basename(file_path), linewidth=2)
         plt.ylabel('speed (km/h)')
         plt.xlabel('time ('+time_units+')')
+#        plt.legend(loc='upper right',fontsize=34)
         
-#        df.plot(ax=axes[0,0], x='distance', y='speed', 
-#                kind='line', 
-#                label=df['timestamp'][0], legend=True)
+#        plt.subplot(222)
+#        plt.scatter(df['speed'][1:]*3.6, np.diff(df['speed']*3.6), 
+#                    c=df['heart_rate'][1:], cmap='rainbow', edgecolors='none')
+#        plt.xlabel('speed (km/h)')
+#        plt.ylabel('acceleration (km/h/' + time_units + ')')
+        
+#        position = np.sqrt(df['position_long']**2+df['position_long']**2)*180/2**31
+        origin = df.loc[:,['position_long','position_lat']]
+        origin['position_long'] = origin['position_long'][0]
+        origin['position_lat'] = origin['position_lat'][0]
+        position = distance(origin['position_long'], 
+                            origin['position_lat'], 
+                            df['position_long'], df['position_lat'])
+        position_std = np.ndarray(position.shape)
+        for ip in range(len(position)):
+            position_std[ip] = np.std(position[ip:])
+        
+        plt.subplot(222)
+#        plt.plot(df['elapsed_time'], df['position_lat']-df['position_lat'].mean(), label='latitude')
+#        plt.plot(df['elapsed_time'], df['position_long']-df['position_long'].mean(), label='longitude')
+        plt.plot(df['elapsed_time'], position, label='position')
+#        plt.legend(loc='upper right',fontsize=34)
+        plt.ylabel('position (a.u.)')
+        plt.xlabel('time ('+time_units+')')
+        
+        plt.subplot(224)
+        plt.plot(df['elapsed_time'], position_std, label='position std')
+        plt.ylabel('position std (a.u.)')
+        plt.xlabel('time ('+time_units+')')
+        plt.ylim([0,0.001])
+        
+#        h = plt.hist(position, normed=True, alpha=0.5, bins=50,
+#                     label=os.path.basename(file_path), linewidth=2)
+#        plt.xlabel('position (a.u.)')
+        
+        plt.subplot(223)
+        plt.scatter(df['speed']*3.6, df['heart_rate'])
+        plt.xlabel('speed (km/h)')
+        plt.ylabel('heart_rate (bpm)')
+        
 
 #        plt.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
 #        gmap.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
         if plot_map:
-#            plt.plot(df['position_long']*180/2**31, df['position_lat']*180/2**31, color=colours[sport])
+            # Add a line plot to the gmap object which will be save to an .html file
+            # Use line instead of scatter plot for faster speed and smaller file size
+            # Make sure to remove NaNs or the plot won't work
             gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, color=colours[sport])
-        # TODO: it doesn't work with "walking" data :( FIX IT!!
-#        gmap.scatter(df['position_lat']*180/2**31, df['position_long']*180/2**31, 'k', marker=True)
         
         
 #    print df.columns
@@ -219,10 +306,10 @@ if __name__ == '__main__':
 #    plt.xlim(['11-may-2017','16-may-2017'])
 #    axes[0].set_xlim([0,10])
 #    axes[1].set_xlim([0,10])
-#    plt.show()
-#    mplleaflet.show(fig=ax.figure)
+    plt.show()
+
     if plot_map:
-        gmap.draw("mymap.html")
+        gmap.draw(directory_path_save + 'mymap.html')
     
 #    skewness_df.plot(y=['speed','heart_rate'])
 
@@ -230,7 +317,7 @@ if __name__ == '__main__':
  
 #plt.yscale('log')
 #df.plot(subplots=True,kind='line')
-#plt.savefig(folder_path_save + 'test.png')
+#plt.savefig(directory_path_save + 'test.png')
 #df.plot(y='heart_rate',kind='hist',bins=100,normed=True,cumulative=True)
 #df.plot(x='elapsed_time',y=['speed','heart_rate'])
 #fig, axes = plt.subplots(nrows=2, ncols=1)

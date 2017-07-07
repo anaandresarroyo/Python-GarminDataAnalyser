@@ -78,7 +78,7 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         If True (default), print progress    
     
     Output:
-    nothing
+    none
         
     """
     

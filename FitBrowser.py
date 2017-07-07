@@ -9,8 +9,24 @@ from fitparse import FitFile
 from collections import Counter
 
 def FitPrinter(file_path, desired_messages=range(250), 
-               verbose_message=True, verbose_summary=True):
-    """TODO: Add doc string """
+               verbose_message=False, verbose_summary=True):
+    """Reads all the data of the desired_messages types
+    from the .fit file and prints it on the console
+        
+    Arguments:
+    file_paths : string
+        The file path to read.
+    desired_messages : string / list of strings / list of numbers (optional)
+        The type of messages to read.
+    verbose_message : bool (optional)
+        If True (default), print data contained within each message
+    verbose_summary : bool (optional)
+        If True (default), print summary of message types
+    
+    Output:
+    none
+        
+    """
     
     # Open .fit file    
     fitfile = FitFile(file_path)
@@ -31,25 +47,22 @@ def FitPrinter(file_path, desired_messages=range(250),
             for message_data in message:        
                 # Print the messages name and value (and units if it has any)
                 if message_data.units:
-                    print " * %s: %s %s" % (
-                                            message_data.name, 
-                                            message_data.value, 
-                                            message_data.units,
-                                            )
+                    print " * %s: %s %s" % (message_data.name, message_data.value, message_data.units)
                 else:
                     print " * %s: %s" % (message_data.name, message_data.value)
             print
             
     if verbose_summary:
-        # print summary of file
+        # Print summary of file
         print "file name: " + os.path.basename(file_path)
         print "selected messages: %s\n" % (sum(message_counter.values()))
     
-        # print the message_counter
+        # Print the message_counter values
         print "message.name: counts --------------------\n"
         for key, val in message_counter.items():
             print "%s: %s" % (key, val)
         print
+    
     
     
 if __name__ == '__main__':
@@ -57,18 +70,18 @@ if __name__ == '__main__':
     file_path = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/1837541844.fit'
     # TODO: ask for user input to select the file_path
     
-    # Select which messages to read
-    desired_messages = range(250) # all message with codes up to 300    
-    FitPrinter(file_path, desired_messages, 
-               verbose_message=False, verbose_summary=True)
+    # Print file summary
+    FitPrinter(file_path)
                
+    desired_messages = ''
     while desired_messages!='exit':
-        print "Type the kind of message you would like to see more info from. " \
+        print "Write the type of message you would like to see more info from. " \
               "(Choose from the options listed in the message counter.) " \
               "(Type 'exit' to exit the while loop.)\n"
         desired_messages = raw_input()
         print
         
+        # Print message data from desired_messages types
         FitPrinter(file_path, desired_messages, 
                    verbose_message=True, verbose_summary=False)
     
