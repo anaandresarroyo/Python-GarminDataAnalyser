@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 import pylab
 import gmplot
+import datetime
 
 matplotlib.rcParams.update({'font.size': 30})
 
@@ -37,73 +38,184 @@ matplotlib.rcParams.update({'grid.linewidth': 1.5})
 
 
 
-def TimestampToElapsed(timestamp,units='sec'):
-    """Convert a timestamp pandas Series to a 
-    float64 pandas Series of the elapsed time"""
-    # the Garmin Forerunner 35 takes data every 1 second so in most cases the 
-    # elapsed time will be the same as the row index
-    timedelta = timestamp-timestamp[0]
+def ElapsedTime(timestamp, units_t='sec', mode='start'):    
+    """Calculate the elapsed time from a timestamp pandas Series.
+        
+    Arguments:
+    timestamp : timestamp pandas Series
+        Timestamp values
+    units_d: string
+        Units of the calculated time, e.g. 'sec' (default), 'min', or 'h'
+    mode : string
+        If 'start' calculate the elapsed time between all points of the array and the first point.
+        If 'previous' calculate the elapsed time between all points of the array the previous point.
+    
+    Output:
+    elapsed_time: float pandas Series
+        Contains the calculated elapsed time in units of units_t
+    """
+    
+    # The Garmin Forerunner 35 takes data every 1 second
+
+    origin_time =  np.empty(timestamp.shape, dtype=type(timestamp))
+    if mode == 'start':
+        origin_time[:] = timestamp[0]
+    
+    elif mode == 'previous':
+        origin_time[0] = timestamp[0]
+        for i, time in enumerate(timestamp[0:-1]):
+            origin_time[i+1] = time
+            
+    else:
+        raise ValueError('Unable to recognise the mode.')  
+    
+    timedelta = timestamp-origin_time
     elapsed_time = timedelta.astype('timedelta64[s]') # in seconds
-    # don't use 'timedelta64[m]' because it only returns the minute component of the 
-    # timestamp and doesn't take into account the seconds as fractions of a minute
-    if units == 'min':
-        # convert from seconds to minutes
+    
+    if units_t == 'sec':
+        pass    
+    elif units_t == 'min':
+        # Convert seconds to minutes
         elapsed_time = elapsed_time/60 
-    if units == 'h':
-        # convert from seconds to hours
+    elif units_t == 'h':
+        # Convert seconds to hours
         elapsed_time = elapsed_time/60/60 
+    else:
+        raise ValueError('Unable to recognise the units for the time.')    
     return elapsed_time
     
-
-
-def distance(origin_long, origin_lat, destination_long, destination_lat):
-    """Haversine formula.
+def Distance(longitude, latitude, units_gps='semicircles', units_d='m',
+             mode='start', fixed_lon=1601994.0, fixed_lat=622913929.0):
+    """Calculate the great circle distance between two points
+    on the earth using the Haversine formula.
+        
+    Arguments:
+    longitude : float pandas Series
+        Longitude values of GPS coordinates, in units of units_gps
+    latitude : float pandas Series
+        Latitude values of GPS coordinates, in units of units_gps        
+    units_gps : string
+        Units of longitude or latitude, e.g. 'semicircles' (default) or 'degrees'
+    units_d: string
+        Units of the calculated distance, e.g. 'm' (default) or 'km'
+    mode : string
+        If 'start' calculate the distance between all points of the array and the first point.
+        If 'previous' calculate the distance between all points of the array the previous point.
+        If 'fixed' calculate the distance between all points of the array and a fixed point.
+    fixed_lon: float
+        Longitude value in units of units_gps to be used with mode='fixed'
+    fixed_lat: float
+        Latitude value in units of units_gps to be used with mode='fixed'        
+    
+    Output:
+    distance: float pandas Series
+        Contains the calculated distance in units of units_d
     """
     
-    radius = 6371 # km
-    dlat = np.radians(destination_lat-origin_lat)
-    dlon = np.radians(destination_long-origin_long)
-    a = np.sin(dlat/2) * np.sin(dlat/2) + np.cos(np.radians(origin_lat)) \
-        * np.cos(np.radians(destination_lat)) * np.sin(dlon/2) * np.sin(dlon/2)
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
-    d = radius * c
-
-    return d
+    if units_gps == 'semicircles':
+        # Convert semicircles to degrees
+        longitude = longitude*180/2**31
+        latitude = latitude*180/2**31
+    elif units_gps == 'degrees':
+        pass
+    else:
+        raise ValueError('Unable to recognise the units for the longitude and latitude.')
     
-def haversine_np(lon1, lat1, lon2, lat2):
-    """
-    Calculate the great circle distance between two points
-    on the earth (specified in decimal degrees)
-
-    All args must be of equal length.    
-
-    """
-    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
-
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-
-    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
-
-    c = 2 * np.arcsin(np.sqrt(a))
-    km = 6367 * c
-    return km
+    origin_lon = np.empty(longitude.shape)
+    origin_lat = np.empty(latitude.shape)
     
-def haversine(lon1, lat1, lon2, lat2):
+    if mode == 'start':
+        origin_lon[:] = longitude[0]
+        origin_lat[:] = latitude[0]
+    
+    elif mode == 'previous':
+        origin_lon[0] = longitude[0]
+        origin_lat[0] = latitude[0]
+        
+        origin_lon[1:] = longitude[0:-1]
+        origin_lat[1:] = latitude[0:-1]
+        
+    elif mode == 'fixed':
+        if units_gps == 'semicircles':
+            fixed_lon = fixed_lon*180/2**31
+            fixed_lat = fixed_lat*180/2**31
+            
+        origin_lon[:] = fixed_lon
+        origin_lat[:] = fixed_lat
+
+    else:
+        raise ValueError('Unable to recognise the mode.')  
+    
+    # Radius of the Earth in units of units_d
+    if units_d == 'm':
+        radius = 6371000
+    elif units_d == 'km':
+        radius = 6371
+    else:
+        raise ValueError('Unable to recognise the units for the distance.')
+    
+    delta_lon = np.radians(longitude-origin_lon)
+    delta_lat = np.radians(latitude-origin_lat)
+    # Haversine formula
+    a = np.sin(delta_lat/2) * np.sin(delta_lat/2) + np.cos(np.radians(origin_lat)) \
+        * np.cos(np.radians(latitude)) * np.sin(delta_lon/2) * np.sin(delta_lon/2)
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))    
+    distance = radius * c # Same units as radius
+    # TODO: check the validity of the Haversine formula
+    # https://en.wikipedia.org/wiki/Geographical_distance
+
+    return distance
+    
+def AutoStop(df, mode='std', threshold=15, correction=False):
+    """Crop the pandas DataFrame to eliminate the data points at the end in 
+    which the user wasn't moving but the device was still recording data.
+        
+    Arguments:
+    df : pandas DataFrame
+        Garmin data. Required columns: 'position', 'speed'
+    mode : string
+        If 'std' (default) use the position's standard deviation to determine the end of the activity.
+    threshold : double
+        If mode='std' the threshold (in units of m) is used to determine the end of the activity
+       
+    Output:
+    df: pandas DataFrame
+        Contains the cropped data.
     """
-    Calculate the great circle distance between two points 
-    on the earth (specified in decimal degrees)
-    """
-    # convert decimal degrees to radians 
-    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
-    # haversine formula 
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
-    a = (np.sin(dlat/2)**2 
-         + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2)
-    c = 2 * np.arcsin(np.sqrt(a)) 
-    km = 6367 * c
-    return km
+    # Create new column in which to store the position's standard deviation
+    df['position_std'] = np.nan
+    for ip in df.index:
+        # Calculate the standard deviation in the position from index ip until the end
+        df.loc[ip,'position_std'] = np.std(df.loc[ip:,'position'])
+#    df['position_std']=df['position_std']/ElapsedTime(df['timestamp'], units_t='sec', mode='previous')
+    # Calculate the index at which the user stopped moving
+    index_stop = df.index[df['position_std']<=threshold][0]
+#    print df['timestamp'][0]
+#    print df['timestamp'][-1]
+#    print index_stop
+    
+    if correction:
+        # Correct for the time it takes for the user to travel a distance equal
+        # to the threshold at the average speed of the acitivity
+        print 'threshold = ' + str(threshold) + ' m'
+    #    print df.head()
+    #    average_speed = np.mean(df.loc[:index_stop,'speed'])*0.2
+#        average_speed = df.loc[index_stop,'speed']
+    #    average_speed = np.mean(df['speed'])
+#        print average_speed
+#        seconds = threshold / average_speed
+        seconds = 15
+        print str(seconds) + ' seconds'
+        timestamp_correction = datetime.timedelta(0, seconds) # (days, secons, ...)
+#        print timestamp_correction
+        # TODO: confirm that the df index is a timestamp
+        index_stop = index_stop + timestamp_correction
+#        print index_stop
+        print
+        
+    # Discard the rows at the end in which the user wasn't moving
+    df[:] = df.loc[:index_stop,:]
+    return df
     
     
 if __name__ == '__main__':
@@ -122,12 +234,15 @@ if __name__ == '__main__':
                'running':'r',
                'training':'g',
                'test':'k'}
-             
-#    time_units = 'h'    
-    time_units = 'min'
-#    time_units = 'sec'
     
-    plot_map=False
+#    units_t = 'sec'
+    units_t = 'min'
+#    units_t = 'h'    
+    
+    units_d = 'm'
+#    units_d = 'km'
+    
+    plot_map=True
     
     # ---------------------------------------
     
@@ -167,7 +282,7 @@ if __name__ == '__main__':
         df=df.set_index(pd.to_datetime(df['timestamp']))
        
         # Calculate elapsed time from the timestamp values
-        df['elapsed_time'] = TimestampToElapsed(df['timestamp'],units=time_units)
+        df['elapsed_time'] = ElapsedTime(df['timestamp'], units_t=units_t)
         
         # Filter DataFrame
         # filter by quantile or by fixed speed?
@@ -177,20 +292,21 @@ if __name__ == '__main__':
 #        indices_2 = df['speed'] > 2 # m/s
 #        indices = list(set(indices_1) & set(indices_2))
 #        df_filtered = df.loc[indices,:]
-        df = df.loc[indices,:]
+        df[:] = df.loc[indices,:]
 #        df_filtered['speed']*df_filtered['distance']
 #        print df_filtered.shape
         
-        delta_time = []
-        calculated_distance = []
-        previous_elapsed_time = 0.0
-        previous_distance = 0.0
-        for ir, row in df.iterrows():
-            if ir > df.index[0]:
-                delta_time.append(row['elapsed_time'] - previous_elapsed_time)
-                calculated_distance.append(row['speed']*delta_time[-1] + previous_distance)
-                previous_distance = calculated_distance[-1]
-            previous_elapsed_time = row['elapsed_time']
+#        delta_time = []
+#        calculated_distance = [0.0]
+#        previous_elapsed_time = 0.0
+#        previous_distance = 0.0
+#        for ir, row in df.iterrows():
+#            if ir > df.index[0]:
+#                delta_time.append(row['elapsed_time'] - previous_elapsed_time)
+#                calculated_distance.append(row['speed']*delta_time[-1] + previous_distance)
+#                previous_distance = calculated_distance[-1]
+#            previous_elapsed_time = row['elapsed_time']
+#        # TODO: fix NaNs!!!
         
         # Investigate outliers with the difference between the mean and the median
 #        stats = df.describe()
@@ -232,56 +348,85 @@ if __name__ == '__main__':
 #        plt.ylim([15,3])
 #        time_offset = df['elapsed_time'][-1] + time_offset
 #        plt.ylabel('pace (min/km)')
-#        plt.xlabel('time ('+time_units+')')
+#        plt.xlabel('time ('+units_t+')')
         
-        plt.subplot(221)
-        plt.plot(df['elapsed_time'], df['speed']*3.6,
-                label=os.path.basename(file_path), linewidth=2)
-#        plt.plot(df['elapsed_time'][1:], np.diff(df['speed']*20),
+#        plt.subplot(221)
+#        plt.plot(df['elapsed_time'], df['speed']*3.6,
 #                label=os.path.basename(file_path), linewidth=2)
-        plt.ylabel('speed (km/h)')
-        plt.xlabel('time ('+time_units+')')
+##        plt.plot(df['elapsed_time'][1:], np.diff(df['speed']*20),
+##                label=os.path.basename(file_path), linewidth=2)
+#        plt.ylabel('speed (km/h)')
+#        plt.xlabel('time ('+units_t+')')
 #        plt.legend(loc='upper right',fontsize=34)
         
 #        plt.subplot(222)
 #        plt.scatter(df['speed'][1:]*3.6, np.diff(df['speed']*3.6), 
 #                    c=df['heart_rate'][1:], cmap='rainbow', edgecolors='none')
 #        plt.xlabel('speed (km/h)')
-#        plt.ylabel('acceleration (km/h/' + time_units + ')')
+#        plt.ylabel('acceleration (km/h/' + units_t + ')')
         
-#        position = np.sqrt(df['position_long']**2+df['position_long']**2)*180/2**31
-        origin = df.loc[:,['position_long','position_lat']]
-        origin['position_long'] = origin['position_long'][0]
-        origin['position_lat'] = origin['position_lat'][0]
-        position = distance(origin['position_long'], 
-                            origin['position_lat'], 
-                            df['position_long'], df['position_lat'])
-        position_std = np.ndarray(position.shape)
-        for ip in range(len(position)):
-            position_std[ip] = np.std(position[ip:])
+#        position = distance(df['position_long'], df['position_lat'], mode='start', units_d=units_d)
+#        position = np.cumsum(position)
+        df['position'] = Distance(df['position_long'], df['position_lat'], mode='start', units_d='m')
+#        df['speed_new'] = Distance(df['position_long'], df['position_lat'], mode='previous', units_d='m') \
+#                / ElapsedTime(df['timestamp'], units_t='sec', mode='previous')
         
-        plt.subplot(222)
-#        plt.plot(df['elapsed_time'], df['position_lat']-df['position_lat'].mean(), label='latitude')
-#        plt.plot(df['elapsed_time'], df['position_long']-df['position_long'].mean(), label='longitude')
-        plt.plot(df['elapsed_time'], position, label='position')
+        df = AutoStop(df, threshold=0)
+#        
+        plt.subplot(311)
+        plt.plot(df['elapsed_time'], df['position'], label='position')
+#        plt.plot(df['elapsed_time'], df['distance'], label='distance')
+#        plt.legend(loc='lower right',fontsize=34)
+        plt.ylabel('position ('+units_d+')')
+        plt.xlabel('time ('+units_t+')')
+#        plt.xlim([15,20])
+        
+        plt.subplot(312)
+        plt.plot(df['elapsed_time'], df['position_std'], label='position std')
 #        plt.legend(loc='upper right',fontsize=34)
-        plt.ylabel('position (a.u.)')
-        plt.xlabel('time ('+time_units+')')
+        plt.ylabel('position std ('+units_d+')')
+        plt.xlabel('time ('+units_t+')')
         
-        plt.subplot(224)
-        plt.plot(df['elapsed_time'], position_std, label='position std')
-        plt.ylabel('position std (a.u.)')
-        plt.xlabel('time ('+time_units+')')
-        plt.ylim([0,0.001])
+        plt.subplot(313)
+        plt.plot(df['elapsed_time'], df['speed'], label='speed')
+#        plt.plot(df['elapsed_time'], df['speed_new'], label='speed new')
+        
+        df = AutoStop(df, threshold=15, correction=False)
+        
+#        plt.subplot(222)
+        plt.subplot(311)
+        plt.plot(df['elapsed_time'], df['position'], label='position filtered')
+#        plt.plot(df['elapsed_time'], df['distance'], label='distance filtered')
+#        plt.legend(loc='lower right',fontsize=34)
+        plt.ylabel('position ('+units_d+')')
+        plt.xlabel('time ('+units_t+')')
+#        plt.xlim([16.5,17])
+        
+#        plt.subplot(224)
+        plt.subplot(312)
+        plt.plot(df['elapsed_time'], df['position_std'], label='position std filtered')
+#        plt.legend(loc='upper right',fontsize=34)
+        plt.ylabel('position std ('+units_d+')')
+        plt.xlabel('time ('+units_t+')')
+        plt.ylim([0,30])
+#        plt.xlim([16.5,17])
+        
+        plt.subplot(313)
+        plt.plot(df['elapsed_time'], df['speed'], label='speed filtered')
+        plt.xlabel('time ('+units_t+')')
+        plt.ylabel('speed (m/s)')
+#        plt.legend(loc='upper right',fontsize=34)
+#        plt.xlim([0,5])
+#        plt.xlim([16.5,17])
         
 #        h = plt.hist(position, normed=True, alpha=0.5, bins=50,
 #                     label=os.path.basename(file_path), linewidth=2)
 #        plt.xlabel('position (a.u.)')
         
-        plt.subplot(223)
-        plt.scatter(df['speed']*3.6, df['heart_rate'])
-        plt.xlabel('speed (km/h)')
-        plt.ylabel('heart_rate (bpm)')
+#        plt.subplot(223)
+#        plt.scatter(df['speed']*3.6, df['heart_rate'])
+#        plt.xlabel('speed (km/h)')
+#        plt.ylabel('heart_rate (bpm)')
         
 
 #        plt.plot(df['position_lat']*180/2**31, df['position_long']*180/2**31, color=colours[sport])
