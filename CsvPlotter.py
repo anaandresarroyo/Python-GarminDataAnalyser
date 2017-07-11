@@ -225,9 +225,9 @@ if __name__ == '__main__':
     sports = [
 #             'walking',
 #             'cycling',
-#             'running',
+             'running',
 #             'training',
-             'test',
+#             'test',
              ]
     colours = {'walking':'k',
                'cycling':'b',
@@ -257,7 +257,7 @@ if __name__ == '__main__':
             file_paths.append(directory_path_sport + file_name)
             file_sports.append(sport)
     
-#    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(32,17), squeeze=True)
     colour_map = pylab.get_cmap('Set1')
@@ -268,8 +268,8 @@ if __name__ == '__main__':
 #        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
     
     time_offset=0
-    number_of_files = 5
-#    number_of_files = len(file_paths);
+#    number_of_files = 1
+    number_of_files = len(file_paths);
     for file_path, sport, ifn in zip(file_paths, file_sports, range(number_of_files)):
         verbose=True
         if verbose:
@@ -292,7 +292,7 @@ if __name__ == '__main__':
 #        indices_2 = df['speed'] > 2 # m/s
 #        indices = list(set(indices_1) & set(indices_2))
 #        df_filtered = df.loc[indices,:]
-        df[:] = df.loc[indices,:]
+#        df[:] = df.loc[indices,:]
 #        df_filtered['speed']*df_filtered['distance']
 #        print df_filtered.shape
         
@@ -318,10 +318,10 @@ if __name__ == '__main__':
 #        else:
 #            skewness_df = skewness_df.append(skewness,ignore_index=True)
         
-#        df.plot(ax=axes[0,0], x='speed', y='heart_rate', 
-#                kind='scatter', color=colours[sport], edgecolors='none',
-#                legend=False)        
-#        axes[0,0].set_xlim([0,10])
+        df.plot(ax=axes[0,0], x='speed', y='cadence', s=30, 
+                kind='scatter', color=colours[sport], edgecolors='none',
+                legend=False)        
+        axes[0,0].set_xlim([0,10])
 
 #        df.plot(ax=axes[0,1], x='position_long', y='position_lat', 
 #                kind='scatter', color=colours[sport], edgecolors='none',
@@ -365,58 +365,72 @@ if __name__ == '__main__':
 #        plt.xlabel('speed (km/h)')
 #        plt.ylabel('acceleration (km/h/' + units_t + ')')
         
-#        position = distance(df['position_long'], df['position_lat'], mode='start', units_d=units_d)
-#        position = np.cumsum(position)
-        df['position'] = Distance(df['position_long'], df['position_lat'], mode='start', units_d='m')
+##        position = Distance(df['position_long'], df['position_lat'], mode='previous')
+##        position = np.cumsum(position)
+#        df['distance_new'] = np.cumsum(Distance(df['position_long'], df['position_lat'], mode='previous'))
+#        df['position'] = Distance(df['position_long'], df['position_lat'], mode='start', units_d='m')
 #        df['speed_new'] = Distance(df['position_long'], df['position_lat'], mode='previous', units_d='m') \
 #                / ElapsedTime(df['timestamp'], units_t='sec', mode='previous')
-        
-        df = AutoStop(df, threshold=0)
 #        
-        plt.subplot(311)
-        plt.plot(df['elapsed_time'], df['position'], label='position')
-#        plt.plot(df['elapsed_time'], df['distance'], label='distance')
-#        plt.legend(loc='lower right',fontsize=34)
-        plt.ylabel('position ('+units_d+')')
-        plt.xlabel('time ('+units_t+')')
-#        plt.xlim([15,20])
-        
-        plt.subplot(312)
-        plt.plot(df['elapsed_time'], df['position_std'], label='position std')
+#        df = AutoStop(df, threshold=0)
+##        
+#        plt.subplot(411)
+##        plt.plot(df['elapsed_time'], df['distance'], label='distance')
+#        plt.plot(df['elapsed_time'], df['position'], label='position')        
+##        plt.legend(loc='lower right',fontsize=34)
+#        plt.ylabel('position ('+units_d+')')
+#        plt.xlabel('time ('+units_t+')')
+##        plt.xlim([15,20])
+#        
+#        plt.subplot(412)
+#        plt.plot(df['elapsed_time'], df['position_std'], label='position std')
+##        plt.legend(loc='upper right',fontsize=34)
+#        plt.ylabel('position std ('+units_d+')')
+#        plt.xlabel('time ('+units_t+')')
+#        
+#        plt.subplot(413)
+#        plt.plot(df['elapsed_time'][1:], np.diff(df['position_std']))
+#        plt.ylabel('d position std / d time (a.u.)')
+#        plt.xlabel('time ('+units_t+')')
+#        
+#        plt.subplot(414)
+#        plt.plot(df['elapsed_time'], df['speed'], label='speed')
+##        plt.plot(df['elapsed_time'], df['speed_new'], label='speed new')
+#        plt.plot(df['elapsed_time'][1:], np.diff(df['distance_new']))
+#        
+#        df = AutoStop(df, mode='diff', threshold=5, correction=False)
+#        
+##        plt.subplot(222)
+#        plt.subplot(411)
+#        plt.plot(df['elapsed_time'], df['position'], label='position filtered')
+##        plt.plot(df['elapsed_time'], df['distance'], label='distance filtered')
+##        plt.legend(loc='lower right',fontsize=34)
+#        plt.ylabel('position ('+units_d+')')
+#        plt.xlabel('time ('+units_t+')')
+##        plt.ylim([1550,1650])
+##        plt.xlim([16.5,17])
+#        
+##        plt.subplot(224)
+#        plt.subplot(412)
+#        plt.plot(df['elapsed_time'], df['position_std'], label='position std filtered')
+##        plt.legend(loc='upper right',fontsize=34)
+#        plt.ylabel('position std ('+units_d+')')
+#        plt.xlabel('time ('+units_t+')')
+##        plt.ylim([0,10])
+##        plt.xlim([16.5,17])
+#        
+#        plt.subplot(413)
+#        plt.plot(df['elapsed_time'][1:], np.diff(df['position_std']))
+#        plt.ylabel('d position std / d time (a.u.)')
+#        plt.xlabel('time ('+units_t+')')
+##        plt.xlim([16.5,17])
+#        
+#        plt.subplot(414)
+#        plt.plot(df['elapsed_time'], df['speed'], label='speed filtered')
+#        plt.xlabel('time ('+units_t+')')
+#        plt.ylabel('speed (m/s)')
 #        plt.legend(loc='upper right',fontsize=34)
-        plt.ylabel('position std ('+units_d+')')
-        plt.xlabel('time ('+units_t+')')
-        
-        plt.subplot(313)
-        plt.plot(df['elapsed_time'], df['speed'], label='speed')
-#        plt.plot(df['elapsed_time'], df['speed_new'], label='speed new')
-        
-        df = AutoStop(df, threshold=15, correction=False)
-        
-#        plt.subplot(222)
-        plt.subplot(311)
-        plt.plot(df['elapsed_time'], df['position'], label='position filtered')
-#        plt.plot(df['elapsed_time'], df['distance'], label='distance filtered')
-#        plt.legend(loc='lower right',fontsize=34)
-        plt.ylabel('position ('+units_d+')')
-        plt.xlabel('time ('+units_t+')')
-#        plt.xlim([16.5,17])
-        
-#        plt.subplot(224)
-        plt.subplot(312)
-        plt.plot(df['elapsed_time'], df['position_std'], label='position std filtered')
-#        plt.legend(loc='upper right',fontsize=34)
-        plt.ylabel('position std ('+units_d+')')
-        plt.xlabel('time ('+units_t+')')
-        plt.ylim([0,30])
-#        plt.xlim([16.5,17])
-        
-        plt.subplot(313)
-        plt.plot(df['elapsed_time'], df['speed'], label='speed filtered')
-        plt.xlabel('time ('+units_t+')')
-        plt.ylabel('speed (m/s)')
-#        plt.legend(loc='upper right',fontsize=34)
-#        plt.xlim([0,5])
+#        plt.ylim([0,6])
 #        plt.xlim([16.5,17])
         
 #        h = plt.hist(position, normed=True, alpha=0.5, bins=50,

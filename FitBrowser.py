@@ -7,6 +7,8 @@ Reads a Garmin .fit file and prints its information
 import os
 from fitparse import FitFile
 from collections import Counter
+import tkFileDialog
+import Tkinter as tk
 
 def FitPrinter(file_path, desired_messages=range(250), 
                verbose_message=False, verbose_summary=True):
@@ -67,8 +69,13 @@ def FitPrinter(file_path, desired_messages=range(250),
     
 if __name__ == '__main__':
     
-    file_path = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/1837541844.fit'
-    # TODO: ask for user input to select the file_path
+    # Hide background Tkinter window
+    root = tk.Tk()
+    root.withdraw()
+    
+    # Choose file
+    file_path = tkFileDialog.askopenfilename(title='Choose .fit file.', 
+                                             filetypes=[('FIT','*.fit'), ('all','*.*')])
     
     # Print file summary
     FitPrinter(file_path)
