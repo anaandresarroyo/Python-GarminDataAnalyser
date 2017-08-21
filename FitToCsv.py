@@ -105,6 +105,8 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         fitfile = FitFile(file_path)    
         for message in fitfile.get_messages('sport'):
             sport = message.get_value('sport')
+#            sport = 'driving'
+#            sport = 'lucia'
             
         # Update the sport_counter
         sport_counter[sport] += 1
@@ -145,10 +147,14 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
 if __name__ == '__main__':
 
     # Directory to read .fit files from
-    path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/fit new/'
+    path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
+#    path_read = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/fit new/'
+#    path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
         
-    # Directory to save .csv files in
-    path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
+#     Directory to save .csv files in
+    path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
+#    path_save = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/csv/'
+#    path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
     
     # Convert .fit files to .csv files
     FitToCsv(path_read, path_save, desired_message='record', 

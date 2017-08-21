@@ -220,20 +220,29 @@ def AutoStop(df, mode='std', threshold=15, correction=False):
     
 if __name__ == '__main__':
 
-    directory_path_read = 'C:/Users/Ana Andres/Dropbox/Garmin/csv/'
-    directory_path_save = 'C:/Users/Ana Andres/Dropbox/Garmin/figures/'
+    directory_path_read = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
+#    directory_path_read = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/csv/'
+    directory_path_save = 'C:/Users/Ana Andres/Documents/Garmin/figures/'
+#    directory_path_save = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/figures/'
+#    map_name = 'mymap.html'
+    map_name = 'lucia_cambridge.html'
     sports = [
 #             'walking',
 #             'cycling',
-             'running',
+#             'running',
+#             'driving',
 #             'training',
 #             'test',
+             'lucia',
              ]
-    colours = {'walking':'k',
-               'cycling':'b',
+    colours = {'walking':'b',
+               'cycling':'k',
                'running':'r',
-               'training':'g',
-               'test':'k'}
+               'driving':'g',
+               'training':'m',
+               'test':'g',
+               'lucia':'k',
+               }
     
 #    units_t = 'sec'
     units_t = 'min'
@@ -257,14 +266,15 @@ if __name__ == '__main__':
             file_paths.append(directory_path_sport + file_name)
             file_sports.append(sport)
     
-    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
+#    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(32,17), squeeze=False)
 #    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(32,17), squeeze=True)
     colour_map = pylab.get_cmap('Set1')
     
     
     if plot_map:
-        gmap = gmplot.GoogleMapPlotter(52.22, 0.120, 12) # Cambridge 
+        gmap = gmplot.GoogleMapPlotter(52.202, 0.12, 13) # Cambridge 
+#        gmap = gmplot.GoogleMapPlotter(43, -120, 5) # USA West Coast
 #        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
     
     time_offset=0
@@ -278,6 +288,11 @@ if __name__ == '__main__':
         df = pd.read_csv(file_path)
         # Convert timestamp column from string to datetime
         df['timestamp']=pd.to_datetime(df['timestamp'])
+        verbose=False
+        if verbose:
+            print file_path
+            print df['timestamp'][0]
+            print
         # Set timestamp column as row indices
         df=df.set_index(pd.to_datetime(df['timestamp']))
        
@@ -318,10 +333,10 @@ if __name__ == '__main__':
 #        else:
 #            skewness_df = skewness_df.append(skewness,ignore_index=True)
         
-        df.plot(ax=axes[0,0], x='speed', y='cadence', s=30, 
-                kind='scatter', color=colours[sport], edgecolors='none',
-                legend=False)        
-        axes[0,0].set_xlim([0,10])
+#        df.plot(ax=axes[0,0], x='speed', y='cadence', s=30, 
+#                kind='scatter', color=colours[sport], edgecolors='none',
+#                legend=False)        
+#        axes[0,0].set_xlim([0,10])
 
 #        df.plot(ax=axes[0,1], x='position_long', y='position_lat', 
 #                kind='scatter', color=colours[sport], edgecolors='none',
@@ -416,7 +431,7 @@ if __name__ == '__main__':
 ##        plt.legend(loc='upper right',fontsize=34)
 #        plt.ylabel('position std ('+units_d+')')
 #        plt.xlabel('time ('+units_t+')')
-##        plt.ylim([0,10])
+#        plt.ylim([0,10])
 ##        plt.xlim([16.5,17])
 #        
 #        plt.subplot(413)
@@ -430,8 +445,8 @@ if __name__ == '__main__':
 #        plt.xlabel('time ('+units_t+')')
 #        plt.ylabel('speed (m/s)')
 #        plt.legend(loc='upper right',fontsize=34)
-#        plt.ylim([0,6])
-#        plt.xlim([16.5,17])
+##        plt.ylim([0,6])
+##        plt.xlim([16.5,17])
         
 #        h = plt.hist(position, normed=True, alpha=0.5, bins=50,
 #                     label=os.path.basename(file_path), linewidth=2)
@@ -449,7 +464,8 @@ if __name__ == '__main__':
             # Add a line plot to the gmap object which will be save to an .html file
             # Use line instead of scatter plot for faster speed and smaller file size
             # Make sure to remove NaNs or the plot won't work
-            gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, color=colours[sport])
+            gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, 
+                      color=colours[sport], edge_width=3)
         
         
 #    print df.columns
@@ -468,7 +484,7 @@ if __name__ == '__main__':
     plt.show()
 
     if plot_map:
-        gmap.draw(directory_path_save + 'mymap.html')
+        gmap.draw(directory_path_save + map_name)
     
 #    skewness_df.plot(y=['speed','heart_rate'])
 
