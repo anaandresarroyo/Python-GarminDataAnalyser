@@ -11,7 +11,7 @@ import tkFileDialog
 import Tkinter as tk
 
 def FitPrinter(file_path, desired_messages=range(250), 
-               verbose_message=False, verbose_summary=True):
+               verbose_message=False, verbose_summary=False):
     """Reads all the data of the desired_messages types
     from the .fit file and prints it on the console
         
@@ -54,17 +54,18 @@ def FitPrinter(file_path, desired_messages=range(250),
                     print " * %s: %s" % (message_data.name, message_data.value)
             print
             
-    if verbose_summary:
-        # Print summary of file
-        print "file name: " + os.path.basename(file_path)
-        print "selected messages: %s\n" % (sum(message_counter.values()))
-    
+    if verbose_summary:    
         # Print the message_counter values
+        print "file name: " + os.path.basename(file_path) + '\n'
         print "message.name: counts --------------------\n"
-        for key, val in message_counter.items():
-            print "%s: %s" % (key, val)
-        print
+        PrintDictionary(message_counter)
     
+    return message_counter
+
+def PrintDictionary(dictionary):
+    for key, val in message_counter.items():
+        print "%s: %s" % (key, val)
+    print    
     
     
 if __name__ == '__main__':
@@ -76,20 +77,25 @@ if __name__ == '__main__':
     # Choose file
     file_path = tkFileDialog.askopenfilename(title='Choose .fit file.', 
                                              filetypes=[('FIT','*.fit'), ('all','*.*')])
+    print "file name: " + os.path.basename(file_path) + '\n'
     
-    # Print file summary
-    FitPrinter(file_path)
+    # Generate file summary
+    message_counter = FitPrinter(file_path)
                
     desired_messages = ''
     while desired_messages!='exit':
+        # Print file summary
+        PrintDictionary(message_counter)
+        
         print "Write the type of message you would like to see more info from. " \
               "(Choose from the options listed in the message counter.) " \
               "(Type 'exit' to exit the while loop.)\n"
         desired_messages = raw_input()
-        print
+        print        
         
         # Print message data from desired_messages types
         FitPrinter(file_path, desired_messages, 
-                   verbose_message=True, verbose_summary=False)
+                   verbose_message=True, verbose_summary=False)       
+        
     
     print 'THE END!'
