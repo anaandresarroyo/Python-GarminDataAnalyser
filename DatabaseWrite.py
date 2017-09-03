@@ -33,6 +33,8 @@ if __name__ == '__main__':
         else:
             # Add row to the database
             df_database = pd.concat([df_database,df])
+
+    # TODO: use timestamp and local_timestamp from the activity data to save the time zone    
     
     # Use the start time as the row index
     df_database = df_database.set_index(df_database['start_time'])

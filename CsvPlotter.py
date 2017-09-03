@@ -286,15 +286,17 @@ if __name__ == '__main__':
             print "%s / %s: %s" % (ifn+1, number_of_files, sport)
         # Read data from .csv file
         df = pd.read_csv(file_path)
+#        df = pd.read_csv(file_path, index_col='timestamp', parse_dates='timestamp')
         # Convert timestamp column from string to datetime
-        df['timestamp']=pd.to_datetime(df['timestamp'])
         verbose=False
         if verbose:
             print file_path
             print df['timestamp'][0]
+#            df.index.values[0]
             print
         # Set timestamp column as row indices
         df=df.set_index(pd.to_datetime(df['timestamp']))
+        #inplace=True argument to not have to assign to df again
        
         # Calculate elapsed time from the timestamp values
         df['elapsed_time'] = ElapsedTime(df['timestamp'], units_t=units_t)
