@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'FitBrowserGUI.ui'
+# Form implementation generated from reading ui file 'FitBrowserGUIdesign.ui'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #
@@ -61,13 +61,13 @@ class Ui_FitBrowserGUI(object):
         self.ControlsPanel.addWidget(self.line_6)
         self.gridLayout_3 = QtGui.QGridLayout()
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.MessageTypesTableWidget = QtGui.QTableWidget(self.layoutWidget)
-        self.MessageTypesTableWidget.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.MessageTypesTableWidget.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.MessageTypesTableWidget.setObjectName(_fromUtf8("MessageTypesTableWidget"))
-        self.MessageTypesTableWidget.setColumnCount(0)
-        self.MessageTypesTableWidget.setRowCount(0)
-        self.gridLayout_3.addWidget(self.MessageTypesTableWidget, 1, 0, 1, 1)
+        self.FileContentsTableWidget = QtGui.QTableWidget(self.layoutWidget)
+        self.FileContentsTableWidget.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.FileContentsTableWidget.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.FileContentsTableWidget.setObjectName(_fromUtf8("FileContentsTableWidget"))
+        self.FileContentsTableWidget.setColumnCount(0)
+        self.FileContentsTableWidget.setRowCount(0)
+        self.gridLayout_3.addWidget(self.FileContentsTableWidget, 1, 0, 1, 1)
         self.MessageTypesLabel = QtGui.QLabel(self.layoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)

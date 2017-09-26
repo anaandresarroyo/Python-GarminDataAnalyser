@@ -57,7 +57,7 @@
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
-           <widget class="QTableWidget" name="MessageTypesTableWidget">
+           <widget class="QTableWidget" name="FileContentsTableWidget">
             <property name="selectionMode">
              <enum>QAbstractItemView::SingleSelection</enum>
             </property>
