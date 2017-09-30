@@ -29,7 +29,8 @@ sport_colours = {'walking':'g',
                  'lucia':'k',
                  }
                  
-record_units = {'timestamp':None,
+record_units = {'elapsed_time':'min',
+                'timestamp':None,
                 'cadence':'rpm',
                 'distance':'m',
                 'enhanced_speed':'m/s',
@@ -82,6 +83,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.setupUi(self)
         #self.file_path = os.getcwd()
         self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'   
+        self.ReadFilePathWidget.insert(self.file_path)
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
         self.new_file()
         self.location_list()
@@ -91,6 +93,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.NewFilePushButton.clicked.connect(self.new_file)
         self.RefreshPlot1PushButton.clicked.connect(self.refresh_1)      
         self.RefreshPlot2PushButton.clicked.connect(self.refresh_2)  
+        self.SaveDataPushButton.clicked.connect(self.save_data)  
         
         self.figure1 = Figure()
         self.canvas1 = FigureCanvas(self.figure1)
@@ -110,7 +113,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         for key in record_units:
             self.XComboBox2.addItem(key, 0)
             self.YComboBox2.addItem(key, 0)
-        index = self.XComboBox2.findText('timestamp')
+        index = self.XComboBox2.findText('elapsed_time')
         self.XComboBox2.setCurrentIndex(index)
         index = self.YComboBox2.findText('speed')
         self.YComboBox2.setCurrentIndex(index)
@@ -118,15 +121,19 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     
         # Initial plot
         self.refresh_1()
+        self.refresh_2()
         
     
     def new_file(self):
         """Select a new CSV file.""" 
-        file_path = self.file_path
-        #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file.', file_path, "CSV files (*.csv)")
+        file_path = self.ReadFilePathWidget.text()
+        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
         if len(file_path):
             self.file_path = file_path
-            self.FilePathWidget.insert(self.file_path)
+            self.ReadFilePathWidget.clear()
+            self.SaveFilePathWidget.clear()
+            self.ReadFilePathWidget.insert(self.file_path)
+            self.SaveFilePathWidget.insert(self.file_path)
             self.read_file()
         else:
             print "No file chosen. Choose another file to avoid errors."            
@@ -136,7 +143,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         print self.file_path
         self.df = pd.read_csv(self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True)
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
-        print "File read."
+        #print "File read."
         self.df_selected = self.df
         self.StartDateEdit.setDate(min(self.df.index))
         self.EndDateEdit.setDate(max(self.df.index))
@@ -177,7 +184,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         for row, item in enumerate(items):
             widget.addItem(item)
             widget.item(row).setSelected(True)
-        print column + ' list updated.'
+        #print column + ' list updated.'
         return items        
 
     def location_list(self):
@@ -193,14 +200,14 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Locations.csv'        
         #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path, "CSV files (*.csv)")
         if len(file_path):
-            print file_path
+            #print file_path
             self.df_locations = pd.read_csv(file_path)
-            print "File read."
+            #print "File read."
             
             for item in self.df_locations['name']:
                 self.StartLocationListWidget.addItem(item)
                 self.EndLocationListWidget.addItem(item)
-            print "Location lists updated."        
+            #print "Location lists updated."        
         else:
             print "No file chosen. Choose another file to avoid errors."            
     
@@ -301,23 +308,47 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.canvas1.draw()
         
         
-    def fill_table(self, df, widget, max_rows=100):            
-        widget.clear()
-        widget.setColumnCount(len(df.columns))
-        widget.setHorizontalHeaderLabels(df.columns)
+    def fill_table(self, df, table, max_rows=50):            
+        table.clear()
+        table.setColumnCount(len(df.columns))
+        table.setHorizontalHeaderLabels(df.columns)
             
         row = 0
         while row < min(max_rows,len(df.index)-1):
-            widget.setRowCount(row+1)
+            table.setRowCount(row+1)
             for col in range(len(df.columns)):                
-                widget.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
-                widget.resizeColumnToContents(col)
+                table.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
+                table.resizeColumnToContents(col)
             row = row + 1
-        widget.setVerticalHeaderLabels(df.index[0:row].strftime("%Y-%m-%d %H:%M"))
-        if row == max_rows:
-            widget.setRowCount(row+1)
-            widget.setItem(row,0,QtGui.QTableWidgetItem(str('And more...')))
-            widget.resizeColumnToContents(col)
+        table.setVerticalHeaderLabels(df.index[0:row].strftime("%Y-%m-%d %H:%M"))
+#        if row == max_rows:
+#            print "Only the first " + str(max_rows) + " rows are displayed in the table.\n"                         
+#            table.setRowCount(row+1)
+#            table.setItem(row,0,QtGui.QTableWidgetItem(str('And more...')))            
+#            table.resizeColumnToContents(col)
+    
+    def read_table(self,table):
+        rows = table.rowCount()
+        columns = table.columnCount()
+
+        column_names = []
+        for column in range(columns):
+            column_names.append(table.horizontalHeaderItem(column).text())
+
+        index_values = []
+        for row in range(rows):
+            index_values.append(pd.to_datetime(table.verticalHeaderItem(row).text()))
+            # TODO: what if the index is not a datetime?
+        
+        df = pd.DataFrame(columns=column_names, index=index_values)
+        df.index.name = 'start_time'
+        # TODO: what if the index is called 'timestamp' instead?
+        
+        for row, index in enumerate(index_values):
+            for column_number, column_name in enumerate(column_names):
+                df.loc[index,column_name] = table.item(row,column_number).data(0)
+            
+        return df
             
     def refresh_2(self):
         selected_rows = self.table_selection(self.Table1Widget)
@@ -328,7 +359,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.record_file_numbers.append(self.df_selected.loc[self.df_selected.index[row],'file_name'])
             self.record_sports.append(self.df_selected.loc[self.df_selected.index[row],'sport'])
             self.record_timezone.append(self.df_selected.loc[self.df_selected.index[row],'timezone'])
-        self.plot2()
+        self.plot2() # this also fills Table 2
+        
+        # TODO: update Table 1 with new values of heart rate, speed, distance, ...
     
     def table_selection(self, widget):
         selected_rows = []
@@ -337,13 +370,36 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         selected_rows = np.unique(selected_rows)
         return selected_rows
     
-    def read_records(self,file_number):
-        file_path = self.records_directory + str(file_number) + '_record.csv'
-        df = pd.read_csv(file_path, parse_dates='start_time', index_col='timestamp')
-        df.index = pd.to_datetime(df.index)
-        self.temp = df
-#        self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True
+    def read_records(self, file_path):
+        df = pd.read_csv(file_path, parse_dates='timestamp', index_col='timestamp')
+        df['elapsed_time'] = ElapsedTime(df.index.to_series(), units_t=record_units['elapsed_time'])
         return df
+        
+    def select_times(self, df):
+        start_time = self.StartTimeDoubleSpinBox.value()
+        end_time = self.EndTimeDoubleSpinBox.value()
+        mask_start = df['elapsed_time'] >= start_time
+        mask_end = df['elapsed_time'] <= end_time
+        return df.loc[mask_start & mask_end]
+    
+    def save_data(self):
+        self.df_selected = self.read_table(self.Table1Widget)
+        df_save = self.df_selected
+        # TODO: combine df_selected with the rest of the activities
+        
+        file_path = self.SaveFilePathWidget.text()
+        file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose database .csv file to save.', file_path, "CSV files (*.csv)")
+        self.SaveFilePathWidget.insert(file_path)
+        df_save.to_csv(file_path, sep=',', header=True, index=True)
+        
+        
+        for index, file_number in enumerate(self.record_file_numbers):
+            file_path = self.records_directory + str(file_number) + '_record.csv'
+            df = self.read_records(file_path)
+            df = self.select_times(df)
+            df = df.drop('elapsed_time', axis=1)
+            df.to_csv(file_path, sep=',', header=True, index=True)
+                
     
     def plot2(self):
         x = self.XComboBox2.currentText()
@@ -355,21 +411,21 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         ax = self.figure2.add_subplot(111)
     
         for index, file_number in enumerate(self.record_file_numbers):
-            df = self.read_records(file_number)
-#            df.set_index(df['timestamp'], drop=True, inplace=True)
+            file_path = self.records_directory + str(file_number) + '_record.csv'
+            df = self.read_records(file_path)
+            df = self.select_times(df)
             sport = self.record_sports[index]
             timezone = self.record_timezone[index]
             # TODO: what if the file contains mixed sports?
             
             if index == 0:
-                self.fill_table(df, self.Table2Widget, max_rows=100)
+                self.fill_table(df, self.Table2Widget)
             
             data = []
             for item in data_labels:
                 if item == 'timestamp':
                     # take into account the timezone
                     data_item = df.index + timezone
-#                    data_item = data_item.values
                 else:
                     data_item = df[item]
                 data.append(data_item)
@@ -393,11 +449,58 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        #ax.legend()
+        if len(self.record_file_numbers) > 0 & len(self.record_file_numbers) <= 5:
+            ax.legend()
         self.canvas2.draw()
             
             
+def ElapsedTime(timestamp, units_t='sec', mode='start'):    
+    """Calculate the elapsed time from a timestamp pandas Series.
+        
+    Arguments:
+    timestamp : timestamp pandas Series
+        Timestamp values
+    units_d: string
+        Units of the calculated time, e.g. 'sec' (default), 'min', or 'h'
+    mode : string
+        If 'start' calculate the elapsed time between all points of the array and the first point.
+        If 'previous' calculate the elapsed time between all points of the array the previous point.
+    
+    Output:
+    elapsed_time: float pandas Series
+        Contains the calculated elapsed time in units of units_t
+    """
+    
+    # The Garmin Forerunner 35 takes data every 1 second
+
+    origin_time =  np.empty(timestamp.shape, dtype=type(timestamp))
+    if mode == 'start':
+        origin_time[:] = timestamp[0]
+    
+    elif mode == 'previous':
+        origin_time[0] = timestamp[0]
+        for i, time in enumerate(timestamp[0:-1]):
+            origin_time[i+1] = time
             
+    else:
+        raise ValueError('Unable to recognise the mode.')  
+    
+    timedelta = timestamp-origin_time
+    elapsed_time = timedelta.astype('timedelta64[s]') # in seconds
+    
+    if units_t == 's':
+        pass    
+    elif units_t == 'sec':
+        pass
+    elif units_t == 'min':
+        # Convert seconds to minutes
+        elapsed_time = elapsed_time/60 
+    elif units_t == 'h':
+        # Convert seconds to hours
+        elapsed_time = elapsed_time/60/60 
+    else:
+        raise ValueError('Unable to recognise the units for the time.')    
+    return elapsed_time
         
     
 if __name__ == '__main__':

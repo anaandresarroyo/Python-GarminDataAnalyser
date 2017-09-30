@@ -56,7 +56,7 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
     """
     
     # The Garmin Forerunner 35 takes data every 1 second
-
+    print timestamp.head()
     origin_time =  np.empty(timestamp.shape, dtype=type(timestamp))
     if mode == 'start':
         origin_time[:] = timestamp[0]
