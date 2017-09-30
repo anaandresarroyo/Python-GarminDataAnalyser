@@ -22,23 +22,24 @@ sport_colours = {'walking':'g',
                  'cycling':'b',
                  'running':'r',
                  'driving':'b',
-                 'train': 'm',
-                 'water': 'c',
+                 'train':'m',
+                 'water':'c',
                  'training':'m',
                  'test':'g',
                  'lucia':'k',
                  }
                  
-records_units = {'cadence':'rpm',
-                 'distance':'m',
-                 'enhanced_speed':'m/s',
-                 'heart_rate':'bpm',
-                 'position_lat':'semicircles',
-                 'position_long	':'semicircles',
-                 'speed':'m/s',
-                 'timestamp':None,
-                 'unknown_88':None,
-                 }
+record_units = {'timestamp':None,
+                'cadence':'rpm',
+                'distance':'m',
+                'enhanced_speed':'m/s',
+                'heart_rate':'bpm',
+                'position_lat':'semicircles',
+                'position_long':'semicircles',
+                'speed':'m/s',
+                'timestamp':None,
+                'unknown_88':None,
+                }
                  
 session_units = {'activity':None,
                  'avg_cadence':'rpm',
@@ -80,14 +81,16 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
         #self.file_path = os.getcwd()
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'        
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'   
+        self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
         self.new_file()
         self.location_list()
-        
+                
         
         # Connect GUI elements
         self.NewFilePushButton.clicked.connect(self.new_file)
         self.RefreshPlot1PushButton.clicked.connect(self.refresh_1)      
+        self.RefreshPlot2PushButton.clicked.connect(self.refresh_2)  
         
         self.figure1 = Figure()
         self.canvas1 = FigureCanvas(self.figure1)
@@ -104,10 +107,23 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.LegendComboBox.addItem('sport', 0)
         # TODO: implement different legend options in plot 1
         
+        for key in record_units:
+            self.XComboBox2.addItem(key, 0)
+            self.YComboBox2.addItem(key, 0)
+        index = self.XComboBox2.findText('timestamp')
+        self.XComboBox2.setCurrentIndex(index)
+        index = self.YComboBox2.findText('speed')
+        self.YComboBox2.setCurrentIndex(index)
+    
+    
+        # Initial plot
+        self.refresh_1()
+        
     
     def new_file(self):
         """Select a new CSV file.""" 
-        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file.', self.file_path, "CSV files (*.csv)")
+        file_path = self.file_path
+        #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file.', file_path, "CSV files (*.csv)")
         if len(file_path):
             self.file_path = file_path
             self.FilePathWidget.insert(self.file_path)
@@ -146,9 +162,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.YComboBox1.addItem(item, 0)
         self.SizeComboBox.addItem('weekday', 0)
             
-        self.XComboBox1.setCurrentIndex(2)
-        self.YComboBox1.setCurrentIndex(1)
-        self.SizeComboBox.setCurrentIndex(0)
+        index = self.XComboBox1.findText('avg_speed')
+        self.XComboBox1.setCurrentIndex(index)
+        index = self.YComboBox1.findText('avg_heart_rate')
+        self.YComboBox1.setCurrentIndex(index)
+        index = self.SizeComboBox.findText('constant')
+        self.SizeComboBox.setCurrentIndex(index)
         
            
     def populate_list(self, column, widget):
@@ -190,12 +209,13 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         end_date = self.EndDateEdit.date().toPyDate()
         return df.loc[str(start_date) : str(end_date + pd.DateOffset(1))]
         
-    def read_selection(self, column, widget):
+    def list_selection(self, widget):
         selected_options = []
         for item in widget.selectedItems():
             selected_options.append(item.text())
         return selected_options
-        
+    
+       
     def generate_mask(self, df, column, selected_options):       
         mask = df[column] == 'nothing'
         for index, option in enumerate(selected_options):
@@ -207,9 +227,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def df_selection(self):
         df_dates = self.select_dates(self.df)
         
-        self.selected_sports = self.read_selection('sport', self.SportsListWidget)
-        self.selected_activities = self.read_selection('activity', self.ActivitiesListWidget)
-        self.selected_gear = self.read_selection('gear', self.GearListWidget)
+        self.selected_sports = self.list_selection(self.SportsListWidget)
+        self.selected_activities = self.list_selection(self.ActivitiesListWidget)
+        self.selected_gear = self.list_selection(self.GearListWidget)
         
         mask_sports = self.generate_mask(df_dates, 'sport', self.selected_sports)
         mask_activities = self.generate_mask(df_dates, 'activity', self.selected_activities)
@@ -281,43 +301,104 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.canvas1.draw()
         
         
-    def fill_table(self, df, widget):            
+    def fill_table(self, df, widget, max_rows=100):            
         widget.clear()
-        if len(df.index) < 100:
-            widget.setColumnCount(len(df.columns))
-            widget.setRowCount(len(df.index))
-            widget.setHorizontalHeaderLabels(df.columns)
-            widget.setVerticalHeaderLabels(df.index.strftime("%Y-%m-%d %H:%M"))
-            # TODO: what if the index is not datetime?
-            for i in range(len(df.index)):
-                for j in range(len(df.columns)):                
-                    widget.setItem(i,j,QtGui.QTableWidgetItem(str(df.iloc[i, j])))
-                    widget.resizeColumnToContents(j)
-        else:
-            widget.setColumnCount(1)
-            widget.setRowCount(1)             
-            widget.setItem(0,0,QtGui.QTableWidgetItem('Too much data to display.'))
-            widget.resizeColumnToContents(0)  
+        widget.setColumnCount(len(df.columns))
+        widget.setHorizontalHeaderLabels(df.columns)
             
-#      def fill_table(self):                
-#        df = self.df_selected
-#            
-#        self.Table1Widget.clear()
-#        if len(df.index) < 100:
-#            self.Table1Widget.setColumnCount(len(df.columns))
-#            self.Table1Widget.setRowCount(len(df.index))
-#            self.Table1Widget.setHorizontalHeaderLabels(df.columns)
-#            self.Table1Widget.setVerticalHeaderLabels(df.index.strftime("%Y-%m-%d %H:%M"))
-#            for i in range(len(df.index)):
-#                for j in range(len(df.columns)):                
-#                    self.Table1Widget.setItem(i,j,QtGui.QTableWidgetItem(str(df.iloc[i, j])))
-#                    self.Table1Widget.resizeColumnToContents(j)
-#        else:
-#            self.Table1Widget.setColumnCount(1)
-#            self.Table1Widget.setRowCount(1)             
-#            self.Table1Widget.setItem(0,0,QtGui.QTableWidgetItem('Too much data to display.'))
-#            self.Table1Widget.resizeColumnToContents(0)  
-#        
+        row = 0
+        while row < min(max_rows,len(df.index)-1):
+            widget.setRowCount(row+1)
+            for col in range(len(df.columns)):                
+                widget.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
+                widget.resizeColumnToContents(col)
+            row = row + 1
+        widget.setVerticalHeaderLabels(df.index[0:row].strftime("%Y-%m-%d %H:%M"))
+        if row == max_rows:
+            widget.setRowCount(row+1)
+            widget.setItem(row,0,QtGui.QTableWidgetItem(str('And more...')))
+            widget.resizeColumnToContents(col)
+            
+    def refresh_2(self):
+        selected_rows = self.table_selection(self.Table1Widget)
+        self.record_file_numbers = []
+        self.record_sports = []
+        self.record_timezone = []
+        for row in selected_rows:
+            self.record_file_numbers.append(self.df_selected.loc[self.df_selected.index[row],'file_name'])
+            self.record_sports.append(self.df_selected.loc[self.df_selected.index[row],'sport'])
+            self.record_timezone.append(self.df_selected.loc[self.df_selected.index[row],'timezone'])
+        self.plot2()
+    
+    def table_selection(self, widget):
+        selected_rows = []
+        for item in widget.selectedIndexes():
+            selected_rows.append(item.row())
+        selected_rows = np.unique(selected_rows)
+        return selected_rows
+    
+    def read_records(self,file_number):
+        file_path = self.records_directory + str(file_number) + '_record.csv'
+        df = pd.read_csv(file_path, parse_dates='start_time', index_col='timestamp')
+        df.index = pd.to_datetime(df.index)
+        self.temp = df
+#        self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True
+        return df
+    
+    def plot2(self):
+        x = self.XComboBox2.currentText()
+        y = self.YComboBox2.currentText()
+        
+        data_labels = [x,y]
+        
+        self.figure2.clear()
+        ax = self.figure2.add_subplot(111)
+    
+        for index, file_number in enumerate(self.record_file_numbers):
+            df = self.read_records(file_number)
+#            df.set_index(df['timestamp'], drop=True, inplace=True)
+            sport = self.record_sports[index]
+            timezone = self.record_timezone[index]
+            # TODO: what if the file contains mixed sports?
+            
+            if index == 0:
+                self.fill_table(df, self.Table2Widget, max_rows=100)
+            
+            data = []
+            for item in data_labels:
+                if item == 'timestamp':
+                    # take into account the timezone
+                    data_item = df.index + timezone
+#                    data_item = data_item.values
+                else:
+                    data_item = df[item]
+                data.append(data_item)
+                
+            (x_data,y_data) = data
+            x_data = np.nan_to_num(x_data)
+            y_data = np.nan_to_num(y_data)
+            
+            ax.plot(x_data, y_data,
+#                    c = sport_colours[sport],
+                    label = str(file_number) + ': ' + sport,
+                    )
+        
+        xlabel = x.replace('_',' ')
+        if record_units[x]:
+            xlabel = xlabel + ' (' + record_units[x] + ')'
+        
+        ylabel = y.replace('_',' ')
+        if record_units[y]:
+            ylabel = ylabel + ' (' + record_units[y] + ')'
+        
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        #ax.legend()
+        self.canvas2.draw()
+            
+            
+            
+        
     
 if __name__ == '__main__':
     
