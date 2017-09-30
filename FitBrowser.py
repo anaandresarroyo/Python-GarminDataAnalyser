@@ -46,7 +46,6 @@ class FitBrowserGUI(QtGui.QMainWindow, FitBrowserGUIdesign.Ui_FitBrowserGUI):
             self.FilePathWidget.insert(self.file_path)
         else:
             print "No file chosen. Choose another file to avoid errors."            
-#            self.new_file()
         
     def open_file(self):
         """Read the FIT file and populate the file contents table."""
@@ -55,8 +54,6 @@ class FitBrowserGUI(QtGui.QMainWindow, FitBrowserGUIdesign.Ui_FitBrowserGUI):
         self.fitfile = FitFile(self.file_path)
         print "File open."
         self.message_list()
-        
-        # TODO: convert euros to pounds and add units in the plots
            
     def message_list(self):
         """Populate the file contents table."""

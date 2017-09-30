@@ -101,18 +101,6 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
     for ifn, file_path in enumerate(file_paths):
         if verbose:
             print "Reading file %s / %s\r" % (ifn + 1, len(file_paths))
-        # Read session data to obtain the type of sport   
-        fitfile = FitFile(file_path)    
-        for message in fitfile.get_messages('sport'):
-            sport = message.get_value('sport')
-#            sport = 'driving'
-#            sport = 'lucia'
-            
-        # Update the sport_counter
-        sport_counter[sport] += 1
-            
-        # Read data into pandas DataFrame
-        df = FitToDataFrame(file_path, desired_message, verbose=False)   
         
         # Get the file_name of the current file_path
         file_name = os.path.basename(file_path)
@@ -127,13 +115,29 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         else: # Do not place files in subdirectories
             # Generate the file_path_save in the path_save directory
             if not os.path.exists(path_save):
-                os.makedirs(path_save)            
+                os.makedirs(path_save)   
             file_path_save = path_save + file_name
+
         if os.path.exists(file_path_save):
             # TODO: ask for user input to overwrite or not
-            print "Overwriting file " + file_name
-        # Save the Pandas DataFrame as a .csv file
-        df.to_csv(file_path_save, sep=',', header=True, index=False)
+            # print "Overwriting file " + file_name
+            print file_name + ': file already exists. Ignore.'
+            
+        else:
+            # Read session data to obtain the type of sport   
+            fitfile = FitFile(file_path)    
+            for message in fitfile.get_messages('sport'):
+                sport = message.get_value('sport')
+                
+            # Update the sport_counter
+            sport_counter[sport] += 1
+                
+            # Read data into pandas DataFrame
+            # This is the part that takes the longest (I think)
+            df = FitToDataFrame(file_path, desired_message, verbose=False)   
+        
+            # Save the Pandas DataFrame as a .csv file
+            df.to_csv(file_path_save, sep=',', header=True, index=False)
         if verbose:
             print
         
@@ -147,15 +151,11 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
 if __name__ == '__main__':
 
     # Directory to read .fit files from
-    path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
-#    path_read = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/fit new/'
-#    path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+    path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit all/'
         
-#     Directory to save .csv files in
-    path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
-#    path_save = 'C:/Users/Ana Andres/Documents/Garmin/2017 USA/csv/'
-#    path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
+    # Directory to save .csv files in
+    path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
     
     # Convert .fit files to .csv files
     FitToCsv(path_read, path_save, desired_message='record', 
-                 subdirectories = True, verbose=True)
+                 subdirectories = False, verbose=True)

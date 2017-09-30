@@ -41,6 +41,9 @@ if __name__ == '__main__':
             
         if mask:
             print "File %s / %s already in database. Skipped." % (ifn + 1, len(os.listdir(directory_path)))
+            # If the file is in the database we will skip in because it is likely
+            # that it's values have been modified to correct for errors such as
+            # forgetting to turn the GPS off at the end of the activity
         else:
             file_path = directory_path + file_name            
             print "Reading file %s / %s\r" % (ifn + 1, len(os.listdir(directory_path)))
@@ -79,7 +82,6 @@ if __name__ == '__main__':
               columns=[
                        'file_name',
                        'sport',
-                       'gear',
                        'activity_type',
                        'avg_heart_rate',
                        'max_heart_rate',
@@ -92,5 +94,6 @@ if __name__ == '__main__':
                        'total_elapsed_time',
                        'total_calories',
                        'timezone',
+                       'gear',
                        ])
     print "Done!"

@@ -79,7 +79,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def __init__(self, parent=None):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
-#        self.file_path = os.getcwd()
+        #self.file_path = os.getcwd()
         self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'        
         self.new_file()
         self.location_list()
@@ -127,9 +127,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.sports = self.populate_list('sport', self.SportsListWidget)
         self.activities = self.populate_list('activity', self.ActivitiesListWidget)
         self.gear = self.populate_list('gear', self.GearListWidget)
-#        self.sports_list()
-#        self.activities_list()
-#        self.gear_list()
         
         self.XComboBox1.clear()
         self.YComboBox1.clear()        
@@ -143,6 +140,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
                 self.SizeComboBox.addItem(item, 0)
         
         datetime_options = ['daytime', 'weekday', 'start_time']
+        # TODO: datetime_options = ['daytime', 'weekday', 'start_time', 'end_time']
         for item in datetime_options:
             self.XComboBox1.addItem(item, 0)
             self.YComboBox1.addItem(item, 0)
@@ -161,35 +159,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             widget.addItem(item)
             widget.item(row).setSelected(True)
         print column + ' list updated.'
-        return items
-        
-    def sports_list(self):
-        """Populate the sports tree widget."""
-        self.sports = np.sort(self.df['sport'].unique())
-        self.SportsListWidget.clear()
-        for row, sport in enumerate(self.sports):
-            self.SportsListWidget.addItem(sport)
-            self.SportsListWidget.item(row).setSelected(True)
-        print "Sport list updated."
-    
-    def activities_list(self):
-        """Populate the activity tree widget."""
-        self.activities = np.sort(self.df['activity'].unique())
-        self.ActivitiesListWidget.clear()
-        for row, activity in enumerate(self.activities):
-            self.ActivitiesListWidget.addItem(activity)
-            self.ActivitiesListWidget.item(row).setSelected(True)
-        print "Activity list updated."
-    
-    def gear_list(self):
-        """Populate the gear tree widget."""
-        self.gear = np.sort(self.df['gear'].unique())
-        self.GearListWidget.clear()
-        for row, gear in enumerate(self.gear):
-            self.GearListWidget.addItem(gear)
-            self.GearListWidget.item(row).setSelected(True)
-        print "Gear list updated."
-        
+        return items        
 
     def location_list(self):
         """Populate the start and end location tree widgets."""
@@ -202,7 +172,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.EndLocationListWidget.setCurrentRow(0)
         
         file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Locations.csv'        
-#        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path, "CSV files (*.csv)")
+        #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path, "CSV files (*.csv)")
         if len(file_path):
             print file_path
             self.df_locations = pd.read_csv(file_path)
@@ -219,40 +189,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         start_date = self.StartDateEdit.date().toPyDate()
         end_date = self.EndDateEdit.date().toPyDate()
         return df.loc[str(start_date) : str(end_date + pd.DateOffset(1))]
-            
-        
-    def mask_sports(self, df):
-        self.selected_sports = []
-        for item in self.SportsListWidget.selectedItems():
-            self.selected_sports.append(item.text())
-
-        mask = df['sport'] == 'nothing'
-        for index, sport in enumerate(self.selected_sports):
-            sport_mask = df['sport'] == sport
-            mask = mask | sport_mask
-        return mask     
-        
-    def mask_activities(self, df):
-        self.selected_activities = []
-        for item in self.ActivitiesListWidget.selectedItems():
-            self.selected_activities.append(item.text())
-
-        mask = df['activity'] == 'nothing'
-        for index, activity in enumerate(self.selected_activities):
-            activity_mask = df['activity'] == activity
-            mask = mask | activity_mask
-        return mask
-        
-    def mask_gear(self, df):
-        self.selected_gear = []
-        for item in self.GearListWidget.selectedItems():
-            self.selected_gear.append(item.text())
-
-        mask = df['gear'] == 'nothing'
-        for index, gear in enumerate(self.selected_gear):
-            gear_mask = df['gear'] == gear
-            mask = mask | gear_mask
-        return mask
         
     def read_selection(self, column, widget):
         selected_options = []
@@ -266,6 +202,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             option_mask = df[column] == option
             mask = mask | option_mask
         return mask
+        # TODO: what if some rows are empy in this column?
     
     def df_selection(self):
         df_dates = self.select_dates(self.df)
@@ -278,13 +215,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         mask_activities = self.generate_mask(df_dates, 'activity', self.selected_activities)
         mask_gear = self.generate_mask(df_dates, 'gear', self.selected_gear)
         
-#        mask = self.mask_sports(df_dates) & self.mask_activities(df_dates) & self.mask_gear(df_dates)
         mask = mask_sports & mask_activities & mask_gear
         self.df_selected = df_dates.loc[mask]
         
     def refresh_1(self):
         self.df_selection()
-        self.fill_table()
+        self.fill_table(self.df_selected, self.Table1Widget)
         self.plot1()
     
     def plot1(self):
@@ -345,26 +281,43 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.canvas1.draw()
         
         
-    def fill_table(self):                
-        df = self.df_selected
-            
-        self.Table1Widget.clear()
+    def fill_table(self, df, widget):            
+        widget.clear()
         if len(df.index) < 100:
-            self.Table1Widget.setColumnCount(len(df.columns))
-            self.Table1Widget.setRowCount(len(df.index))
-            self.Table1Widget.setHorizontalHeaderLabels(df.columns)
-            self.Table1Widget.setVerticalHeaderLabels(df.index.strftime("%Y-%m-%d %H:%M"))
+            widget.setColumnCount(len(df.columns))
+            widget.setRowCount(len(df.index))
+            widget.setHorizontalHeaderLabels(df.columns)
+            widget.setVerticalHeaderLabels(df.index.strftime("%Y-%m-%d %H:%M"))
+            # TODO: what if the index is not datetime?
             for i in range(len(df.index)):
                 for j in range(len(df.columns)):                
-                    self.Table1Widget.setItem(i,j,QtGui.QTableWidgetItem(str(df.iloc[i, j])))
-                    self.Table1Widget.resizeColumnToContents(j)
+                    widget.setItem(i,j,QtGui.QTableWidgetItem(str(df.iloc[i, j])))
+                    widget.resizeColumnToContents(j)
         else:
-            self.Table1Widget.setColumnCount(1)
-            self.Table1Widget.setRowCount(1)             
-            self.Table1Widget.setItem(0,0,QtGui.QTableWidgetItem('Too much data to display.'))
-            self.Table1Widget.resizeColumnToContents(0)  
-                      
-        
+            widget.setColumnCount(1)
+            widget.setRowCount(1)             
+            widget.setItem(0,0,QtGui.QTableWidgetItem('Too much data to display.'))
+            widget.resizeColumnToContents(0)  
+            
+#      def fill_table(self):                
+#        df = self.df_selected
+#            
+#        self.Table1Widget.clear()
+#        if len(df.index) < 100:
+#            self.Table1Widget.setColumnCount(len(df.columns))
+#            self.Table1Widget.setRowCount(len(df.index))
+#            self.Table1Widget.setHorizontalHeaderLabels(df.columns)
+#            self.Table1Widget.setVerticalHeaderLabels(df.index.strftime("%Y-%m-%d %H:%M"))
+#            for i in range(len(df.index)):
+#                for j in range(len(df.columns)):                
+#                    self.Table1Widget.setItem(i,j,QtGui.QTableWidgetItem(str(df.iloc[i, j])))
+#                    self.Table1Widget.resizeColumnToContents(j)
+#        else:
+#            self.Table1Widget.setColumnCount(1)
+#            self.Table1Widget.setRowCount(1)             
+#            self.Table1Widget.setItem(0,0,QtGui.QTableWidgetItem('Too much data to display.'))
+#            self.Table1Widget.resizeColumnToContents(0)  
+#        
     
 if __name__ == '__main__':
     
