@@ -59,6 +59,8 @@ if __name__ == '__main__':
             df['gear'] = current_gear[df.get_value(0,'sport')]
             # Add the type of activity, it will need to be edited later
             df['activity'] = activity_type[df.get_value(0,'sport')]
+            # Add a blank column for comments.
+            df['comments'] = ''
             # Add the timezone offset in hours
             # TODO: this needs checking
             df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False)           

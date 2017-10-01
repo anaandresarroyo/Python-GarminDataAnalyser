@@ -20,12 +20,13 @@ if __name__ == '__main__':
     map_name = 'mymap.html'
     
     sports = [
-             'walking',
-             'cycling',
-             'running',
-             'driving',
-             'train',
-             'water',
+             'all',
+#             'walking',
+#             'cycling',
+#             'running',
+#             'driving',
+#             'train',
+#             'water',
 #             'training',
 #             'test',
 #             'lucia',
@@ -39,6 +40,7 @@ if __name__ == '__main__':
                'training':'m',
                'test':'g',
                'lucia':'k',
+               'all':'k',
                }
     
     plot_map=True
@@ -50,6 +52,7 @@ if __name__ == '__main__':
     file_sports = []
     for sport in sports:
         directory_path_sport = directory_path_read + sport + '/'
+#        directory_path_sport = directory_path_read
 #        for file_name in os.listdir(directory_path_sport):
         for file_name in reversed(os.listdir(directory_path_sport)):
             file_paths.append(directory_path_sport + file_name)

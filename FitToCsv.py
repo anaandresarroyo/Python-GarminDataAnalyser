@@ -60,7 +60,7 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
         raise
 
 def FitToCsv(path_read, path_save=False, desired_message='record', 
-             subdirectories = True, verbose=True):
+             subdirectories = True, overwrite=False, verbose=True):
     """Reads all the data of the desired_message type
     from the .fit files and saves it to .csv files
         
@@ -74,6 +74,8 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
         The type of messages to read.
     subdirectories : bool (optional)
         If True (default), place .csv files in subdirectories according to their sport
+    overwrite : bool (optional)
+        If False (default), do not overwrite existing .csv file
     verbose : bool (optional)
         If True (default), print progress    
     
@@ -118,12 +120,16 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
                 os.makedirs(path_save)   
             file_path_save = path_save + file_name
 
+        save = True
         if os.path.exists(file_path_save):
             # TODO: ask for user input to overwrite or not
-            # print "Overwriting file " + file_name
-            print file_name + ': file already exists. Ignore.'
+            if overwrite:
+                print "Overwriting file " + file_name
+            else:
+                print file_name + ': file already exists. Ignore.'
+                save = False
             
-        else:
+        if save:
             # Read session data to obtain the type of sport   
             fitfile = FitFile(file_path)    
             for message in fitfile.get_messages('sport'):
@@ -151,11 +157,11 @@ def FitToCsv(path_read, path_save=False, desired_message='record',
 if __name__ == '__main__':
 
     # Directory to read .fit files from
-    path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit all/'
+    path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
         
     # Directory to save .csv files in
     path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
     
     # Convert .fit files to .csv files
     FitToCsv(path_read, path_save, desired_message='record', 
-                 subdirectories = False, verbose=True)
+                 subdirectories = False, overwrite=True, verbose=True)

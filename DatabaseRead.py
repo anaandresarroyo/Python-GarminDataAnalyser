@@ -13,21 +13,27 @@ import numpy as np
 import DataBaseGUIdesign
 import sys
 import os
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
+#matplotlib.rcParams.update({'font.size': 50})
+
 sport_colours = {'walking':'g',
                  'cycling':'b',
                  'running':'r',
-                 'driving':'b',
-                 'train':'m',
-                 'water':'c',
+                 'driving':'k',
+                 'train':'y',
+                 'punting':'c',
                  'training':'m',
                  'test':'g',
                  'lucia':'k',
+                 'mixed':'y',
+                 'squash':'m',
+                 'yoga':'c',
                  }
+# TODO: generate unique colours for all sports
                  
 record_units = {'elapsed_time':'min',
                 'timestamp':None,
@@ -82,7 +88,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
         #self.file_path = os.getcwd()
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'   
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171001-1.csv'   
         self.ReadFilePathWidget.insert(self.file_path)
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
         self.new_file()
@@ -108,6 +114,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.Plot2WidgetContainer.addWidget(self.canvas2)  
         
         self.LegendComboBox.addItem('sport', 0)
+        self.LegendComboBox.addItem('activity', 0)
+        self.LegendComboBox.addItem('gear', 0)
+        self.LegendComboBox.setCurrentIndex(0)
         # TODO: implement different legend options in plot 1
         
         for key in record_units:
@@ -127,7 +136,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def new_file(self):
         """Select a new CSV file.""" 
         file_path = self.ReadFilePathWidget.text()
-        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
+#        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
         if len(file_path):
             self.file_path = file_path
             self.ReadFilePathWidget.clear()
@@ -135,6 +144,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.ReadFilePathWidget.insert(self.file_path)
             self.SaveFilePathWidget.insert(self.file_path)
             self.read_file()
+            # TODO: don't overwrite previous user input settings
         else:
             print "No file chosen. Choose another file to avoid errors."            
         
@@ -145,8 +155,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
         #print "File read."
         self.df_selected = self.df
-        self.StartDateEdit.setDate(min(self.df.index))
-        self.EndDateEdit.setDate(max(self.df.index))
+#        self.StartDateEdit.setDate(min(self.df.index))
+#        self.EndDateEdit.setDate(max(self.df.index))
         self.sports = self.populate_list('sport', self.SportsListWidget)
         self.activities = self.populate_list('activity', self.ActivitiesListWidget)
         self.gear = self.populate_list('gear', self.GearListWidget)
@@ -262,37 +272,53 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.figure1.clear()
         ax = self.figure1.add_subplot(111)
 
-        for sport in self.selected_sports:            
+        legend_variable = self.LegendComboBox.currentText()
+        if legend_variable == 'sport':
+            selected_legend = self.selected_sports
+        elif legend_variable == 'activity':
+            selected_legend = self.selected_activities
+        elif legend_variable == 'gear':
+            selected_legend = self.selected_gear
+                   
+        cmap = plt.get_cmap('CMRmap')
+        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+        
+        for i, label in enumerate(selected_legend):
             data = []
             for item in data_labels:
                 if item == 'start_time':
                     # take into account the timezone
-                    data_item = df.loc[df['sport']==sport].index + df.loc[df['sport']==sport, 'timezone']
-                    data_item = data_item.values
-                    
+                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
+                    data_item = data_item.values                    
                     # TODO: implement end_time option too
                     
                 elif item == 'daytime':
                     # take into account the timezone
-                    data_item = df.loc[df['sport']==sport].index + df.loc[df['sport']==sport, 'timezone']
+                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
+                    # TODO: fix error that appears when data_item is empty
                     data_item = data_item.dt.time.values
                 elif item == 'weekday':
                     # 0 = Monday, ... 6 = Sunday
-                    data_item = df.loc[df['sport']==sport].index.weekday
+                    data_item = df.loc[df[legend_variable]==label].index.weekday
                 elif item == 'constant':
                     data_item = 1
                 else:
-                    data_item = df.loc[df['sport']==sport, item]
+                    data_item = df.loc[df[legend_variable]==label, item]
                 data.append(data_item)
                 
             (x_data,y_data,size_data) = data
 
             size_data = size_data - np.min(size_data)*0.8
-            size_data = size_data / np.max(size_data)*500
+            size_data = size_data / np.max(size_data)*800
             
-            ax.scatter(x_data, y_data, s = size_data, 
-                       c = sport_colours[sport], label = sport, 
-                       edgecolors='face', alpha = 0.4)
+            if len(x_data) > 0:
+                ax.scatter(x_data, y_data, s = size_data, 
+                           c = colours[i],
+    #                       c = sport_colours[label], 
+                           label = label, 
+    #                       edgecolors='face', 
+                           alpha = 0.4,
+                           )
         
         xlabel = x.replace('_',' ')
         if session_units[x]:
@@ -314,7 +340,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         table.setHorizontalHeaderLabels(df.columns)
             
         row = 0
-        while row < min(max_rows,len(df.index)-1):
+        while row <= min(max_rows,len(df.index)-1):
             table.setRowCount(row+1)
             for col in range(len(df.columns)):                
                 table.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
@@ -359,7 +385,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.record_file_numbers.append(self.df_selected.loc[self.df_selected.index[row],'file_name'])
             self.record_sports.append(self.df_selected.loc[self.df_selected.index[row],'sport'])
             self.record_timezone.append(self.df_selected.loc[self.df_selected.index[row],'timezone'])
-        self.plot2() # this also fills Table 2
+        self.plot2() # this also fills Tables 1 and 2
         
         # TODO: update Table 1 with new values of heart rate, speed, distance, ...
     
@@ -382,13 +408,24 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         mask_end = df['elapsed_time'] <= end_time
         return df.loc[mask_start & mask_end]
     
+    def merge_dataframes(self,left,right):
+        for row in right.index:
+            for column in right.columns:
+                left.loc[row,column] = right.loc[row,column]
+        return left
+    
     def save_data(self):
-        self.df_selected = self.read_table(self.Table1Widget)
-        df_save = self.df_selected
-        # TODO: combine df_selected with the rest of the activities
+        print 'saving data...'
+        # read data from Table 1
+        self.df_widget = self.read_table(self.Table1Widget)
+        # combine df_widget with the rest of the activities not shown in Table 1
+        df_save = self.merge_dataframes(self.df, self.df_widget)
+        self.df = df_save
+        # TODO: check wether this is causing issues from the data formats
         
         file_path = self.SaveFilePathWidget.text()
-        file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose database .csv file to save.', file_path, "CSV files (*.csv)")
+#        file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose database .csv file to save.', file_path, "CSV files (*.csv)")
+        self.SaveFilePathWidget.clear()
         self.SaveFilePathWidget.insert(file_path)
         df_save.to_csv(file_path, sep=',', header=True, index=True)
         
@@ -397,23 +434,81 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             file_path = self.records_directory + str(file_number) + '_record.csv'
             df = self.read_records(file_path)
             df = self.select_times(df)
+            df['distance'] = df['distance'] - df.loc[df.index[0],'distance']
             df = df.drop('elapsed_time', axis=1)
             df.to_csv(file_path, sep=',', header=True, index=True)
+        
+        print 'saving complete \n'
                 
+    def recalculate_statistics(self,df,file_number):
+        row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
+        
+        number_of_columns = self.Table1Widget.columnCount()
+        column_dict = {}
+        for column in range(number_of_columns):
+            column_name = self.Table1Widget.horizontalHeaderItem(column).text()
+            column_dict[column_name] = column
+               
+        avg_speed = df['speed'].mean()
+        self.Table1Widget.setItem(row, column_dict['avg_speed'], 
+                                  QtGui.QTableWidgetItem(format(avg_speed,'.3f')))
+                                                                   
+        avg_heart_rate = df['heart_rate'].mean()
+        self.Table1Widget.setItem(row, column_dict['avg_heart_rate'], 
+                                  QtGui.QTableWidgetItem(format(avg_heart_rate,'.0f')))
+                                 
+        max_heart_rate = df['heart_rate'].max()
+        self.Table1Widget.setItem(row, column_dict['max_heart_rate'], 
+                                  QtGui.QTableWidgetItem(format(max_heart_rate,'.0f')))
+                                  
+        # TODO: fix the average cadence calculation because it decreases drastically for no apparent reason
+#        avg_cadence = df['cadence'].mean()
+#        self.Table1Widget.setItem(row, column_dict['avg_cadence'], 
+#                                  QtGui.QTableWidgetItem(format(avg_cadence,'.1f')))
+#                                 
+#        max_cadence = df['cadence'].max()
+#        self.Table1Widget.setItem(row, column_dict['max_cadence'], 
+#                                  QtGui.QTableWidgetItem(format(max_cadence,'.1f')))
+        
+        start_position_lat = df.loc[df.index[0],'position_lat']
+        self.Table1Widget.setItem(row, column_dict['start_position_lat'], 
+                                  QtGui.QTableWidgetItem(format(start_position_lat,'.0f')))
+
+        start_position_long = df.loc[df.index[0],'position_long']
+        self.Table1Widget.setItem(row, column_dict['start_position_long'], 
+                                  QtGui.QTableWidgetItem(format(start_position_long,'.0f')))        
+        
+        total_distance = df.loc[df.index[-1],'distance'] - df.loc[df.index[0],'distance']
+        self.Table1Widget.setItem(row, column_dict['total_distance'], 
+                                  QtGui.QTableWidgetItem(format(total_distance,'.2f')))        
+
+        total_elapsed_time = df.loc[df.index[-1],'elapsed_time'] - df.loc[df.index[0],'elapsed_time']
+        total_elapsed_time = total_elapsed_time * 60 # conversion from minutes to seconds
+        self.Table1Widget.setItem(row, column_dict['total_elapsed_time'], 
+                                  QtGui.QTableWidgetItem(format(total_elapsed_time,'.3f')))        
+        
+        
     
     def plot2(self):
-        x = self.XComboBox2.currentText()
-        y = self.YComboBox2.currentText()
+        x1 = self.XComboBox2.currentText()
+        y1 = self.YComboBox2.currentText()
+        x2 = 'position_long'
+        y2 = 'position_lat'
         
-        data_labels = [x,y]
+        data_labels = [x1,y1,x2,y2]
         
         self.figure2.clear()
-        ax = self.figure2.add_subplot(111)
+        ax1 = self.figure2.add_subplot(211)
+        ax2 = self.figure2.add_subplot(212)
     
         for index, file_number in enumerate(self.record_file_numbers):
             file_path = self.records_directory + str(file_number) + '_record.csv'
+            # read the csv file
             df = self.read_records(file_path)
+            # select data based on start and end values of elapsed_time
             df = self.select_times(df)
+            # recalculate average and max values (heart_rate, speed, ...) and update Table 1
+            self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]
             timezone = self.record_timezone[index]
             # TODO: what if the file contains mixed sports?
@@ -430,27 +525,49 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
                     data_item = df[item]
                 data.append(data_item)
                 
-            (x_data,y_data) = data
-            x_data = np.nan_to_num(x_data)
-            y_data = np.nan_to_num(y_data)
+            (x1_data, y1_data, x2_data, y2_data) = data
+#            x1_data = np.nan_to_num(x1_data)
+#            y1_data = np.nan_to_num(y1_data)
+#            x2_data = np.nan_to_num(x2_data)
+#            y2_data = np.nan_to_num(y2_data)
             
-            ax.plot(x_data, y_data,
+            ax1.plot(x1_data, y1_data,
 #                    c = sport_colours[sport],
                     label = str(file_number) + ': ' + sport,
                     )
+                    
+            ax2.plot(x2_data, y2_data,
+#                    c = sport_colours[sport],
+                    label = str(file_number) + ': ' + sport,
+                    )
+                    
         
-        xlabel = x.replace('_',' ')
-        if record_units[x]:
-            xlabel = xlabel + ' (' + record_units[x] + ')'
+        xlabel = x1.replace('_',' ')
+        if record_units[x1]:
+            xlabel = xlabel + ' (' + record_units[x1] + ')'
         
-        ylabel = y.replace('_',' ')
-        if record_units[y]:
-            ylabel = ylabel + ' (' + record_units[y] + ')'
+        ylabel = y1.replace('_',' ')
+        if record_units[y1]:
+            ylabel = ylabel + ' (' + record_units[y1] + ')'
         
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-        if len(self.record_file_numbers) > 0 & len(self.record_file_numbers) <= 5:
-            ax.legend()
+        ax1.set_xlabel(xlabel)
+        ax1.set_ylabel(ylabel)
+        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
+            ax1.legend()
+        
+        xlabel = x2.replace('_',' ')
+        if record_units[x2]:
+            xlabel = xlabel + ' (' + record_units[x2] + ')'
+        
+        ylabel = y2.replace('_',' ')
+        if record_units[y2]:
+            ylabel = ylabel + ' (' + record_units[y2] + ')'
+        
+        ax2.set_xlabel(xlabel)
+        ax2.set_ylabel(ylabel)
+#        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
+#            ax2.legend()
+        
         self.canvas2.draw()
             
             
