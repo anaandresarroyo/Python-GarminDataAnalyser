@@ -9,10 +9,11 @@ Reads Garmin database entries.
 from MatplotlibSettings import *
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.mlab import frange
 import numpy as np
 import DataBaseGUIdesign
 import sys
-import os
+import gmplot
 from PyQt4 import QtGui, QtCore
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -66,6 +67,8 @@ session_units = {'activity':None,
                  'sport':None,
                  'start_position_lat':'semicircle',
                  'start_position_long':'semicircles',
+                 'end_position_lat':'semicircle',
+                 'end_position_long':'semicircles',
                  'start_time':None,
                  'sub_sport':None,
                  'timestamp':None,
@@ -82,14 +85,16 @@ session_units = {'activity':None,
 
 class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     """
-    GUI which analyses and plots the expenses data from a csv file
+    GUI which analyses and plots GPS and fitness data.
     """
     def __init__(self, parent=None):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
-        #self.file_path = os.getcwd()
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171001-1.csv'   
+        #self.file_path = os.getcwd()        
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
+        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
+        self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/figures/mymap.html')        
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
         self.new_file()
         self.location_list()
@@ -100,6 +105,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.RefreshPlot1PushButton.clicked.connect(self.refresh_1)      
         self.RefreshPlot2PushButton.clicked.connect(self.refresh_2)  
         self.SaveDataPushButton.clicked.connect(self.save_data)  
+        self.SaveMapPushButton.clicked.connect(self.save_map)  
         
         self.figure1 = Figure()
         self.canvas1 = FigureCanvas(self.figure1)
@@ -113,13 +119,19 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.Plot2WidgetContainer.addWidget(self.toolbar2)
         self.Plot2WidgetContainer.addWidget(self.canvas2)  
         
+        self.figure3 = Figure()
+        self.canvas3 = FigureCanvas(self.figure3)
+        self.toolbar3 = NavigationToolbar(self.canvas3, self)
+        self.Plot3WidgetContainer.addWidget(self.toolbar3)
+        self.Plot3WidgetContainer.addWidget(self.canvas3) 
+        
         self.LegendComboBox.addItem('sport', 0)
         self.LegendComboBox.addItem('activity', 0)
         self.LegendComboBox.addItem('gear', 0)
         self.LegendComboBox.setCurrentIndex(0)
         # TODO: implement different legend options in plot 1
         
-        for key in record_units:
+        for key in np.sort(record_units.keys()):
             self.XComboBox2.addItem(key, 0)
             self.YComboBox2.addItem(key, 0)
         index = self.XComboBox2.findText('elapsed_time')
@@ -146,14 +158,13 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.read_file()
             # TODO: don't overwrite previous user input settings
         else:
-            print "No file chosen. Choose another file to avoid errors."            
+            print "No file chosen. Choose another file to avoid errors.\n"            
         
     def read_file(self):
         """Read the CSV file."""
-        print self.file_path
+        print self.file_path + '\n'
         self.df = pd.read_csv(self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True)
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
-        #print "File read."
         self.df_selected = self.df
 #        self.StartDateEdit.setDate(min(self.df.index))
 #        self.EndDateEdit.setDate(max(self.df.index))
@@ -194,9 +205,22 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         for row, item in enumerate(items):
             widget.addItem(item)
             widget.item(row).setSelected(True)
-        #print column + ' list updated.'
         return items        
 
+        
+    
+    def select_dates(self, df):
+        start_date = self.StartDateEdit.date().toPyDate()
+        end_date = self.EndDateEdit.date().toPyDate()
+        return df.loc[str(start_date) : str(end_date + pd.DateOffset(1))]
+        
+    def list_selection(self, widget):
+        selected_options = []
+        for item in widget.selectedItems():
+            selected_options.append(item.text())
+        return selected_options       
+
+        
     def location_list(self):
         """Populate the start and end location tree widgets."""
         self.StartLocationListWidget.clear()
@@ -210,32 +234,33 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Locations.csv'        
         #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path, "CSV files (*.csv)")
         if len(file_path):
-            #print file_path
             self.df_locations = pd.read_csv(file_path)
-            #print "File read."
             
             for item in self.df_locations['name']:
                 self.StartLocationListWidget.addItem(item)
-                self.EndLocationListWidget.addItem(item)
-            #print "Location lists updated."        
+                self.EndLocationListWidget.addItem(item)      
         else:
-            print "No file chosen. Choose another file to avoid errors."            
-    
-    def select_dates(self, df):
-        start_date = self.StartDateEdit.date().toPyDate()
-        end_date = self.EndDateEdit.date().toPyDate()
-        return df.loc[str(start_date) : str(end_date + pd.DateOffset(1))]
+            print "No file chosen. Choose another file to avoid errors.\n"  
+            
+    def location_mask(self, df, when, selected_options):
+        if 'any' in selected_options:
+            mask = True
+        else:
+            mask = df['sport'] == 'nothing'
+            for option in selected_options:
+                radius = self.df_locations.loc[self.df_locations['name'] == option, 'radius'].values[0]
+                lon_deg = self.df_locations.loc[self.df_locations['name'] == option, 'position_long']
+                lat_deg = self.df_locations.loc[self.df_locations['name'] == option, 'position_lat']
+                distance = Distance(df[when+'_position_long'], df[when+'_position_lat'], 
+                                    units_gps='semicircles', units_d='m', mode='fixed', 
+                                    fixed_lon=lon_deg*2**31/180, fixed_lat=lat_deg*2**31/180)
+                option_mask = distance.abs() <= radius
+                mask = mask | option_mask                                    
+        return mask
         
-    def list_selection(self, widget):
-        selected_options = []
-        for item in widget.selectedItems():
-            selected_options.append(item.text())
-        return selected_options
-    
-       
     def generate_mask(self, df, column, selected_options):       
         mask = df[column] == 'nothing'
-        for index, option in enumerate(selected_options):
+        for option in selected_options:
             option_mask = df[column] == option
             mask = mask | option_mask
         return mask
@@ -247,18 +272,23 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.selected_sports = self.list_selection(self.SportsListWidget)
         self.selected_activities = self.list_selection(self.ActivitiesListWidget)
         self.selected_gear = self.list_selection(self.GearListWidget)
+        self.selected_start_locations = self.list_selection(self.StartLocationListWidget)
+        self.selected_end_locations = self.list_selection(self.EndLocationListWidget)
         
         mask_sports = self.generate_mask(df_dates, 'sport', self.selected_sports)
         mask_activities = self.generate_mask(df_dates, 'activity', self.selected_activities)
         mask_gear = self.generate_mask(df_dates, 'gear', self.selected_gear)
+        mask_location_start = self.location_mask(df_dates, 'start', self.selected_start_locations)
+        mask_location_end = self.location_mask(df_dates, 'end', self.selected_end_locations)
         
-        mask = mask_sports & mask_activities & mask_gear
+        mask = mask_sports & mask_activities & mask_gear & mask_location_start & mask_location_end
         self.df_selected = df_dates.loc[mask]
         
     def refresh_1(self):
         self.df_selection()
         self.fill_table(self.df_selected, self.Table1Widget)
         self.plot1()
+        self.EndTimeDoubleSpinBox.setValue(1000)
     
     def plot1(self):
         df = self.df_selected
@@ -270,7 +300,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         data_labels = [x,y,size]
         
         self.figure1.clear()
-        ax = self.figure1.add_subplot(111)
+        self.figure3.clear()
+        ax1 = self.figure1.add_subplot(111)
+        ax3 = self.figure3.add_subplot(111)
 
         legend_variable = self.LegendComboBox.currentText()
         if legend_variable == 'sport':
@@ -282,6 +314,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
                    
         cmap = plt.get_cmap('CMRmap')
         colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+        
+        bins = np.linspace(min(df[x]), max(df[x]), 20)
+        # TODO: what if it's start_time, daytime, or weekday?
         
         for i, label in enumerate(selected_legend):
             data = []
@@ -312,13 +347,16 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             size_data = size_data / np.max(size_data)*800
             
             if len(x_data) > 0:
-                ax.scatter(x_data, y_data, s = size_data, 
-                           c = colours[i],
-    #                       c = sport_colours[label], 
-                           label = label, 
-    #                       edgecolors='face', 
-                           alpha = 0.4,
+                # scatter plot
+                ax1.scatter(x_data, y_data, s = size_data, 
+                           color = colours[i], label = label, 
+                           alpha = 0.4, # edgecolors='face',                            
                            )
+                # histogram plot
+                ax3.hist(x_data, bins=bins,
+                        color = colours[i], label = label, 
+                        normed = True, alpha = 0.4,
+                        )
         
         xlabel = x.replace('_',' ')
         if session_units[x]:
@@ -328,16 +366,24 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         if session_units[y]:
             ylabel = ylabel + ' (' + session_units[y] + ')'
         
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-        ax.legend()
+        ax1.set_xlabel(xlabel)
+        ax1.set_ylabel(ylabel)
+        ax1.legend()
         self.canvas1.draw()
+        
+        ax3.set_xlabel(xlabel)
+        ax3.set_ylabel('histogram')
+        ax3.legend()
+        self.canvas3.draw()
+        
         
         
     def fill_table(self, df, table, max_rows=50):            
         table.clear()
         table.setColumnCount(len(df.columns))
         table.setHorizontalHeaderLabels(df.columns)
+        
+        # TODO: update display which indicates max_rows
             
         row = 0
         while row <= min(max_rows,len(df.index)-1):
@@ -374,6 +420,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             for column_number, column_name in enumerate(column_names):
                 df.loc[index,column_name] = table.item(row,column_number).data(0)
             
+        # change strings to numbers
+        for column_name in column_names:
+            df[column_name] = pd.to_numeric(df[column_name], errors='ignore')
         return df
             
     def refresh_2(self):
@@ -415,7 +464,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         return left
     
     def save_data(self):
-        print 'saving data...'
+        print 'Saving data...'
         # read data from Table 1
         self.df_widget = self.read_table(self.Table1Widget)
         # combine df_widget with the rest of the activities not shown in Table 1
@@ -438,7 +487,42 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             df = df.drop('elapsed_time', axis=1)
             df.to_csv(file_path, sep=',', header=True, index=True)
         
-        print 'saving complete \n'
+        print 'Saving complete! \n'
+    
+    def save_map(self):     
+        print "Generating map..."           
+        selected_legend = self.selected_sports
+#        cmap = plt.get_cmap('CMRmap')
+#        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+#        colours_dict = dict(zip(selected_legend, colours))
+
+        gmap = gmplot.GoogleMapPlotter(52.202, 0.12, 13) # Cambridge 
+#        gmap = gmplot.GoogleMapPlotter(43, -120, 5) # USA West Coast
+#        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
+        
+        
+        for index in self.df_selected.index:
+            file_number = self.df_selected.loc[index,'file_name']
+            sport = self.df_selected.loc[index,'sport']
+            
+            file_path = self.records_directory + str(file_number) + '_record.csv'
+            # read the csv file
+            df = self.read_records(file_path)       
+            
+            # Add a line plot to the gmap object which will be save to an .html file
+            # Use line instead of scatter plot for faster speed and smaller file size
+            # Make sure to remove NaNs or the plot won't work
+            gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, 
+                      color='k', edge_width=3)
+            # TODO: use different colours for different sports
+        
+        file_path = self.MapFilePathWidget.text()
+        file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose .html file to save map.', file_path, "HTML files (*.html)")
+        self.MapFilePathWidget.clear()
+        self.MapFilePathWidget.insert(file_path)
+        
+        gmap.draw(file_path)
+        print "Map saved!\n"
                 
     def recalculate_statistics(self,df,file_number):
         row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
@@ -476,7 +560,15 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
 
         start_position_long = df.loc[df.index[0],'position_long']
         self.Table1Widget.setItem(row, column_dict['start_position_long'], 
-                                  QtGui.QTableWidgetItem(format(start_position_long,'.0f')))        
+                                  QtGui.QTableWidgetItem(format(start_position_long,'.0f')))    
+                                  
+        end_position_lat = df.loc[df.index[-1],'position_lat']
+        self.Table1Widget.setItem(row, column_dict['end_position_lat'], 
+                                  QtGui.QTableWidgetItem(format(end_position_lat,'.0f')))
+
+        end_position_long = df.loc[df.index[-1],'position_long']
+        self.Table1Widget.setItem(row, column_dict['end_position_long'], 
+                                  QtGui.QTableWidgetItem(format(end_position_long,'.0f')))        
         
         total_distance = df.loc[df.index[-1],'distance'] - df.loc[df.index[0],'distance']
         self.Table1Widget.setItem(row, column_dict['total_distance'], 
@@ -619,6 +711,87 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
         raise ValueError('Unable to recognise the units for the time.')    
     return elapsed_time
         
+def Distance(longitude, latitude, units_gps='semicircles', units_d='m',
+             mode='start', fixed_lon=1601994.0, fixed_lat=622913929.0):
+    """Calculate the great circle distance between two points
+    on the earth using the Haversine formula.
+        
+    Arguments:
+    longitude : float pandas Series
+        Longitude values of GPS coordinates, in units of units_gps
+    latitude : float pandas Series
+        Latitude values of GPS coordinates, in units of units_gps        
+    units_gps : string
+        Units of longitude or latitude, e.g. 'semicircles' (default) or 'degrees'
+    units_d: string
+        Units of the calculated distance, e.g. 'm' (default) or 'km'
+    mode : string
+        If 'start' calculate the distance between all points of the array and the first point.
+        If 'previous' calculate the distance between all points of the array the previous point.
+        If 'fixed' calculate the distance between all points of the array and a fixed point.
+    fixed_lon: float
+        Longitude value in units of units_gps to be used with mode='fixed'
+    fixed_lat: float
+        Latitude value in units of units_gps to be used with mode='fixed'        
+    
+    Output:
+    distance: float pandas Series
+        Contains the calculated distance in units of units_d
+    """
+    
+    if units_gps == 'semicircles':
+        # Convert semicircles to degrees
+        longitude = longitude*180/2**31
+        latitude = latitude*180/2**31
+    elif units_gps == 'degrees':
+        pass
+    else:
+        raise ValueError('Unable to recognise the units for the longitude and latitude.')
+    
+    origin_lon = np.empty(longitude.shape)
+    origin_lat = np.empty(latitude.shape)
+    
+    if mode == 'start':
+        origin_lon[:] = longitude[0]
+        origin_lat[:] = latitude[0]
+    
+    elif mode == 'previous':
+        origin_lon[0] = longitude[0]
+        origin_lat[0] = latitude[0]
+        
+        origin_lon[1:] = longitude[0:-1]
+        origin_lat[1:] = latitude[0:-1]
+        
+    elif mode == 'fixed':
+        if units_gps == 'semicircles':
+            fixed_lon = fixed_lon*180/2**31
+            fixed_lat = fixed_lat*180/2**31
+            
+        origin_lon[:] = fixed_lon
+        origin_lat[:] = fixed_lat
+
+    else:
+        raise ValueError('Unable to recognise the mode.')  
+    
+    # Radius of the Earth in units of units_d
+    if units_d == 'm':
+        radius = 6371000
+    elif units_d == 'km':
+        radius = 6371
+    else:
+        raise ValueError('Unable to recognise the units for the distance.')
+    
+    delta_lon = np.radians(longitude-origin_lon)
+    delta_lat = np.radians(latitude-origin_lat)
+    # Haversine formula
+    a = np.sin(delta_lat/2) * np.sin(delta_lat/2) + np.cos(np.radians(origin_lat)) \
+        * np.cos(np.radians(latitude)) * np.sin(delta_lon/2) * np.sin(delta_lon/2)
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))    
+    distance = radius * c # Same units as radius
+    # TODO: check the validity of the Haversine formula
+    # https://en.wikipedia.org/wiki/Geographical_distance
+
+    return distance
     
 if __name__ == '__main__':
     

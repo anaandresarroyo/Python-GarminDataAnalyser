@@ -28,7 +28,7 @@ if __name__ == '__main__':
     new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'
     directory_path = 'C:/Users/Ana Andres/Documents/Garmin/fit all/'
     
-#    df_database = pd.read_csv(existing_database_path)
+    df_database = pd.read_csv(existing_database_path)
     
     for ifn, file_name in enumerate(os.listdir(directory_path)):   
         
@@ -59,8 +59,10 @@ if __name__ == '__main__':
             df['gear'] = current_gear[df.get_value(0,'sport')]
             # Add the type of activity, it will need to be edited later
             df['activity'] = activity_type[df.get_value(0,'sport')]
-            # Add a blank column for comments.
+            # Add other columns to be filled later
             df['comments'] = ''
+            df['end_position_lat'] = ''
+            df['end_position_long'] = ''
             # Add the timezone offset in hours
             # TODO: this needs checking
             df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False)           
@@ -79,23 +81,27 @@ if __name__ == '__main__':
     
     # TODO: sort dataframe by file name
     # TODO: ask the user wether to overwrite the file if it already exists
+    # TODO: add end location information
     
     df_database.to_csv(new_database_path, sep=',', header=True, index=True,
               columns=[
                        'file_name',
                        'sport',
                        'activity_type',
+                       'avg_speed',
+                       'total_distance',
+                       'total_elapsed_time',
                        'avg_heart_rate',
                        'max_heart_rate',
                        'avg_cadence',
                        'max_cadence',
-                       'start_position_lat',
                        'start_position_long',
-                       'avg_speed',
-                       'total_distance',
-                       'total_elapsed_time',
+                       'start_position_lat',                       
+                       'end_position_long',
+                       'end_position_lat',                       
                        'total_calories',
                        'timezone',
                        'gear',
+                       'comments',
                        ])
     print "Done!"

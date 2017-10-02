@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>2225</width>
-    <height>1396</height>
+    <height>1523</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,20 +32,24 @@
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item>
-         <widget class="QLineEdit" name="ReadFilePathWidget"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="NewFilePushButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Select New File</string>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="ReadFilePathWidget"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="NewFilePushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string> Select New File: </string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
@@ -238,36 +242,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="Plot1Label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Plot 1 and Table 1 Options:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="7" column="0">
-           <widget class="QLabel" name="LegendLabel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Legend: </string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="XLabel1">
             <property name="sizePolicy">
@@ -278,92 +253,6 @@
             </property>
             <property name="text">
              <string>X Axis: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="StartDateLabel_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>End date: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QDateEdit" name="StartDateEdit">
-            <property name="date">
-             <date>
-              <year>2017</year>
-              <month>1</month>
-              <day>1</day>
-             </date>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QComboBox" name="YComboBox1">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="duplicatesEnabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QDateEdit" name="EndDateEdit">
-            <property name="date">
-             <date>
-              <year>2017</year>
-              <month>12</month>
-              <day>31</day>
-             </date>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="YLabel1">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Y Axis: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="2">
-           <widget class="QComboBox" name="SizeComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="duplicatesEnabled">
-             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -390,7 +279,74 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="5" column="2">
+           <widget class="QComboBox" name="YComboBox1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="duplicatesEnabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QDateEdit" name="StartDateEdit">
+            <property name="date">
+             <date>
+              <year>2017</year>
+              <month>1</month>
+              <day>1</day>
+             </date>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="YLabel1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Y Axis: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="StartDateLabel_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>End date: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QDateEdit" name="EndDateEdit">
+            <property name="date">
+             <date>
+              <year>2017</year>
+              <month>12</month>
+              <day>31</day>
+             </date>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
            <widget class="QLabel" name="SizeLabel">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -403,7 +359,39 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="2">
+          <item row="4" column="4">
+           <widget class="QComboBox" name="SizeComboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="duplicatesEnabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QLabel" name="LegendLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Legend: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="4">
            <widget class="QComboBox" name="LegendComboBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -438,25 +426,29 @@
          </widget>
         </item>
         <item>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="MapFilePathWidget"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="SaveMapPushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string> Save Map to File: </string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="Line" name="line_4">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="Plot1Label_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Plot 2 and Table 2 Options:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -562,7 +554,7 @@
              <double>0.100000000000000</double>
             </property>
             <property name="value">
-             <double>500.000000000000000</double>
+             <double>1000.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -582,20 +574,24 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="SaveFilePathWidget"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="SaveDataPushButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Save Data</string>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="SaveFilePathWidget"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="SaveDataPushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string> Save Data to File: </string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -618,7 +614,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="Tab1">
         <property name="sizePolicy">
@@ -628,11 +624,21 @@
          </sizepolicy>
         </property>
         <attribute name="title">
-         <string>Plot 1</string>
+         <string>Scatter</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <layout class="QVBoxLayout" name="Plot1WidgetContainer"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Histogram</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <layout class="QVBoxLayout" name="Plot3WidgetContainer"/>
          </item>
         </layout>
        </widget>
