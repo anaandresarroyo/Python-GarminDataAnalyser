@@ -473,7 +473,7 @@ class Ui_DataBaseGUI(object):
         QtCore.QMetaObject.connectSlotsByName(DataBaseGUI)
 
     def retranslateUi(self, DataBaseGUI):
-        DataBaseGUI.setWindowTitle(_translate("DataBaseGUI", "Garmin DataBase", None))
+        DataBaseGUI.setWindowTitle(_translate("DataBaseGUI", "Ana\'s GPS DataBase", None))
         self.NewFilePushButton.setText(_translate("DataBaseGUI", " Select New File: ", None))
         self.SportsLabel.setText(_translate("DataBaseGUI", "Sports:", None))
         self.ActivitiesLabel.setText(_translate("DataBaseGUI", "Activities:", None))

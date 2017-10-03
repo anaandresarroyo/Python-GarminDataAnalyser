@@ -9,7 +9,6 @@ Reads Garmin database entries.
 from MatplotlibSettings import *
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.mlab import frange
 import numpy as np
 import DataBaseGUIdesign
 import sys
@@ -19,7 +18,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
-#matplotlib.rcParams.update({'font.size': 50})
+matplotlib.rcParams.update({'font.size': 50})
 
 sport_colours = {'walking':'g',
                  'cycling':'b',
@@ -91,13 +90,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
         #self.file_path = os.getcwd()        
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
-        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002.csv'   
+#        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
         self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/figures/mymap.html')        
-        self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
-        self.new_file()
-        self.location_list()
+        self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
+
                 
         
         # Connect GUI elements
@@ -139,11 +137,10 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         index = self.YComboBox2.findText('speed')
         self.YComboBox2.setCurrentIndex(index)
     
-    
-        # Initial plot
-        self.refresh_1()
-        self.refresh_2()
-        
+        # Read file      
+        self.location_list()
+        self.new_file()
+
     
     def new_file(self):
         """Select a new CSV file.""" 
@@ -156,6 +153,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.ReadFilePathWidget.insert(self.file_path)
             self.SaveFilePathWidget.insert(self.file_path)
             self.read_file()
+            self.refresh_1()
+            self.refresh_2()
             # TODO: don't overwrite previous user input settings
         else:
             print "No file chosen. Choose another file to avoid errors.\n"            
@@ -288,6 +287,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.df_selection()
         self.fill_table(self.df_selected, self.Table1Widget)
         self.plot1()
+        self.StartTimeDoubleSpinBox.setValue(0)
         self.EndTimeDoubleSpinBox.setValue(1000)
     
     def plot1(self):
@@ -298,6 +298,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         size = self.SizeComboBox.currentText()
         
         data_labels = [x,y,size]
+        print '\nstatistics:'
+        print df.loc[:,[x,y]].describe()
         
         self.figure1.clear()
         self.figure3.clear()
@@ -311,12 +313,18 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             selected_legend = self.selected_activities
         elif legend_variable == 'gear':
             selected_legend = self.selected_gear
-                   
-        cmap = plt.get_cmap('CMRmap')
+        
+#        cmap_name = 'CMRmap'
+#        cmap_name = 'Set1'
+        cmap_name = 'Accent'
+        cmap = plt.get_cmap(cmap_name)
         colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
         
-        bins = np.linspace(min(df[x]), max(df[x]), 20)
-        # TODO: what if it's start_time, daytime, or weekday?
+        try:
+            bins = np.linspace(min(df[x]), max(df[x]), 20)
+            # TODO: what if it's start_time, daytime, or weekday?
+        except:
+            print "Cannot generate histogram.\n"
         
         for i, label in enumerate(selected_legend):
             data = []
@@ -352,11 +360,15 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
                            color = colours[i], label = label, 
                            alpha = 0.4, # edgecolors='face',                            
                            )
+                
                 # histogram plot
-                ax3.hist(x_data, bins=bins,
-                        color = colours[i], label = label, 
-                        normed = True, alpha = 0.4,
-                        )
+                try:
+                    ax3.hist(x_data, bins=bins,
+                            color = colours[i], label = label, 
+                            normed = True, alpha = 0.4,
+                            )
+                except:
+                    pass
         
         xlabel = x.replace('_',' ')
         if session_units[x]:
@@ -392,7 +404,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
                 table.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
                 table.resizeColumnToContents(col)
             row = row + 1
-        table.setVerticalHeaderLabels(df.index[0:row].strftime("%Y-%m-%d %H:%M"))
+        table.setVerticalHeaderLabels(df.index[0:row].strftime("%Y-%m-%d %H:%M:%S"))
 #        if row == max_rows:
 #            print "Only the first " + str(max_rows) + " rows are displayed in the table.\n"                         
 #            table.setRowCount(row+1)
@@ -422,7 +434,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             
         # change strings to numbers
         for column_name in column_names:
-            df[column_name] = pd.to_numeric(df[column_name], errors='ignore')
+            if column_name != 'file_name':
+                df[column_name] = pd.to_numeric(df[column_name], errors='ignore')
         return df
             
     def refresh_2(self):
@@ -599,6 +612,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             df = self.read_records(file_path)
             # select data based on start and end values of elapsed_time
             df = self.select_times(df)
+            print '\n' + str(file_number)
+            print df.loc[:,[x1,y1]].describe()
             # recalculate average and max values (heart_rate, speed, ...) and update Table 1
             self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]
@@ -645,6 +660,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
         if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
+            pass
             ax1.legend()
         
         xlabel = x2.replace('_',' ')

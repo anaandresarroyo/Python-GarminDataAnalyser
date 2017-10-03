@@ -24,9 +24,9 @@ activity_type = {'cycling':'Transportation',
 if __name__ == '__main__':
     
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-170930.csv'
-    directory_path = 'C:/Users/Ana Andres/Documents/Garmin/fit all/'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002-1.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002-1.csv'
+    directory_path = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
     
     df_database = pd.read_csv(existing_database_path)
     
@@ -87,7 +87,7 @@ if __name__ == '__main__':
               columns=[
                        'file_name',
                        'sport',
-                       'activity_type',
+                       'activity',
                        'avg_speed',
                        'total_distance',
                        'total_elapsed_time',

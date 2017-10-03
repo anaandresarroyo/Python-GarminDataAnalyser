@@ -160,8 +160,8 @@ if __name__ == '__main__':
     path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
         
     # Directory to save .csv files in
-    path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/all/'
+    path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
     
     # Convert .fit files to .csv files
     FitToCsv(path_read, path_save, desired_message='record', 
-                 subdirectories = False, overwrite=True, verbose=True)
+                 subdirectories = False, overwrite=False, verbose=True)
