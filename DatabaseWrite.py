@@ -3,7 +3,6 @@
 @author: Ana Andres-Arroyo
 
 Creates/updates Garmin database entries.
-Inputs: .fit file, .csv file, or user input.
 """
 
 import pandas as pd
@@ -24,8 +23,8 @@ activity_type = {'cycling':'Transportation',
 if __name__ == '__main__':
     
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002-1.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002-1.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171004.csv'
     directory_path = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
     
     df_database = pd.read_csv(existing_database_path)
@@ -64,7 +63,6 @@ if __name__ == '__main__':
             df['end_position_lat'] = ''
             df['end_position_long'] = ''
             # Add the timezone offset in hours
-            # TODO: this needs checking
             df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False)           
             df['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp']            
     

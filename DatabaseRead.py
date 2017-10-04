@@ -2,7 +2,7 @@
 """
 @author: Ana Andres-Arroyo
 
-Reads Garmin database entries.
+GUI which reads, analyses, plots, and updates the database CSV file and the activities' CSV files.
 """
 # pyuic4 DataBaseGUIdesign.ui -o DataBaseGUIdesign.py
 
@@ -18,7 +18,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
-matplotlib.rcParams.update({'font.size': 50})
+#matplotlib.rcParams.update({'font.size': 50})
 
 sport_colours = {'walking':'g',
                  'cycling':'b',
@@ -89,14 +89,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def __init__(self, parent=None):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
-        #self.file_path = os.getcwd()        
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002.csv'   
-#        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
+#        self.file_path = os.getcwd()        
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
+        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
-        self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/figures/mymap.html')        
-        self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
-
-                
+        self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/maps/mymap.html')        
+        self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'                
         
         # Connect GUI elements
         self.NewFilePushButton.clicked.connect(self.new_file)
@@ -138,12 +136,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.YComboBox2.setCurrentIndex(index)
     
         # Read file      
-        self.location_list()
         self.new_file()
 
     
     def new_file(self):
-        """Select a new CSV file.""" 
+        """Select a new Garmin DataBase CSV file and locations file.""" 
+        self.location_list()
         file_path = self.ReadFilePathWidget.text()
 #        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
         if len(file_path):
@@ -184,6 +182,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         datetime_options = ['daytime', 'weekday', 'start_time']
         # TODO: datetime_options = ['daytime', 'weekday', 'start_time', 'end_time']
+        # TODO: make these options be columns of the dataframe too
         for item in datetime_options:
             self.XComboBox1.addItem(item, 0)
             self.YComboBox1.addItem(item, 0)
@@ -204,9 +203,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         for row, item in enumerate(items):
             widget.addItem(item)
             widget.item(row).setSelected(True)
-        return items        
-
-        
+        return items                
     
     def select_dates(self, df):
         start_date = self.StartDateEdit.date().toPyDate()
@@ -234,7 +231,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         #file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path, "CSV files (*.csv)")
         if len(file_path):
             self.df_locations = pd.read_csv(file_path)
-            
+            # TODO: order alphabetically
             for item in self.df_locations['name']:
                 self.StartLocationListWidget.addItem(item)
                 self.EndLocationListWidget.addItem(item)      
@@ -242,11 +239,14 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             print "No file chosen. Choose another file to avoid errors.\n"  
             
     def location_mask(self, df, when, selected_options):
+        # TODO: add option to select start OR end locations as well as AND
+        # TODO: add option to select mid-trajectory locations... maybe?
         if 'any' in selected_options:
             mask = True
         else:
             mask = df['sport'] == 'nothing'
             for option in selected_options:
+                # TODO: what the activity doesn't have gps data?
                 radius = self.df_locations.loc[self.df_locations['name'] == option, 'radius'].values[0]
                 lon_deg = self.df_locations.loc[self.df_locations['name'] == option, 'position_long']
                 lat_deg = self.df_locations.loc[self.df_locations['name'] == option, 'position_lat']
@@ -264,6 +264,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             mask = mask | option_mask
         return mask
         # TODO: what if some rows are empy in this column?
+        # TODO: allow several gear for the same activity
     
     def df_selection(self):
         df_dates = self.select_dates(self.df)
@@ -273,6 +274,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.selected_gear = self.list_selection(self.GearListWidget)
         self.selected_start_locations = self.list_selection(self.StartLocationListWidget)
         self.selected_end_locations = self.list_selection(self.EndLocationListWidget)
+        # TODO: add more selection options - speed, heart_rate, time, distance...
         
         mask_sports = self.generate_mask(df_dates, 'sport', self.selected_sports)
         mask_activities = self.generate_mask(df_dates, 'activity', self.selected_activities)
@@ -298,8 +300,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         size = self.SizeComboBox.currentText()
         
         data_labels = [x,y,size]
-        print '\nstatistics:'
-        print df.loc[:,[x,y]].describe()
+#        print '\nstatistics:'
+#        print df.loc[:,[x,y]].describe()
         
         self.figure1.clear()
         self.figure3.clear()
@@ -314,9 +316,10 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         elif legend_variable == 'gear':
             selected_legend = self.selected_gear
         
-#        cmap_name = 'CMRmap'
+        # TODO: allow the user to select between different colour maps
+        cmap_name = 'CMRmap'
 #        cmap_name = 'Set1'
-        cmap_name = 'Accent'
+#        cmap_name = 'Accent'
         cmap = plt.get_cmap(cmap_name)
         colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
         
@@ -356,6 +359,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             
             if len(x_data) > 0:
                 # scatter plot
+                # TODO: fix the weird colours that show sometimes - when there are 4 data points
                 ax1.scatter(x_data, y_data, s = size_data, 
                            color = colours[i], label = label, 
                            alpha = 0.4, # edgecolors='face',                            
@@ -390,12 +394,13 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         
         
-    def fill_table(self, df, table, max_rows=50):            
+    def fill_table(self, df, table, max_rows=50):    
+        # TODO: add option for the user to select how many rows to print
+        # TODO: make sure the default is often reset to 50    
+        # TODO: organise by start time - with or without timezone?
         table.clear()
         table.setColumnCount(len(df.columns))
         table.setHorizontalHeaderLabels(df.columns)
-        
-        # TODO: update display which indicates max_rows
             
         row = 0
         while row <= min(max_rows,len(df.index)-1):
@@ -489,6 +494,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
 #        file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose database .csv file to save.', file_path, "CSV files (*.csv)")
         self.SaveFilePathWidget.clear()
         self.SaveFilePathWidget.insert(file_path)
+        self.ReadFilePathWidget.clear()
+        self.ReadFilePathWidget.insert(file_path)
         df_save.to_csv(file_path, sep=',', header=True, index=True)
         
         
@@ -504,6 +511,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     
     def save_map(self):     
         print "Generating map..."           
+        # TODO: make it more clear that this takes a while
+        
         selected_legend = self.selected_sports
 #        cmap = plt.get_cmap('CMRmap')
 #        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
@@ -603,6 +612,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         data_labels = [x1,y1,x2,y2]
         
         self.figure2.clear()
+        # TODO: use this syntax? fig, axs = plt.subplots(2, 2)
         ax1 = self.figure2.add_subplot(211)
         ax2 = self.figure2.add_subplot(212)
     
@@ -612,8 +622,13 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             df = self.read_records(file_path)
             # select data based on start and end values of elapsed_time
             df = self.select_times(df)
-            print '\n' + str(file_number)
-            print df.loc[:,[x1,y1]].describe()
+            # TODO: output the statistics to the GUI
+            # TODO: fix error when a non-df column is selected by making all the options be part of the df
+            try:
+                print '\n' + str(file_number)
+                print df.loc[:,[x1,y1]].describe()
+            except:
+                pass
             # recalculate average and max values (heart_rate, speed, ...) and update Table 1
             self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]
@@ -638,14 +653,17 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
 #            x2_data = np.nan_to_num(x2_data)
 #            y2_data = np.nan_to_num(y2_data)
             
+            # TODO: use a different label - start_time instead of file_number?
+            # TODO: use a different colour scheme
+            plot_label = str(file_number) + ': ' + sport;
             ax1.plot(x1_data, y1_data,
 #                    c = sport_colours[sport],
-                    label = str(file_number) + ': ' + sport,
+                    label = plot_label,
                     )
                     
             ax2.plot(x2_data, y2_data,
 #                    c = sport_colours[sport],
-                    label = str(file_number) + ': ' + sport,
+                    label = plot_label,
                     )
                     
         
@@ -671,6 +689,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         if record_units[y2]:
             ylabel = ylabel + ' (' + record_units[y2] + ')'
         
+        # make sure x and y axis have the same spacing
+        ax2.axis('equal')        
         ax2.set_xlabel(xlabel)
         ax2.set_ylabel(ylabel)
 #        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
@@ -812,7 +832,7 @@ def Distance(longitude, latitude, units_gps='semicircles', units_d='m',
 if __name__ == '__main__':
     
     app = QtGui.QApplication(sys.argv)
-    GUI = DataBaseGUI()
-    GUI.show()
+    gui = DataBaseGUI()
+    gui.show()
     app.exec_()
     

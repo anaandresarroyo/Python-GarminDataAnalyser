@@ -2,7 +2,7 @@
 """
 @author: Ana Andres-Arroyo
 
-Reads a Garmin .fit file and prints its information
+GUI which displays the contents of a Garmin .fit file
 """
 from fitparse import FitFile
 from collections import Counter
@@ -116,6 +116,6 @@ class FitBrowserGUI(QtGui.QMainWindow, FitBrowserGUIdesign.Ui_FitBrowserGUI):
 if __name__ == '__main__':
         
     app = QtGui.QApplication(sys.argv)
-    form = FitBrowserGUI()
-    form.show()
+    gui = FitBrowserGUI()
+    gui.show()
     app.exec_()
