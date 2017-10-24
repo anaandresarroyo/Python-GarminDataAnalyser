@@ -20,6 +20,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 
 #matplotlib.rcParams.update({'font.size': 50})
 
+# TODO: move the record_units and session_units inside the DataBaseGUI class
 record_units = {'elapsed_time':'min',
                 'timestamp':None,
                 'cadence':'rpm',
@@ -635,52 +636,37 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         self.canvas_map.draw()
         
+        # TODO: calculate the required zoom too
+        # TODO: adjust histogram number of bins depending on the data
         self.temp = avg_long
-        self.map_centre = [np.mean(avg_long), np.mean(avg_lat)]
+        temp = np.histogram(avg_long,bins=100)
+        centre_long = (temp[1][np.argmax(temp[0])] + temp[1][np.argmax(temp[0])+1])/2
+        temp = np.histogram(avg_lat,bins=100)
+        centre_lat = (temp[1][np.argmax(temp[0])] + temp[1][np.argmax(temp[0])+1])/2
+        self.map_centre = [centre_long, centre_lat]        
+#        self.map_centre = [np.mean(avg_long), np.mean(avg_lat)]
             
         
         
     def save_map(self):     
-        # TODO: centre and zoom map appropriately
-#        print "Generating map..."           
-        # TODO: make it more clear that this takes a while
-        
-#        selected_legend = self.selected_sports
-#        cmap = plt.get_cmap('CMRmap')
-#        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
-#        colours_dict = dict(zip(selected_legend, colours))
-
         gmap = gmplot.GoogleMapPlotter(self.map_centre[1], self.map_centre[0], 13)
 #        gmap = gmplot.GoogleMapPlotter(52.202, 0.12, 13) # Cambridge 
 #        gmap = gmplot.GoogleMapPlotter(43, -120, 5) # USA West Coast
-#        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
+#        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled        
         
-        
-        for key in self.map_data:
-#            file_number = key
-#            sport = self.df_selected.loc[index,'sport']
-            
-#            file_path = self.records_directory + str(file_number) + '_record.csv'
-            # read the csv file
-#            df = self.read_records(file_path)       
-            
+        for key in self.map_data:             
             # Add a line plot to the gmap object which will be save to an .html file
             # Use line instead of scatter plot for faster speed and smaller file size
-            # Make sure to remove NaNs or the plot won't work
-            # Convert from semicircles to degrees
             
             gmap.plot(self.map_data[key]['position_lat'], 
                       self.map_data[key]['position_long'], 
                       color=self.map_colours[key], edge_width=3)
-            # TODO: use different colours for different sports
         
         file_path = self.MapFilePathWidget.text()
         file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose .html file to save map.', file_path, "HTML files (*.html)")
         self.MapFilePathWidget.clear()
-        self.MapFilePathWidget.insert(file_path)
-        
+        self.MapFilePathWidget.insert(file_path)        
         gmap.draw(file_path)
-#        print "Map saved!\n"
                 
     def recalculate_statistics(self,df,file_number):
         row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
