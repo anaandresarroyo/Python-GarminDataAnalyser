@@ -20,21 +20,6 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 
 #matplotlib.rcParams.update({'font.size': 50})
 
-sport_colours = {'walking':'g',
-                 'cycling':'b',
-                 'running':'r',
-                 'driving':'k',
-                 'train':'y',
-                 'punting':'c',
-                 'training':'m',
-                 'test':'g',
-                 'lucia':'k',
-                 'mixed':'y',
-                 'squash':'m',
-                 'yoga':'c',
-                 }
-# TODO: generate unique colours for all sports
-                 
 record_units = {'elapsed_time':'min',
                 'timestamp':None,
                 'cadence':'rpm',
@@ -90,8 +75,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
 #        self.file_path = os.getcwd()        
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
-        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171023.csv'   
+#        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
         self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/maps/mymap.html')        
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'                
@@ -102,12 +87,15 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.RefreshPlot2PushButton.clicked.connect(self.refresh_2)  
         self.SaveDataPushButton.clicked.connect(self.save_data)  
         self.SaveMapPushButton.clicked.connect(self.save_map)  
+        self.ScatterPushButton.clicked.connect(self.plot_scatter)  
+        self.HistogramPushButton.clicked.connect(self.plot_histogram)  
+        self.PlotMapPushButton.clicked.connect(self.generate_map)  
         
-        self.figure1 = Figure()
-        self.canvas1 = FigureCanvas(self.figure1)
-        self.toolbar1 = NavigationToolbar(self.canvas1, self)
-        self.Plot1WidgetContainer.addWidget(self.toolbar1)
-        self.Plot1WidgetContainer.addWidget(self.canvas1)    
+        self.figure_scatter = Figure()
+        self.canvas_scatter = FigureCanvas(self.figure_scatter)
+        self.toolbar_scatter = NavigationToolbar(self.canvas_scatter, self)
+        self.PlotScatterWidgetContainer.addWidget(self.toolbar_scatter)
+        self.PlotScatterWidgetContainer.addWidget(self.canvas_scatter)    
 
         self.figure2 = Figure()
         self.canvas2 = FigureCanvas(self.figure2)
@@ -115,17 +103,35 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.Plot2WidgetContainer.addWidget(self.toolbar2)
         self.Plot2WidgetContainer.addWidget(self.canvas2)  
         
-        self.figure3 = Figure()
-        self.canvas3 = FigureCanvas(self.figure3)
-        self.toolbar3 = NavigationToolbar(self.canvas3, self)
-        self.Plot3WidgetContainer.addWidget(self.toolbar3)
-        self.Plot3WidgetContainer.addWidget(self.canvas3) 
+        self.figure_hist = Figure()
+        self.canvas_hist = FigureCanvas(self.figure_hist)
+        self.toolbar_hist = NavigationToolbar(self.canvas_hist, self)
+        self.PlotHistWidgetContainer.addWidget(self.toolbar_hist)
+        self.PlotHistWidgetContainer.addWidget(self.canvas_hist) 
         
-        self.LegendComboBox.addItem('sport', 0)
-        self.LegendComboBox.addItem('activity', 0)
-        self.LegendComboBox.addItem('gear', 0)
-        self.LegendComboBox.setCurrentIndex(0)
-        # TODO: implement different legend options in plot 1
+        self.figure_map = Figure()
+        self.canvas_map = FigureCanvas(self.figure_map)
+        self.toolbar_map = NavigationToolbar(self.canvas_map, self)
+        self.MapWidgetContainer.addWidget(self.toolbar_map)
+        self.MapWidgetContainer.addWidget(self.canvas_map) 
+        
+        legend_list = ['sport','activity','gear']
+        for item in legend_list:
+            self.ScatterLegendComboBox.addItem(item, 0)
+            self.HistLegendComboBox.addItem(item, 0)
+        index = self.ScatterLegendComboBox.findText('sport')
+        self.ScatterLegendComboBox.setCurrentIndex(index)
+        index = self.HistLegendComboBox.findText('sport')
+        self.HistLegendComboBox.setCurrentIndex(index)
+       
+        colormap_list = ['CMRmap','Set1','Accent','jet']
+        for item in colormap_list:
+            self.HistCMapComboBox.addItem(item, 0)
+            self.ScatterCMapComboBox.addItem(item, 0)
+        index = self.HistCMapComboBox.findText('CMRmap')
+        self.HistCMapComboBox.setCurrentIndex(index)
+        index = self.ScatterCMapComboBox.findText('CMRmap')
+        self.ScatterCMapComboBox.setCurrentIndex(index)
         
         for key in np.sort(record_units.keys()):
             self.XComboBox2.addItem(key, 0)
@@ -162,6 +168,18 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         print self.file_path + '\n'
         self.df = pd.read_csv(self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True)
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
+        # TODO: what if the dates column is not called start_time
+        
+        # take into account the timezone        
+#        temp =  self.df.index + self.df['timezone']
+#        # TODO: what if there is no timezone?
+#        self.df['daytime'] = temp.dt.time.values
+##        df.loc[df[legend_variable]==label].index.weekday
+#        self.df['weekday'] = temp.dt.weekday
+#        self.df['local_start_time'] = temp.values
+        # TODO: save these in the database or not?
+        # TODO: I think these extra columns in the dataframe are screwing up the "save_data" function
+        
         self.df_selected = self.df
 #        self.StartDateEdit.setDate(min(self.df.index))
 #        self.EndDateEdit.setDate(max(self.df.index))
@@ -169,31 +187,41 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.activities = self.populate_list('activity', self.ActivitiesListWidget)
         self.gear = self.populate_list('gear', self.GearListWidget)
         
-        self.XComboBox1.clear()
-        self.YComboBox1.clear()        
-        self.SizeComboBox.clear()      
+        self.HistXComboBox.clear()
+        self.ScatterXComboBox.clear()
+        self.ScatterYComboBox.clear()        
+        self.ScatterSizeComboBox.clear()      
 
-        self.SizeComboBox.addItem('constant', 0)
+        self.ScatterSizeComboBox.addItem('constant', 0)
         for item in np.sort(self.df.columns):
-            if self.df.dtypes[item] == 'int64' or self.df.dtypes[item] == 'float64':
-                self.XComboBox1.addItem(item, 0)
-                self.YComboBox1.addItem(item, 0)
-                self.SizeComboBox.addItem(item, 0)
+#            if self.df.dtypes[item] == 'int64' or self.df.dtypes[item] == 'float64' or self.df.dtypes[item] == 'datetime.time':
+#            if self.df.dtypes[item] != 'str':
+            # TODO: disable unwanted options
+#                print item                
+#                print self.df.dtypes[item]
+#                print
+                self.HistXComboBox.addItem(item, 0)
+                self.ScatterXComboBox.addItem(item, 0)
+                self.ScatterYComboBox.addItem(item, 0)
+                self.ScatterSizeComboBox.addItem(item, 0)
         
-        datetime_options = ['daytime', 'weekday', 'start_time']
+#        datetime_options = ['weekday', 'start_time']
+#        datetime_options = ['daytime', 'weekday', 'start_time']
         # TODO: datetime_options = ['daytime', 'weekday', 'start_time', 'end_time']
         # TODO: make these options be columns of the dataframe too
-        for item in datetime_options:
-            self.XComboBox1.addItem(item, 0)
-            self.YComboBox1.addItem(item, 0)
-        self.SizeComboBox.addItem('weekday', 0)
+#        for item in datetime_options:
+#            self.ScatterXComboBox.addItem(item, 0)
+#            self.ScatterYComboBox.addItem(item, 0)
+#        self.ScatterSizeComboBox.addItem('weekday', 0)
             
-        index = self.XComboBox1.findText('avg_speed')
-        self.XComboBox1.setCurrentIndex(index)
-        index = self.YComboBox1.findText('avg_heart_rate')
-        self.YComboBox1.setCurrentIndex(index)
-        index = self.SizeComboBox.findText('constant')
-        self.SizeComboBox.setCurrentIndex(index)
+        index = self.HistXComboBox.findText('avg_speed')
+        self.HistXComboBox.setCurrentIndex(index)
+        index = self.ScatterXComboBox.findText('avg_speed')
+        self.ScatterXComboBox.setCurrentIndex(index)
+        index = self.ScatterYComboBox.findText('avg_heart_rate')
+        self.ScatterYComboBox.setCurrentIndex(index)
+        index = self.ScatterSizeComboBox.findText('constant')
+        self.ScatterSizeComboBox.setCurrentIndex(index)
         
            
     def populate_list(self, column, widget):
@@ -241,6 +269,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def location_mask(self, df, when, selected_options):
         # TODO: add option to select start OR end locations as well as AND
         # TODO: add option to select mid-trajectory locations... maybe?
+        # TODO: fix error with weird characters such as "ñ" in "Logroño"
         if 'any' in selected_options:
             mask = True
         else:
@@ -287,28 +316,30 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
     def refresh_1(self):
         self.df_selection()
-        self.fill_table(self.df_selected, self.Table1Widget)
-        self.plot1()
+        self.DatabaseSizeSpinBox.setValue(len(self.df_selected))
+        self.fill_table(self.df_selected, self.Table1Widget, self.DatabaseRowsSpinBox.value())
+        self.plot_histogram()
+        self.plot_scatter()
+        if self.MapCheckBox.checkState():
+            self.generate_map()
         self.StartTimeDoubleSpinBox.setValue(0)
         self.EndTimeDoubleSpinBox.setValue(1000)
     
-    def plot1(self):
+    def plot_scatter(self):
         df = self.df_selected
         
-        x = self.XComboBox1.currentText()
-        y = self.YComboBox1.currentText()
-        size = self.SizeComboBox.currentText()
+        x = self.ScatterXComboBox.currentText()
+        y = self.ScatterYComboBox.currentText()
+        size = self.ScatterSizeComboBox.currentText()
         
         data_labels = [x,y,size]
 #        print '\nstatistics:'
 #        print df.loc[:,[x,y]].describe()
         
-        self.figure1.clear()
-        self.figure3.clear()
-        ax1 = self.figure1.add_subplot(111)
-        ax3 = self.figure3.add_subplot(111)
+        self.figure_scatter.clear()
+        ax = self.figure_scatter.add_subplot(111)
 
-        legend_variable = self.LegendComboBox.currentText()
+        legend_variable = self.ScatterLegendComboBox.currentText()
         if legend_variable == 'sport':
             selected_legend = self.selected_sports
         elif legend_variable == 'activity':
@@ -316,43 +347,43 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         elif legend_variable == 'gear':
             selected_legend = self.selected_gear
         
-        # TODO: allow the user to select between different colour maps
-        cmap_name = 'CMRmap'
-#        cmap_name = 'Set1'
-#        cmap_name = 'Accent'
+        cmap_name = self.ScatterCMapComboBox.currentText()
         cmap = plt.get_cmap(cmap_name)
         colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
         
-        try:
-            bins = np.linspace(min(df[x]), max(df[x]), 20)
-            # TODO: what if it's start_time, daytime, or weekday?
-        except:
-            print "Cannot generate histogram.\n"
         
         for i, label in enumerate(selected_legend):
             data = []
             for item in data_labels:
-                if item == 'start_time':
-                    # take into account the timezone
-                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
-                    data_item = data_item.values                    
-                    # TODO: implement end_time option too
-                    
-                elif item == 'daytime':
-                    # take into account the timezone
-                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
-                    # TODO: fix error that appears when data_item is empty
-                    data_item = data_item.dt.time.values
-                elif item == 'weekday':
-                    # 0 = Monday, ... 6 = Sunday
-                    data_item = df.loc[df[legend_variable]==label].index.weekday
-                elif item == 'constant':
+#                if item == 'start_time':
+#                    # take into account the timezone
+#                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
+#                    data_item = data_item.values                    
+#                    # TODO: implement end_time option too
+#                    
+#                elif item == 'daytime':
+#                    # take into account the timezone
+#                    data_item = df.loc[df[legend_variable]==label].index + df.loc[df[legend_variable]==label, 'timezone']
+#                    # TODO: fix error that appears when data_item is empty
+#                    data_item = data_item.dt.time.values
+#                elif item == 'weekday':
+#                    # 0 = Monday, ... 6 = Sunday
+#                    data_item = df.loc[df[legend_variable]==label].index.weekday
+                if item == 'constant':
                     data_item = 1
                 else:
                     data_item = df.loc[df[legend_variable]==label, item]
+#                    print label
+#                    print item
+#                    print data_item.head()
+#                    print
                 data.append(data_item)
+
                 
             (x_data,y_data,size_data) = data
+#            print x_data.head()
+#            print y_data.head()
+#            self.temp=x_data
 
             size_data = size_data - np.min(size_data)*0.8
             size_data = size_data / np.max(size_data)*800
@@ -360,19 +391,11 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             if len(x_data) > 0:
                 # scatter plot
                 # TODO: fix the weird colours that show sometimes - when there are 4 data points
-                ax1.scatter(x_data, y_data, s = size_data, 
+                ax.scatter(x_data, y_data, s = size_data, 
                            color = colours[i], label = label, 
                            alpha = 0.4, # edgecolors='face',                            
                            )
                 
-                # histogram plot
-                try:
-                    ax3.hist(x_data, bins=bins,
-                            color = colours[i], label = label, 
-                            normed = True, alpha = 0.4,
-                            )
-                except:
-                    pass
         
         xlabel = x.replace('_',' ')
         if session_units[x]:
@@ -382,15 +405,72 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         if session_units[y]:
             ylabel = ylabel + ' (' + session_units[y] + ')'
         
-        ax1.set_xlabel(xlabel)
-        ax1.set_ylabel(ylabel)
-        ax1.legend()
-        self.canvas1.draw()
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.legend()
+        self.canvas_scatter.draw()
         
-        ax3.set_xlabel(xlabel)
-        ax3.set_ylabel('histogram')
-        ax3.legend()
-        self.canvas3.draw()
+            
+    def plot_histogram(self):
+        df = self.df_selected
+        x = self.HistXComboBox.currentText()        
+        self.figure_hist.clear()
+        ax = self.figure_hist.add_subplot(111)
+
+        legend_variable = self.HistLegendComboBox.currentText()
+        if legend_variable == 'sport':
+            selected_legend = self.selected_sports
+        elif legend_variable == 'activity':
+            selected_legend = self.selected_activities
+        elif legend_variable == 'gear':
+            selected_legend = self.selected_gear
+        
+        cmap_name = self.HistCMapComboBox.currentText()
+        cmap = plt.get_cmap(cmap_name)
+        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+        # generate colours after the plot in case there are empty sports or other
+        
+        try:
+            bins = np.linspace(min(df[x]), max(df[x]), 20)
+            histogram = True
+            # TODO: what if it's start_time, daytime, or weekday?
+        except:
+            print "Cannot generate histogram.\n"
+            histogram = False
+        
+        for i, label in enumerate(selected_legend):
+#            data = []
+#            for item in data_labels:
+#                if item == 'constant':
+#                    data_item = 1
+#                else:
+#                    data_item = df.loc[df[legend_variable]==label, item]
+##                    print label
+##                    print item
+##                    print data_item.head()
+##                    print
+#                data.append(data_item)
+
+                
+            x_data = df.loc[df[legend_variable]==label, x]
+            
+            if len(x_data) > 0:                
+                # histogram plot
+                if histogram:
+                    ax.hist(x_data, bins=bins,
+                            color = colours[i], label = label, 
+                            normed = True, alpha = 0.4,
+                            )
+        
+        xlabel = x.replace('_',' ')
+        if session_units[x]:
+            xlabel = xlabel + ' (' + session_units[x] + ')'        
+        
+        if histogram:
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel('frequency')
+            ax.legend()
+            self.canvas_hist.draw()
         
         
         
@@ -398,6 +478,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         # TODO: add option for the user to select how many rows to print
         # TODO: make sure the default is often reset to 50    
         # TODO: organise by start time - with or without timezone?
+        # TODO: use timestamp as column index or not?
         table.clear()
         table.setColumnCount(len(df.columns))
         table.setHorizontalHeaderLabels(df.columns)
@@ -482,6 +563,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         return left
     
     def save_data(self):
+        # TODO: strange characters like ñ screw it up
         print 'Saving data...'
         # read data from Table 1
         self.df_widget = self.read_table(self.Table1Widget)
@@ -509,33 +591,87 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         print 'Saving complete! \n'
     
+    def generate_map(self):    
+        number_of_activities = self.MapActivitiesSpinBox.value()
+        
+#        selected_legend = self.selected_sports
+#        cmap = plt.get_cmap('CMRmap')
+#        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+#        colours_dict = dict(zip(selected_legend, colours))        
+        
+        self.figure_map.clear()
+        # TODO: use this syntax? fig, axs = plt.subplots(2, 2)
+        ax = self.figure_map.add_subplot(111)
+        
+        self.map_data = {}
+        self.map_colours = {}
+        avg_lat = []
+        avg_long = []
+        for index in self.df_selected.iloc[0:number_of_activities].index:
+            file_number = self.df_selected.loc[index,'file_name']
+#            sport = self.df_selected.loc[index,'sport']
+            # TODO: use different colours for different sports
+            
+            file_path = self.records_directory + str(file_number) + '_record.csv'
+            # read the csv file
+            df = self.read_records(file_path)     
+            # Extract location information, remove missing data, convert to degrees
+            self.map_data[file_number] = df.loc[:,['position_lat','position_long']].dropna()*180/2**31
+            self.map_colours[file_number] = 'k'
+            
+            avg_long.append(self.map_data[file_number]['position_long'].mean())
+            avg_lat.append(self.map_data[file_number]['position_lat'].mean())
+            
+            ax.plot(self.map_data[file_number]['position_long'], 
+                    self.map_data[file_number]['position_lat'],
+                    label = file_number,
+                    )     
+                
+
+        # make sure x and y axis have the same spacing
+        ax.axis('equal')        
+        ax.set_xlabel('longitude (degrees)')
+        ax.set_ylabel('latitude (degrees)')        
+        
+        self.canvas_map.draw()
+        
+        self.temp = avg_long
+        self.map_centre = [np.mean(avg_long), np.mean(avg_lat)]
+            
+        
+        
     def save_map(self):     
-        print "Generating map..."           
+        # TODO: centre and zoom map appropriately
+#        print "Generating map..."           
         # TODO: make it more clear that this takes a while
         
-        selected_legend = self.selected_sports
+#        selected_legend = self.selected_sports
 #        cmap = plt.get_cmap('CMRmap')
 #        colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
 #        colours_dict = dict(zip(selected_legend, colours))
 
-        gmap = gmplot.GoogleMapPlotter(52.202, 0.12, 13) # Cambridge 
+        gmap = gmplot.GoogleMapPlotter(self.map_centre[1], self.map_centre[0], 13)
+#        gmap = gmplot.GoogleMapPlotter(52.202, 0.12, 13) # Cambridge 
 #        gmap = gmplot.GoogleMapPlotter(43, -120, 5) # USA West Coast
 #        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled
         
         
-        for index in self.df_selected.index:
-            file_number = self.df_selected.loc[index,'file_name']
-            sport = self.df_selected.loc[index,'sport']
+        for key in self.map_data:
+#            file_number = key
+#            sport = self.df_selected.loc[index,'sport']
             
-            file_path = self.records_directory + str(file_number) + '_record.csv'
+#            file_path = self.records_directory + str(file_number) + '_record.csv'
             # read the csv file
-            df = self.read_records(file_path)       
+#            df = self.read_records(file_path)       
             
             # Add a line plot to the gmap object which will be save to an .html file
             # Use line instead of scatter plot for faster speed and smaller file size
             # Make sure to remove NaNs or the plot won't work
-            gmap.plot(df['position_lat'].dropna()*180/2**31, df['position_long'].dropna()*180/2**31, 
-                      color='k', edge_width=3)
+            # Convert from semicircles to degrees
+            
+            gmap.plot(self.map_data[key]['position_lat'], 
+                      self.map_data[key]['position_long'], 
+                      color=self.map_colours[key], edge_width=3)
             # TODO: use different colours for different sports
         
         file_path = self.MapFilePathWidget.text()
@@ -544,7 +680,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         self.MapFilePathWidget.insert(file_path)
         
         gmap.draw(file_path)
-        print "Map saved!\n"
+#        print "Map saved!\n"
                 
     def recalculate_statistics(self,df,file_number):
         row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
@@ -576,19 +712,20 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
 #        self.Table1Widget.setItem(row, column_dict['max_cadence'], 
 #                                  QtGui.QTableWidgetItem(format(max_cadence,'.1f')))
         
-        start_position_lat = df.loc[df.index[0],'position_lat']
+        start_position_lat = df['position_lat'].dropna().iloc[0]
         self.Table1Widget.setItem(row, column_dict['start_position_lat'], 
                                   QtGui.QTableWidgetItem(format(start_position_lat,'.0f')))
+                                  # TODO: fix error when activity has no GPS data
 
-        start_position_long = df.loc[df.index[0],'position_long']
+        start_position_long = df['position_long'].dropna().iloc[0]
         self.Table1Widget.setItem(row, column_dict['start_position_long'], 
                                   QtGui.QTableWidgetItem(format(start_position_long,'.0f')))    
                                   
-        end_position_lat = df.loc[df.index[-1],'position_lat']
+        end_position_lat = df['position_lat'].dropna().iloc[-1]
         self.Table1Widget.setItem(row, column_dict['end_position_lat'], 
                                   QtGui.QTableWidgetItem(format(end_position_lat,'.0f')))
 
-        end_position_long = df.loc[df.index[-1],'position_long']
+        end_position_long = df['position_long'].dropna().iloc[-1]
         self.Table1Widget.setItem(row, column_dict['end_position_long'], 
                                   QtGui.QTableWidgetItem(format(end_position_long,'.0f')))        
         
@@ -624,11 +761,11 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             df = self.select_times(df)
             # TODO: output the statistics to the GUI
             # TODO: fix error when a non-df column is selected by making all the options be part of the df
-            try:
-                print '\n' + str(file_number)
-                print df.loc[:,[x1,y1]].describe()
-            except:
-                pass
+#            try:
+#                print '\n' + str(file_number)
+#                print df.loc[:,[x1,y1]].describe()
+#            except:
+#                pass
             # recalculate average and max values (heart_rate, speed, ...) and update Table 1
             self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]

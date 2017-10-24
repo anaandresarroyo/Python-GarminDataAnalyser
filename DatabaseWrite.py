@@ -12,10 +12,10 @@ import os
 current_gear = {'cycling':'Trek FX2 Hybrid Bike',
                 'running':'Nike Black Sneakers',
                 'training':'Nike Blue Sneakers',
-                'walking':'Decathlon Hiking Shoes',
+                'walking':'Decathlon Hiking',
                 }
 activity_type = {'cycling':'Transportation',
-                'running':'Fitness',
+                'running':'Training',
                 'training':'Fitness',
                 'walking':'Recreation',
                 }
@@ -23,8 +23,8 @@ activity_type = {'cycling':'Transportation',
 if __name__ == '__main__':
     
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171002.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171004.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171020-1.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171020-2.csv'
     directory_path = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
     
     df_database = pd.read_csv(existing_database_path)
