@@ -76,8 +76,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
 #        self.file_path = os.getcwd()        
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171023.csv'   
-#        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
+        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
+        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
         self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/maps/mymap.html')        
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'                
@@ -756,7 +756,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]
             timezone = self.record_timezone[index]
-            # TODO: what if the file contains mixed sports?
             
             if index == 0:
                 self.fill_table(df, self.Table2Widget)
