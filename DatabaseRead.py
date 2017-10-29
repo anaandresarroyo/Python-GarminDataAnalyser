@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 @author: Ana Andres-Arroyo
-
 GUI which reads, analyses, plots, and updates the database CSV file and the activities' CSV files.
 """
 # pyuic4 DataBaseGUIdesign.ui -o DataBaseGUIdesign.py
@@ -76,12 +75,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         super(DataBaseGUI, self).__init__(parent)
         self.setupUi(self)
 #        self.file_path = os.getcwd()        
-<<<<<<< HEAD
         self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/'   
-=======
-        self.file_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171023.csv'   
->>>>>>> parent of b00380e... Merge FitToCsv into DatabaseWrite
-#        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
+        self.file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', self.file_path, "CSV files (*.csv)")
         self.ReadFilePathWidget.insert(self.file_path)
         self.MapFilePathWidget.insert('C:/Users/Ana Andres/Documents/Garmin/maps/mymap.html')        
         self.records_directory = 'C:/Users/Ana Andres/Documents/Garmin/csv/'                
@@ -129,7 +124,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         index = self.HistLegendComboBox.findText('sport')
         self.HistLegendComboBox.setCurrentIndex(index)
        
-        colormap_list = ['CMRmap','Set1','Accent','jet','gist_heat']
+        colormap_list = ['CMRmap','Set1','Accent','jet']
         for item in colormap_list:
             self.HistCMapComboBox.addItem(item, 0)
             self.ScatterCMapComboBox.addItem(item, 0)
@@ -154,7 +149,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         """Select a new Garmin DataBase CSV file and locations file.""" 
         self.location_list()
         file_path = self.ReadFilePathWidget.text()
-        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
+#        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
         if len(file_path):
             self.file_path = file_path
             self.ReadFilePathWidget.clear()
@@ -480,6 +475,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         
     def fill_table(self, df, table, max_rows=50):    
+        # TODO: add option for the user to select how many rows to print
+        # TODO: make sure the default is often reset to 50    
         # TODO: organise by start time - with or without timezone?
         # TODO: use timestamp as column index or not?
         table.clear()
@@ -537,6 +534,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.record_sports.append(self.df_selected.loc[self.df_selected.index[row],'sport'])
             self.record_timezone.append(self.df_selected.loc[self.df_selected.index[row],'timezone'])
         self.plot2() # this also fills Tables 1 and 2
+        
+        # TODO: update Table 1 with new values of heart rate, speed, distance, ...
     
     def table_selection(self, widget):
         selected_rows = []
@@ -756,7 +755,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             self.recalculate_statistics(df,file_number)
             sport = self.record_sports[index]
             timezone = self.record_timezone[index]
-            # TODO: what if the file contains mixed sports?
             
             if index == 0:
                 self.fill_table(df, self.Table2Widget)
@@ -852,9 +850,7 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
             
     else:
         raise ValueError('Unable to recognise the mode.')  
-        
-    print type(timestamp)
-    print type(origin_time)
+    
     timedelta = timestamp-origin_time
     elapsed_time = timedelta.astype('timedelta64[s]') # in seconds
     
