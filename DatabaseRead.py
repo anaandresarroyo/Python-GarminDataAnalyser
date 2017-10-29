@@ -350,6 +350,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         cmap_name = self.ScatterCMapComboBox.currentText()
         cmap = plt.get_cmap(cmap_name)
         colours = cmap(np.linspace(0,1,len(selected_legend)+1))  
+        self.temp=colours
         
         
         for i, label in enumerate(selected_legend):
@@ -390,9 +391,12 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             
             if len(x_data) > 0:
                 # scatter plot
-                # TODO: fix the weird colours that show sometimes - when there are 4 data points
                 ax.scatter(x_data, y_data, s = size_data, 
-                           color = colours[i], label = label, 
+                           color = [colours[i],] * len(x_data), 
+                           # the RGB colour array is duplidated for every data points
+                           # otherwise when having just 4 data points it gets confused
+                           # due to a bug in matplotlib
+                           label = label, 
                            alpha = 0.4, # edgecolors='face',                            
                            )
                 
@@ -546,7 +550,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     
     def read_records(self, file_path):
         df = pd.read_csv(file_path, parse_dates=['timestamp'], index_col='timestamp')
-        self.temp=df
         df['elapsed_time'] = ElapsedTime(df.index.to_series(), units_t=record_units['elapsed_time'])
         return df
         
@@ -638,7 +641,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         # TODO: calculate the required zoom too
         # TODO: adjust histogram number of bins depending on the data
-        self.temp = avg_long
+#        self.temp = avg_long
         temp = np.histogram(avg_long,bins=100)
         centre_long = (temp[1][np.argmax(temp[0])] + temp[1][np.argmax(temp[0])+1])/2
         temp = np.histogram(avg_lat,bins=100)
@@ -777,6 +780,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
             
             # TODO: use a different label - start_time instead of file_number?
             # TODO: use a different colour scheme
+            # TODO: allow scatter plot option
             plot_label = str(file_number) + ': ' + sport;
             ax1.plot(x1_data, y1_data,
 #                    c = sport_colours[sport],
@@ -799,7 +803,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
-#        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
         if self.TraceLegendCheckBox.checkState():
             ax1.legend()
         
@@ -816,7 +819,6 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         ax2.set_xlabel(xlabel)
         ax2.set_ylabel(ylabel)
         if self.MapLegendCheckBox.checkState():
-#        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
             ax2.legend()
         
         self.canvas2.draw()
