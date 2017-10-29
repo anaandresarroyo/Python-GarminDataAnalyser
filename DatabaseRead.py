@@ -166,7 +166,7 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
     def read_file(self):
         """Read the CSV file."""
         print self.file_path + '\n'
-        self.df = pd.read_csv(self.file_path, parse_dates='start_time', index_col='start_time', dayfirst=True)
+        self.df = pd.read_csv(self.file_path, parse_dates=['start_time'], index_col='start_time', dayfirst=True)
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
         # TODO: what if the dates column is not called start_time
         
@@ -545,7 +545,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         return selected_rows
     
     def read_records(self, file_path):
-        df = pd.read_csv(file_path, parse_dates='timestamp', index_col='timestamp')
+        df = pd.read_csv(file_path, parse_dates=['timestamp'], index_col='timestamp')
+        self.temp=df
         df['elapsed_time'] = ElapsedTime(df.index.to_series(), units_t=record_units['elapsed_time'])
         return df
         
@@ -798,8 +799,8 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
-        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
-            pass
+#        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
+        if self.TraceLegendCheckBox.checkState():
             ax1.legend()
         
         xlabel = x2.replace('_',' ')
@@ -814,8 +815,9 @@ class DataBaseGUI(QtGui.QMainWindow, DataBaseGUIdesign.Ui_DataBaseGUI):
         ax2.axis('equal')        
         ax2.set_xlabel(xlabel)
         ax2.set_ylabel(ylabel)
+        if self.MapLegendCheckBox.checkState():
 #        if len(self.record_file_numbers) > 0 and len(self.record_file_numbers) <= 5:
-#            ax2.legend()
+            ax2.legend()
         
         self.canvas2.draw()
             
@@ -839,7 +841,8 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
     
     # The Garmin Forerunner 35 takes data every 1 second
 
-    origin_time =  np.empty(timestamp.shape, dtype=type(timestamp))
+    origin_time = np.empty(timestamp.shape, dtype=type(timestamp))
+#    origin_time = timestamp
     if mode == 'start':
         origin_time[:] = timestamp[0]
     
@@ -850,7 +853,7 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
             
     else:
         raise ValueError('Unable to recognise the mode.')  
-    
+
     timedelta = timestamp-origin_time
     elapsed_time = timedelta.astype('timedelta64[s]') # in seconds
     

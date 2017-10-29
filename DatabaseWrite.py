@@ -69,8 +69,8 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 
 if __name__ == '__main__':
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171024-1.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171024-2.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171029.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171029-1.csv'
     
     # Directory to read .fit files from
     fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
