@@ -70,12 +70,11 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 
 if __name__ == '__main__':
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171024-1.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171024-2.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171027.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171029.csv'
     
     # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
-        
+    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'        
     # Directory to save .csv files in
     fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
         
@@ -155,12 +154,14 @@ if __name__ == '__main__':
     # TODO: use global or local start_time?
     
     # Sort dataframe by file_name
-    df_database.sort_values(by='start_time', inplace=True)
+#    print "\nSorting database by start time..."
+#    df_database.sort_values(by='start_time', inplace=True)
     
     # Use the start time as the row index
     df_database = df_database.set_index(df_database['start_time'])   
     
     # Save the database to a .csv file
+    print "\nSaving database..."
     df_database.to_csv(new_database_path, sep=',', header=True, index=True,
                       columns=[                               
                                'sport',

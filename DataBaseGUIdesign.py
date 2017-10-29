@@ -774,7 +774,7 @@ class Ui_DataBaseGUI(object):
 
         self.retranslateUi(DataBaseGUI)
         self.tabWidget_8.setCurrentIndex(1)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(DataBaseGUI)
 
     def retranslateUi(self, DataBaseGUI):
