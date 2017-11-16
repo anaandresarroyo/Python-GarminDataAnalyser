@@ -69,8 +69,8 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 
 if __name__ == '__main__':
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171029.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171029-1.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171114.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171114.csv'
     
     # Directory to read .fit files from
     fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
@@ -129,6 +129,10 @@ if __name__ == '__main__':
             df_session['activity'] = activity_type[df_session.get_value(0,'sport')]
             # Add comments columns to be filled later
             df_session['comments'] = ''
+
+            # TODO: add end_time  information
+            # TODO: add max_speed information
+            
             # Add end position information
             try:
                 df_session['end_position_lat'] = df_record['position_lat'].dropna().iloc[-1]
@@ -145,23 +149,11 @@ if __name__ == '__main__':
             else:
                 # Initialise the database
                 df_database = df_session
-    
-    
-    
-    # TODO: sort dataframe by file name
-    # TODO: ask the user wether to overwrite the file if it already exists
-    # TODO: add end location information
-    # TODO: use global or local start_time?
-    
-    # Sort dataframe by file_name
-    df_database.sort_values(by='start_time', inplace=True)
-    
-    # Use the start time as the row index
-    df_database = df_database.set_index(df_database['start_time'])   
-    
-    # Save the database to a .csv file
-    df_database.to_csv(new_database_path, sep=',', header=True, index=True,
+           
+        # Save the database to a .csv file
+        df_database.to_csv(new_database_path, sep=',', header=True, index=False,
                       columns=[                               
+                               'start_time',
                                'sport',
                                'activity',
                                'gear',
@@ -181,4 +173,41 @@ if __name__ == '__main__':
                                'total_calories',
                                'timezone',                       
                                ])
-    print "Done!"
+    
+    
+    
+    # TODO: sort dataframe by file name
+    # TODO: ask the user wether to overwrite the file if it already exists
+    # TODO: add end location information
+    # TODO: use global or local start_time?
+    
+    # Sort dataframe by file_name
+#    df_database.sort_values(by='start_time', inplace=True)
+    
+    # Use the start time as the row index
+#    df_database = df_database.set_index(df_database['start_time'])   
+    
+    # Save the database to a .csv file
+#    df_database.to_csv(new_database_path, sep=',', header=True, index=True,
+#                      columns=[                               
+#                               'start_time',
+#                               'sport',
+#                               'activity',
+#                               'gear',
+#                               'comments',
+#                               'file_name',
+#                               'avg_speed',
+#                               'total_distance',
+#                               'total_elapsed_time',
+#                               'avg_heart_rate',
+#                               'max_heart_rate',
+#                               'avg_cadence',
+#                               'max_cadence',
+#                               'start_position_long',
+#                               'start_position_lat',                       
+#                               'end_position_long',
+#                               'end_position_lat',                       
+#                               'total_calories',
+#                               'timezone',                       
+#                               ])
+    print "\nDone!"

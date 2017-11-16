@@ -81,7 +81,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="RefreshPlot1PushButton">
+         <widget class="QPushButton" name="FilterPlotDatabasePushButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -103,8 +103,162 @@
         <item>
          <widget class="QTabWidget" name="tabWidget_8">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>Database</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_32">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_9">
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="ReadFilePathWidget">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="NewFilePushButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string> Select New Database File: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="SaveFilePathWidget">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="SaveDataPushButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string> Save Database to File: </string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_14">
+              <item row="1" column="0">
+               <widget class="QLabel" name="Label_10">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Number of rows to display: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="Label_9">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Number of rows in the filtered database: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="DatabaseRowsSpinBox">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="maximum">
+                 <number>100000</number>
+                </property>
+                <property name="value">
+                 <number>50</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="DatabaseSizeSpinBox">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+                <property name="maximum">
+                 <number>100000</number>
+                </property>
+                <property name="value">
+                 <number>50</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="Table1Widget">
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>false</bool>
+              </property>
+              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
             <string>Filters</string>
@@ -302,24 +456,112 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_4">
+          <widget class="QWidget" name="tab_5">
            <attribute name="title">
-            <string>Database</string>
+            <string>Units</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_32">
+           <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <layout class="QGridLayout" name="gridLayout_9">
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="ReadFilePathWidget">
+             <widget class="QPushButton" name="SIUnitsPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Set units to SI</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="1" column="0">
+               <widget class="QLabel" name="XLabel1_3">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>8</pointsize>
                  </font>
                 </property>
+                <property name="text">
+                 <string>Position: </string>
+                </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QPushButton" name="NewFilePushButton">
+              <item row="4" column="1">
+               <widget class="QComboBox" name="SpeedUnitsComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QComboBox" name="DistanceUnitsComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="SizeLabel_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Distance: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="PositionUnitsComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -331,22 +573,28 @@
                   <pointsize>8</pointsize>
                  </font>
                 </property>
-                <property name="text">
-                 <string> Select New Database File: </string>
-                </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="SaveFilePathWidget">
+              <item row="4" column="0">
+               <widget class="QLabel" name="LegendLabel_13">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>8</pointsize>
                  </font>
                 </property>
+                <property name="text">
+                 <string>Speed: </string>
+                </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="SaveDataPushButton">
+              <item row="0" column="1">
+               <widget class="QComboBox" name="TimeUnitsComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -358,37 +606,12 @@
                   <pointsize>8</pointsize>
                  </font>
                 </property>
-                <property name="text">
-                 <string> Save Database to File: </string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_14">
-              <item row="1" column="0">
-               <widget class="QLabel" name="Label_10">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Number of rows to display: </string>
-                </property>
                </widget>
               </item>
               <item row="0" column="0">
-               <widget class="QLabel" name="Label_9">
+               <widget class="QLabel" name="XLabel1_2">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -399,59 +622,23 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Number of rows in the filtered database: </string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QSpinBox" name="DatabaseRowsSpinBox">
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="maximum">
-                 <number>100000</number>
-                </property>
-                <property name="value">
-                 <number>50</number>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QSpinBox" name="DatabaseSizeSpinBox">
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="maximum">
-                 <number>100000</number>
-                </property>
-                <property name="value">
-                 <number>50</number>
+                 <string>Time: </string>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QTableWidget" name="Table1Widget">
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
+             <widget class="QPushButton" name="UpdateUnitsPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <property name="sortingEnabled">
-               <bool>false</bool>
+              <property name="text">
+               <string>Update database table</string>
               </property>
-              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-               <bool>false</bool>
-              </attribute>
              </widget>
             </item>
            </layout>
@@ -479,7 +666,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -1197,7 +1384,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QPushButton" name="RefreshPlot2PushButton">
+          <widget class="QPushButton" name="PlotTracePushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1215,7 +1402,7 @@
           </widget>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="Plot2WidgetContainer"/>
+          <layout class="QVBoxLayout" name="PlotTraceWidgetContainer"/>
          </item>
         </layout>
        </widget>
