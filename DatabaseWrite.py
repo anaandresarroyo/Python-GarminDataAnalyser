@@ -8,7 +8,9 @@ import pandas as pd
 import os
 from fitparse import FitFile
 
-current_gear = {'cycling':'Trek FX2 Hybrid Bike',
+current_gear = {
+                'cycling':'Trek FX2 Hybrid Bike', # Ana
+#                'cycling':'Genesis Day One Bike', # John
                 'running':'Nike Black Sneakers',
                 'training':'Nike Blue Sneakers',
                 'walking':'Decathlon Hiking',
@@ -69,14 +71,20 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 
 if __name__ == '__main__':
     # TODO: ask the user for the directories
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171114.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171114.csv'
-    
+
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171123.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171123.csv'
     # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'
-        
+    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'        
     # Directory to save .csv files in
     fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
+
+#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
+#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
+#    # Directory to read .fit files from
+#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+#    # Directory to save .csv files in
+#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
         
     df_database = pd.read_csv(existing_database_path)
     
@@ -84,7 +92,8 @@ if __name__ == '__main__':
         
         if 'df_database' in locals():
             # Check wether this file is already in the database
-            mask = df_database['file_name'] == int(file_name[:-4])
+            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
+#            mask = df_database['file_name'] == file_name[:-4] # John
             mask = mask.any()
         else:
             mask = False
@@ -141,7 +150,8 @@ if __name__ == '__main__':
                 print "No GPS data."
             # Add the timezone offset in hours
             df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False)           
-            df_session['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp']            
+            df_session['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp'] # Ana
+#            df_session['timezone'] = df_activity.loc[0,'timestamp']-df_activity.loc[0,'timestamp'] # John
     
             if 'df_database' in locals():
                 # Add row to the database
@@ -149,6 +159,8 @@ if __name__ == '__main__':
             else:
                 # Initialise the database
                 df_database = df_session
+           
+        # TODO: intersection between desired columns and available columns
            
         # Save the database to a .csv file
         df_database.to_csv(new_database_path, sep=',', header=True, index=False,
@@ -160,12 +172,15 @@ if __name__ == '__main__':
                                'comments',
                                'file_name',
                                'avg_speed',
+#                               'max_speed', # John
+#                               'total_ascent', # John
+#                               'total_descent', # John
                                'total_distance',
                                'total_elapsed_time',
-                               'avg_heart_rate',
-                               'max_heart_rate',
-                               'avg_cadence',
-                               'max_cadence',
+                               'avg_heart_rate', # Ana
+                               'max_heart_rate', # Ana
+                               'avg_cadence', # Ana
+                               'max_cadence', # Ana
                                'start_position_long',
                                'start_position_lat',                       
                                'end_position_long',
@@ -181,33 +196,4 @@ if __name__ == '__main__':
     # TODO: add end location information
     # TODO: use global or local start_time?
     
-    # Sort dataframe by file_name
-#    df_database.sort_values(by='start_time', inplace=True)
-    
-    # Use the start time as the row index
-#    df_database = df_database.set_index(df_database['start_time'])   
-    
-    # Save the database to a .csv file
-#    df_database.to_csv(new_database_path, sep=',', header=True, index=True,
-#                      columns=[                               
-#                               'start_time',
-#                               'sport',
-#                               'activity',
-#                               'gear',
-#                               'comments',
-#                               'file_name',
-#                               'avg_speed',
-#                               'total_distance',
-#                               'total_elapsed_time',
-#                               'avg_heart_rate',
-#                               'max_heart_rate',
-#                               'avg_cadence',
-#                               'max_cadence',
-#                               'start_position_long',
-#                               'start_position_lat',                       
-#                               'end_position_long',
-#                               'end_position_lat',                       
-#                               'total_calories',
-#                               'timezone',                       
-#                               ])
     print "\nDone!"
