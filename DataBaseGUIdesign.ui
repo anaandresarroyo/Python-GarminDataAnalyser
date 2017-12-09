@@ -101,9 +101,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QTabWidget" name="tabWidget_8">
+         <widget class="QTabWidget" name="DatabaseTabsWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_4">
            <attribute name="title">
@@ -458,26 +458,31 @@
           </widget>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
-            <string>Units</string>
+            <string>Plot Options</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QPushButton" name="SIUnitsPushButton">
+             <widget class="QLabel" name="StartTimeLabel_9">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>8</pointsize>
+               </font>
+              </property>
               <property name="text">
-               <string>Set units to SI</string>
+               <string>Units: </string>
               </property>
              </widget>
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_4">
-              <item row="1" column="0">
-               <widget class="QLabel" name="XLabel1_3">
+              <item row="0" column="0">
+               <widget class="QLabel" name="XLabel1_2">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -490,35 +495,11 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Position: </string>
+                 <string>Time: </string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QComboBox" name="SpeedUnitsComboBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="duplicatesEnabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
+              <item row="2" column="1">
                <widget class="QComboBox" name="DistanceUnitsComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -542,7 +523,7 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="SizeLabel_2">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -557,6 +538,48 @@
                 </property>
                 <property name="text">
                  <string>Distance: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="XLabel1_3">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Position: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QComboBox" name="SpeedUnitsComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -575,7 +598,7 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="LegendLabel_13">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -608,8 +631,122 @@
                 </property>
                </widget>
               </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="UpdateUnitsPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Update units</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="SIUnitsPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Set units to SI</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_8">
+              <item row="1" column="0">
+               <widget class="QLabel" name="LegendLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Colour Variable:  </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="ColourVariableComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="TransparencyDoubleSpinBox">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.400000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="CMapComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="0">
-               <widget class="QLabel" name="XLabel1_2">
+               <widget class="QLabel" name="StartTimeLabel_8">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -622,22 +759,71 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Time: </string>
+                 <string>Transparency:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="LegendLabel_12">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Colour Map: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QCheckBox" name="LegendCheckBox">
+                <property name="text">
+                 <string>Legend: </string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+                <property name="tristate">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QComboBox" name="LegendLocationComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="duplicatesEnabled">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="UpdateUnitsPushButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Update database table</string>
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -647,7 +833,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="QTabWidget" name="PlotTabsWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -666,7 +852,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -675,7 +861,7 @@
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
           <layout class="QGridLayout" name="gridLayout_23">
-           <item row="0" column="1">
+           <item row="0" column="3">
             <widget class="QCheckBox" name="MapCheckBox">
              <property name="font">
               <font>
@@ -684,6 +870,42 @@
              </property>
              <property name="text">
               <string>Generate map when filtering. </string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QSpinBox" name="MapActivitiesSpinBox">
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+             <property name="value">
+              <number>5</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="Label_11">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string># activities: </string>
              </property>
             </widget>
            </item>
@@ -701,81 +923,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Update map (it can be very slow). </string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QGridLayout" name="gridLayout_38">
-           <item row="0" column="0">
-            <widget class="QLabel" name="Label_11">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Number of activities to display: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="MapActivitiesSpinBox">
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="maximum">
-              <number>100000</number>
-             </property>
-             <property name="value">
-              <number>5</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="LegendLabel_17">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Legend: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QComboBox" name="MapLegendComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
+              <string>Update map</string>
              </property>
             </widget>
            </item>
@@ -830,7 +978,43 @@
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="1">
+           <item row="0" column="0">
+            <widget class="QLabel" name="YLabel1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Y Axis: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="XLabel1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>X Axis: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
             <widget class="QComboBox" name="ScatterXComboBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -845,26 +1029,8 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="LegendLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Legend: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QComboBox" name="ScatterLegendComboBox">
+           <item row="0" column="1">
+            <widget class="QComboBox" name="ScatterYComboBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -887,21 +1053,16 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="XLabel1">
+           <item row="1" column="3">
+            <widget class="QPushButton" name="ScatterPushButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
              <property name="text">
-              <string>X Axis: </string>
+              <string>Update scatter plot</string>
              </property>
             </widget>
            </item>
@@ -947,103 +1108,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QComboBox" name="ScatterYComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="YLabel1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Y Axis: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="LegendLabel_12">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Color Map: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="ScatterCMapComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="3">
-            <widget class="QPushButton" name="ScatterPushButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Update scatter plot</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
          <item>
@@ -1061,63 +1125,16 @@
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
            </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="XLabel1_5">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>X Axis: </string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="2">
-            <widget class="QLabel" name="LegendLabel_5">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Legend: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QComboBox" name="HistLegendComboBox">
+            <widget class="QPushButton" name="HistogramPushButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
+             <property name="text">
+              <string>Update histogram plot</string>
              </property>
             </widget>
            </item>
@@ -1136,130 +1153,10 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="LegendLabel_7">
+           <item row="0" column="0">
+            <widget class="QLabel" name="XLabel1_5">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Color Map: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="HistCMapComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QPushButton" name="HistogramPushButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Update histogram plot</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="PlotHistWidgetContainer"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="Tab3">
-        <attribute name="title">
-         <string>Trace</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QLabel" name="StartTimeLabel_4">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>8</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Select rows from the database table to plot their data below.</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QGridLayout" name="gridLayout_5">
-           <item row="4" column="2">
-            <widget class="QComboBox" name="MapStyleComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="StartTimeLabel_7">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot legend:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="XLabel2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1274,85 +1171,22 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="QComboBox" name="TraceStyleComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QCheckBox" name="TraceLegendCheckBox">
-             <property name="text">
-              <string>Visible</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="2">
-            <widget class="QComboBox" name="MapColourComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="2">
-            <widget class="QCheckBox" name="MapLegendCheckBox">
-             <property name="text">
-              <string>Visible</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="StartTimeLabel_6">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot colour:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="TraceTopXComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="StartTimeLabel_3">
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="PlotHistWidgetContainer"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="Tab3">
+        <attribute name="title">
+         <string>Traces</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="2">
+            <widget class="QLabel" name="XLabel2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1365,65 +1199,14 @@
               </font>
              </property>
              <property name="text">
-              <string>Top plot:</string>
+              <string>X Axis: </string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="StartTimeLabel_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot kind: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QComboBox" name="TraceColourComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="StartTimeLabel_5">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Bottom plot:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
+           <item row="0" column="1">
             <widget class="QLabel" name="YLabel2">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1435,30 +1218,6 @@
              </property>
              <property name="text">
               <string>Y Axis: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QComboBox" name="TraceTopYComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="duplicatesEnabled">
-              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -1477,8 +1236,131 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="2">
+           <item row="0" column="3">
+            <widget class="QLabel" name="StartTimeLabel_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Kind: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QComboBox" name="TraceTopXComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
             <widget class="QComboBox" name="TraceBottomYComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="duplicatesEnabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="StartTimeLabel_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Top plot:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="StartTimeLabel_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Bottom plot:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QComboBox" name="TraceTopKindComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="QComboBox" name="TraceBottomKindComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="TraceTopYComboBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1512,10 +1394,10 @@
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="0" column="2">
-            <widget class="QLabel" name="EndTimeLabel">
+           <item row="0" column="4">
+            <widget class="QPushButton" name="PlotTracePushButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1526,7 +1408,7 @@
               </font>
              </property>
              <property name="text">
-              <string>End time: </string>
+              <string>Update</string>
              </property>
             </widget>
            </item>
@@ -1541,25 +1423,7 @@
               <double>10000000.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.050000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QDoubleSpinBox" name="EndTimeDoubleSpinBox">
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="maximum">
-              <double>10000000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.050000000000000</double>
-             </property>
-             <property name="value">
-              <double>1000.000000000000000</double>
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -1581,30 +1445,58 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="3">
+            <widget class="QDoubleSpinBox" name="EndTimeDoubleSpinBox">
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="maximum">
+              <double>10000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>10000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="EndTimeLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>End time: </string>
+             </property>
+            </widget>
+           </item>
           </layout>
-         </item>
-         <item>
-          <widget class="QPushButton" name="PlotTracePushButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>8</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Read activities and update database</string>
-           </property>
-          </widget>
          </item>
          <item>
           <layout class="QVBoxLayout" name="PlotTraceWidgetContainer"/>
          </item>
         </layout>
+       </widget>
+       <widget class="QWidget" name="tab_7">
+        <attribute name="title">
+         <string>Activity</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="tab_6">
+        <attribute name="title">
+         <string>Summary</string>
+        </attribute>
        </widget>
        <widget class="QWidget" name="Tab4">
         <attribute name="title">

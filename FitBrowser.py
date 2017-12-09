@@ -8,34 +8,28 @@ from fitparse import FitFile
 from collections import Counter
 
 from MatplotlibSettings import *
-import FitBrowserGUIdesign
-import sys
 import os
-from PyQt4 import QtGui
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt4 import QtGui, uic
 
-class FitBrowserGUI(QtGui.QMainWindow, FitBrowserGUIdesign.Ui_FitBrowserGUI):
+class FitBrowserGUI(QtGui.QMainWindow):
     """
     GUI which displays the contents of a .fit file
     """
     def __init__(self, parent=None):
         super(FitBrowserGUI, self).__init__(parent)
-        self.setupUi(self)
+        ui_file = 'FitBrowserGUIdesign.ui'
+        uic.loadUi(ui_file, self)
+        
         self.file_path = os.getcwd()
         self.new_file()
         
         # Connect GUI elements
         self.NewFilePushButton.clicked.connect(self.new_file)
         self.PrintPushButton.clicked.connect(self.fill_table)
-                      
-        self.figure1 = Figure()
-        self.canvas1 = FigureCanvas(self.figure1)
-        self.toolbar1 = NavigationToolbar(self.canvas1, self)
-        self.Plot1WidgetContainer.addWidget(self.toolbar1)
-        self.Plot1WidgetContainer.addWidget(self.canvas1)    
-       
+        
+        # Set initial splitter size
+        self.splitter.setSizes([50,650])
+                            
     
     def new_file(self):
         """Select a new FIT file and populate the file contents table.""" 
@@ -115,7 +109,6 @@ class FitBrowserGUI(QtGui.QMainWindow, FitBrowserGUIdesign.Ui_FitBrowserGUI):
     
 if __name__ == '__main__':
         
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication([])
     gui = FitBrowserGUI()
     gui.show()
-    app.exec_()

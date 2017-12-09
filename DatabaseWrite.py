@@ -72,15 +72,15 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 if __name__ == '__main__':
     # TODO: ask the user for the directories
 
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171123.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171123.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171208.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171208.csv'
     # Directory to read .fit files from
     fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'        
     # Directory to save .csv files in
     fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
 
 #    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
-#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
+#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208.csv'
 #    # Directory to read .fit files from
 #    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
 #    # Directory to save .csv files in
@@ -100,12 +100,12 @@ if __name__ == '__main__':
 
         print "\r%s / %s: %s\r" % (ifn + 1, len(os.listdir(fit_path_read)), file_name)            
         if mask:
-            print "Activity already in database!"
+            print "Already in database. SKIPPED."
             # If the file is in the database we will skip in because it is likely
             # that it's values have been modified to correct for errors such as
             # forgetting to turn the GPS off at the end of the activity
         else:
-            print "Adding activity to database..."
+            print "Adding NEW activity..."
             file_path = fit_path_read + file_name                        
             
             # Read data from the Garmin 'record' message type

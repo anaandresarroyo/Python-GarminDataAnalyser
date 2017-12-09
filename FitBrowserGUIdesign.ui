@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2225</width>
+    <width>1522</width>
     <height>1296</height>
    </rect>
   </property>
@@ -58,6 +58,12 @@
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
            <widget class="QTableWidget" name="FileContentsTableWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::SingleSelection</enum>
             </property>
@@ -143,53 +149,30 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>1100</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <widget class="QWidget" name="Tab1">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <attribute name="title">
-         <string>Plot 1</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <layout class="QVBoxLayout" name="Plot1WidgetContainer"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="Tab2">
-        <attribute name="title">
-         <string>Table 1</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QTableWidget" name="Table1Widget"/>
-         </item>
-        </layout>
-       </widget>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <layout class="QVBoxLayout" name="MessageInfo">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Message contents:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="Table1Widget">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
