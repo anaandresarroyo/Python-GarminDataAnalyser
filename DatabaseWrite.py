@@ -13,7 +13,7 @@ current_gear = {
 #                'cycling':'Genesis Day One Bike', # John
                 'running':'Nike Black Sneakers',
                 'training':'Nike Blue Sneakers',
-                'walking':'Decathlon Hiking',
+                'walking':'Decathlon Hiking Shoes',
                 }
 activity_type = {'cycling':'Transportation',
                 'running':'Training',
@@ -72,12 +72,12 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 if __name__ == '__main__':
     # TODO: ask the user for the directories
 
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171208.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/database/Garmin-Ana-171208.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107.csv'
     # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/fit new/'        
+    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
     # Directory to save .csv files in
-    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/csv/'
+    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
 
 #    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
 #    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208.csv'
@@ -160,35 +160,37 @@ if __name__ == '__main__':
                 # Initialise the database
                 df_database = df_session
            
-        # TODO: intersection between desired columns and available columns
-           
+        desired_columns = ['sport',
+                           'activity',
+                           'gear',
+                           'comments',
+                           'avg_speed',
+                           'max_speed', # John
+                           'total_ascent', # John
+                           'total_descent', # John
+                           'total_distance',
+                           'total_elapsed_time',
+                           'avg_heart_rate', # Ana
+                           'max_heart_rate', # Ana
+                           'avg_cadence', # Ana
+                           'max_cadence', # Ana
+                           'start_position_long',
+                           'start_position_lat',                       
+                           'end_position_long',
+                           'end_position_lat',                       
+                           'total_calories',
+                           'timezone', 
+                           'file_name',
+                           'start_time',
+                           ]
+                           
+        # Find intersection between desired_columns and columns in the database
+        # Order intersection based on the order of desired_columns                                      
+        saving_columns = sorted(set(desired_columns) & set(df_database.columns), key = desired_columns.index)
+        
         # Save the database to a .csv file
         df_database.to_csv(new_database_path, sep=',', header=True, index=False,
-                      columns=[                               
-                               'start_time',
-                               'sport',
-                               'activity',
-                               'gear',
-                               'comments',
-                               'file_name',
-                               'avg_speed',
-#                               'max_speed', # John
-#                               'total_ascent', # John
-#                               'total_descent', # John
-                               'total_distance',
-                               'total_elapsed_time',
-                               'avg_heart_rate', # Ana
-                               'max_heart_rate', # Ana
-                               'avg_cadence', # Ana
-                               'max_cadence', # Ana
-                               'start_position_long',
-                               'start_position_lat',                       
-                               'end_position_long',
-                               'end_position_lat',                       
-                               'total_calories',
-                               'timezone',                       
-                               ])
-    
+                      columns=saving_columns)    
     
     
     # TODO: sort dataframe by file name
