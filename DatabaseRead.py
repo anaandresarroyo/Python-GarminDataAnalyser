@@ -28,15 +28,15 @@ class DataBaseGUI(QtGui.QMainWindow):
         uic.loadUi(ui_file, self)    
         
         # Maximise GUI window
-#        self.showMaximized()
+        self.showMaximized()
         
         # Set initial splitter sizes
         self.splitter.setSizes([50,6000])
         self.SummarySplitter.setSizes([50,6000])
         
         # Set initial tabs        
-        self.DatabaseTabsWidget.setCurrentIndex(1)   
-        self.PlotTabsWidget.setCurrentIndex(0)
+        self.DatabaseTabsWidget.setCurrentIndex(0)   
+        self.PlotTabsWidget.setCurrentIndex(4)
         self.SummaryTabsWidget.setCurrentIndex(0)
         
 #        self.file_path = os.getcwd()        
@@ -75,65 +75,45 @@ class DataBaseGUI(QtGui.QMainWindow):
                             'min/mile':2.23694,
                             }
                                
-        # default SI units for all fields in the dataframes
-        # TODO: what if the dataframes have some fields not listed here?
+        # default SI units for the dataframe columns
+        # if a dataframe column is not listed here the figures will not display units
         self.dataframe_units = {'elapsed_time':'s',
-                                'timestamp':None,
-                                'cadence':'rpm',
+                                'total_elapsed_time':'s',
+                                'total_timer_time':'s',
+                                
+                                'timezone':'h',
+                                'weekday':'1 = Monday, 7 = Sunday',
+                                
                                 'distance':'m',
-                                'enhanced_speed':'m/s',
-                                'heart_rate':'bpm',
-                                'position_lat':'semicircles',
-                                'position_long':'semicircles',
-                                'speed':'m/s',
-                                'timestamp':None,
-                                'unknown_88':None,
-                                'activity':None,
-                                'avg_cadence':'rpm',
-                                'avg_heart_rate':'bpm',
-                                'avg_speed':'m/s',
-                                'daytime':None,
-                                'start_daytime':None,
-                                'start_daytime_local':None,
                                 'altitude':'m',
-                                'enhanced_avg_speed':'m/s',
-                                'event':None,
-                                'event_type':None,
-                                'file_name':None,
-                                'first_lap_index	':None,
-                                'gear':None,
-                                'max_cadence':'rpm',
-                                'max_heart_rate':'bpm',
-                                'max_speed':'m/s',
-                                'message_index':None,
-                                'num_laps':None,
-                                'sport':None,
+                                'total_distance':'m',
+                                'total_ascent':'m',
+                                'total_descent':'m',
+                                
+                                'position_lat':'semicircles',
+                                'position_long':'semicircles',                                
                                 'start_position_lat':'semicircle',
                                 'start_position_long':'semicircles',
                                 'end_position_lat':'semicircle',
                                 'end_position_long':'semicircles',
-                                'start_time':None,
-                                'start_time_local':None,
-                                'sub_sport':None,
-                                'timestamp':None,
-                                'timezone':'h',
-                                'total_calories':'kcal',
-                                'total_distance':'m',
-                                'total_ascent':'m',
-                                'total_descent':'m',
-                                'total_elapsed_time':'s',
+
+                                'cadence':'rpm',
+                                'avg_cadence':'rpm',
+                                'max_cadence':'rpm',
+                                
                                 'total_strides':'strides',
-                                'total_timer_time':'s',
-                                'trigger':None,
-                                'weekday':'1 = Monday, 7 = Sunday',
-                                'weekday_name':None,
-                                'week':None,                                
-                                'month':None,
-                                'year':None,
-                                'year_week':None,
-                                'year_month':None,
-                                'year_month_day':None,                                
-                                'comments':None, 
+
+                                'heart_rate':'bpm',
+                                'avg_heart_rate':'bpm',
+                                'max_heart_rate':'bpm',
+                                
+                                'speed':'m/s',
+                                'avg_speed':'m/s',
+                                'max_speed':'m/s',
+                                'enhanced_speed':'m/s',
+                                'enhanced_avg_speed':'m/s',
+                                
+                                'total_calories':'kcal',
                                 }            
         
         # Connect GUI elements
@@ -148,7 +128,6 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.HistogramPushButton.clicked.connect(self.plot_histogram)
         self.PlotMapPushButton.clicked.connect(self.generate_map)  
         self.UpdateUnitsPushButton.clicked.connect(self.update_units)  
-        self.SIUnitsPushButton.clicked.connect(self.set_SI_units)
         self.SIUnitsPushButton.clicked.connect(self.set_SI_units)
              
 
@@ -185,7 +164,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         
         colour_variable_list = ['sport','activity','gear','file_name']
         self.populate_combobox(colour_variable_list, 'sport',
-                          [self.ColourVariableComboBox])
+                          [self.LegendVariableComboBox])
        
         colormap_list = ['jet','hsv',
                          'viridis','plasma','inferno',
@@ -293,7 +272,7 @@ class DataBaseGUI(QtGui.QMainWindow):
             self.current_units = dict(self.SI_units) 
             self.update_units() # includes self.filter_and_plot_database()
 #            self.filter_and_plot_database()            
-            # TODO: don't overwrite previous user input settings
+            
         else:
             print "WARNING: No file chosen. Choose another file to avoid errors.\n" 
                 
@@ -316,7 +295,6 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
         # TODO: what if the dates column is not called start_time
         # TODO: fix errors that appear when some activities have empty gear
-        # TODO: make empty comments be blank, not nan
         
         # Create a variable with the column names to use when saving the database
         self.database_columns_to_save = self.df.columns
@@ -332,15 +310,10 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.gear = self.populate_list('gear', self.GearListWidget)
            
 
-#        plot_variables = self.df.columns
-        # TODO: disable unwanted options
-
         plot_variables = []
         # 'start_daytime_local' is not a datetime or numeric but it does work in the plot so i manually add it
         plot_variables.append('start_daytime_local')
         for column in self.df.columns:
-#            print column
-#            print self.df[column].dtype
             if self.df[column].dtype in ['float64', 'int64', 'datetime64[ns]']:
                 plot_variables.append(column)
                 
@@ -364,26 +337,24 @@ class DataBaseGUI(QtGui.QMainWindow):
     def calculate_new_columns(self, df): 
         # take into account the timezone        
         temp =  df['start_time'] + df['timezone']
-#        df['start_time_local'] = pd.to_datetime(temp.values)
+
         # TODO: what if there is no timezone?       
-#        df['start_time_local'] = temp.values
         df['start_time_local'] = temp
-#        df['start_daytime_local'] = temp.dt.time.values
         df['start_daytime_local'] = temp.dt.time
-        # TODO: add end_daytime info when it's added in DatabaseWrite.py
+        # TODO: add end_daytime and end_time_local info when it's added in DatabaseWrite.py
         df['weekday'] = temp.dt.weekday+1 # numeric        
         df['weekday_name'] = (temp.dt.weekday+1).apply(str) + ': ' + temp.dt.weekday_name # string
-#        self.dataframe_units['weekday'] = None
         df['week'] = temp.dt.week
         df['year_week'] = temp.dt.year.apply(str) + '-' + temp.dt.week.apply(str).str.pad(2,fillchar='0')
         df['month'] = temp.dt.month
         df['year_month'] = temp.dt.year.apply(str) + '-' + temp.dt.month.apply(str).str.pad(2,fillchar='0')
         df['year_month_day'] = df['year_month'] + '-' + temp.dt.day.apply(str).str.pad(2,fillchar='0')
         df['year'] = temp.dt.year
-        # TODO: add end_time_local info when it's added in DatabaseWrite.py             
+
         return df
     
-    def set_SI_units(self):       
+    def set_SI_units(self):   
+        print "Setting database units to SI..."
         index = self.TimeUnitsComboBox.findText(self.SI_units['elapsed_time'])
         self.TimeUnitsComboBox.setCurrentIndex(index)
         index = self.PositionUnitsComboBox.findText(self.SI_units['position'])
@@ -395,78 +366,76 @@ class DataBaseGUI(QtGui.QMainWindow):
         
         # update the units
         self.update_units()
+    
+    def read_units(self):
+        # read new dataframe_units from GUI
+        units = dict()
+        units['elapsed_time'] = self.TimeUnitsComboBox.currentText()
+        units['position'] = self.PositionUnitsComboBox.currentText()
+        units['distance'] = self.DistanceUnitsComboBox.currentText()
+        units['speed'] = self.SpeedUnitsComboBox.currentText()
+        return units
+        
+    def display_units(self, units):
+        # display current units on the GUI
+        self.CurrentTimeUnitsLabel.setText(units['elapsed_time'])
+        self.CurrentPositionUnitsLabel.setText(units['position'])
+        self.CurrentDistanceUnitsLabel.setText(units['distance'])
+        self.CurrentSpeedUnitsLabel.setText(units['speed'])
+        
         
     def update_units(self):
         # dataframes to update: df, df_selected
-        # converting self.df also converts self.df_selected because it's just a section of it
+        print "Updating database units..."     
         
-        # convert from current_units to SI_units
-#        print self.current_units['position']
-#        print 'to SI:'        
-        self.df = self.convert_units(self.df, self.current_units, to_SI=True)
-#        print self.df['start_position_lat'].iloc[0]
-#        print self.df_selected['start_position_lat'].iloc[0]
-        self.df_selected = self.convert_units(self.df_selected, self.current_units, to_SI=True)
-#        print self.df_selected['start_position_lat'].iloc[0]
-#        print
-        
-        # read new dataframe_units from GUI
-        self.current_units['elapsed_time'] = self.TimeUnitsComboBox.currentText()
-        self.current_units['position'] = self.PositionUnitsComboBox.currentText()
-        self.current_units['distance'] = self.DistanceUnitsComboBox.currentText()
-        self.current_units['speed'] = self.SpeedUnitsComboBox.currentText()
-        
+        # convert from current_units to SI_units       
+        self.df, self.dataframe_units = self.convert_units(self.df, self.dataframe_units, self.current_units, to_SI=True)
+        self.df_selected, self.dataframe_units = self.convert_units(self.df_selected, self.dataframe_units, self.current_units, to_SI=True)       
+
+        # read desired units from the GUI into self.current_units
+        self.current_units = self.read_units()
                 
         # convert from SI_units to current_units
-#        print self.current_units['position']
-#        print 'to other:'
-        self.df = self.convert_units(self.df, self.current_units, to_SI=False)
-#        print self.df['start_position_lat'].iloc[0]
-#        print self.df_selected['start_position_lat'].iloc[0]
-        self.df_selected = self.convert_units(self.df_selected, self.current_units, to_SI=False)
-#        print self.df_selected['start_position_lat'].iloc[0]
-#        print
+        self.df, self.dataframe_units = self.convert_units(self.df, self.dataframe_units, self.current_units, to_SI=False)
+        self.df_selected, self.dataframe_units = self.convert_units(self.df_selected, self.dataframe_units, self.current_units, to_SI=False)
         
-        # repopulate the database table
-#        self.fill_table(self.df_selected, self.Table1Widget, self.DatabaseRowsSpinBox.value())               
+        self.display_units(self.current_units)
+        print "Finished updating datatabase units!\n"
         
         # re-filter the database
         self.filter_and_plot_database()
-        # TODO: also convert units in the trace plot
+        
     
-    def convert_units(self, df, units, to_SI=False):
+    def convert_units(self, df, dataframe_units, desired_units, to_SI=False):
         # if to_SI = False: convert from SI_units to dataframe_units
         # if to_SI = True: convert from dataframe_units to SI_units
         if to_SI:
             factor = -1.
         else: 
             factor = 1.
-    
-        # update the elapsed_time units so it is calculated correctly when reading the records csv file
-        self.dataframe_units['elapsed_time'] = units['elapsed_time']
-        
+            
         for column_name in df.columns:
             if 'elapsed_time' in column_name:
-                self.dataframe_units[column_name] = units['elapsed_time']
-                df[column_name] = df[column_name] * (self.time_units[units['elapsed_time']] ** factor)
+                dataframe_units[column_name] = desired_units['elapsed_time']
+                df[column_name] = df[column_name] * (self.time_units[desired_units['elapsed_time']] ** factor)
             if 'position' in column_name:
-                self.dataframe_units[column_name] = units['position']
-                df[column_name] = df[column_name] * (self.position_units[units['position']] ** factor)
+                dataframe_units[column_name] = desired_units['position']
+                df[column_name] = df[column_name] * (self.position_units[desired_units['position']] ** factor)
             if 'distance' in column_name:
-                self.dataframe_units[column_name] = units['distance']
-                df[column_name] = df[column_name] * (self.distance_units[units['distance']] ** factor)
+                dataframe_units[column_name] = desired_units['distance']
+                df[column_name] = df[column_name] * (self.distance_units[desired_units['distance']] ** factor)
             if 'speed' in column_name:
-                self.dataframe_units[column_name] = units['speed']                
-                if 'min/' in units['speed']:
+                dataframe_units[column_name] = desired_units['speed']                
+                if 'min/' in desired_units['speed']:
                     if to_SI:
                         df[column_name] = 60 / df[column_name]
-                        df[column_name] = df[column_name] * (self.speed_units[units['speed']] ** factor)
+                        df[column_name] = df[column_name] * (self.speed_units[desired_units['speed']] ** factor)
                     else:
-                        df[column_name] = df[column_name] * (self.speed_units[units['speed']] ** factor)
+                        df[column_name] = df[column_name] * (self.speed_units[desired_units['speed']] ** factor)
                         df[column_name] = 60 / df[column_name]
                 else:
-                    df[column_name] = df[column_name] * (self.speed_units[units['speed']] ** factor)
-        return df
+                    df[column_name] = df[column_name] * (self.speed_units[desired_units['speed']] ** factor)
+        return df, dataframe_units
            
     def populate_list(self, column, widget):
         """Populate the tree widget with items from the dataframe column."""
@@ -516,7 +485,6 @@ class DataBaseGUI(QtGui.QMainWindow):
             
     def location_mask(self, df, when, selected_options):
         # TODO: add option to select start OR end locations as well as AND
-        # TODO: add option to select mid-trajectory locations... maybe?
         # TODO: fix error with weird characters such as "ñ" in "Logroño"
         if 'any' in selected_options:
             mask = True
@@ -548,6 +516,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         # TODO: allow several gear for the same activity - maybe?
     
     def filter_database(self):
+        print "Filtering database..."
         df_dates = self.select_dates(self.df)
         
         self.selected_sports = self.list_selection(self.SportsListWidget)
@@ -555,8 +524,6 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.selected_gear = self.list_selection(self.GearListWidget)
         self.selected_start_locations = self.list_selection(self.StartLocationListWidget)
         self.selected_end_locations = self.list_selection(self.EndLocationListWidget)
-        # TODO: add more selection options - speed, heart_rate, time, distance...
-        # TODO: add checkbockes to enable/disable activities, gear, sport and location selection
         
         mask_sports = self.generate_mask(df_dates, 'sport', self.selected_sports)
         mask_activities = self.generate_mask(df_dates, 'activity', self.selected_activities)
@@ -566,20 +533,23 @@ class DataBaseGUI(QtGui.QMainWindow):
         
         mask = mask_sports & mask_activities & mask_gear & mask_location_start & mask_location_end
         self.df_selected = df_dates.loc[mask]
+        print "Finished filtering database!\n"
         
     def filter_and_plot_database(self):
         self.filter_database()
         self.DatabaseSizeSpinBox.setValue(len(self.df_selected))
         self.fill_table(self.df_selected, self.Table1Widget, self.DatabaseRowsSpinBox.value())
-        self.plot_histogram()
+        
+        print "Updating summary, scatter, histogram, and map..."
+        self.plot_summary()
         self.plot_scatter()
+        self.plot_histogram()        
         if self.MapCheckBox.checkState():
             self.generate_map()
+        print "Figures updated!\n"
+        
         self.StartTimeDoubleSpinBox.setValue(0)
-        self.EndTimeDoubleSpinBox.setValue(999999)
-        self.plot_summary()
-              
-    
+        self.EndTimeDoubleSpinBox.setValue(999999)    
     
     def generate_colours(self, df, column, cmap_name):
         labels = np.sort(df[column].unique())
@@ -594,77 +564,61 @@ class DataBaseGUI(QtGui.QMainWindow):
         y = self.ScatterYComboBox.currentText()
         cmap_name = self.CMapComboBox.currentText()   
         alpha = self.TransparencyDoubleSpinBox.value()
-        legend = self.ColourVariableComboBox.currentText()
-        kind = 'line'
-               
-        self.figure_scatter.clear()
-        ax = self.figure_scatter.add_subplot(111)
-        
-        colour_dict = self.generate_colours(df, legend, cmap_name)
-        for label in np.sort(colour_dict.keys()):
+        legend = self.LegendVariableComboBox.currentText()
+        kind = 'line' # fake scatter plot made from a line plot with markers
             
-            # select data according to the legend variable selected            
-            df_plot = df.loc[df[legend]==label][[x,y]]
-#            df_plot.set_index(x, inplace=True)
+        if x == y:
+            print "WARNING: choose different X and Y variables for the scatter plot!"
+        else:
             
-#        df_plot = df.groupby([x,legend])
-#        self.temp = df_plot
-#        df_plot = df.groupby([legend])[[x,y]].set_index(x)
-#        plot_options = self.populate_plot_options(kind=kind, alpha=alpha, cmap_name=cmap_name)
-#        df_plot[y].unstack(level=1).plot(ax=ax, **plot_options)
-#        df_plot.plot(ax=ax, **plot_options)
+            self.figure_scatter.clear()
+            ax = self.figure_scatter.add_subplot(111)
             
-            
-            if len(df_plot) > 0:
-                 # convert .tolist() in order to plot timestamps
-#                 ax.scatter(x=df_plot[x].tolist(), y=df_plot[y].tolist(), s = 400,
-#                             color = [colour_dict[label],] * len(df_plot),
-#                             # the RGB colour array is duplidated for every data points
-#                             # otherwise when having just 4 data points it gets confused
-#                             # due to a bug in matplotlib
-#                             label = label, 
-#                             alpha = alpha, 
-#                             edgecolors = 'face',
-#                             )   
-
-                 # TODO: fix errors that appear when x = y
-                 df_plot.plot(x=x, y=y,
-                              ax=ax,
-                              kind=kind,
-#                 ax.plot(df_plot[x], df_plot[y],
-                              label=label, 
-                              alpha=alpha, 
-                              c=colour_dict[label],
-#                              s=400,
-#                              edgecolors='face',
-                              marker='.',
-                              markersize=50,
-                              linestyle='None',
-                              ) 
-        
-        ax.autoscale(enable=True, axis='both', tight='False')
-        ax.margins(0.1,0.1)
+            colour_dict = self.generate_colours(df, legend, cmap_name)
+            for label in np.sort(colour_dict.keys()):
                 
-        xlabel = x.replace('_',' ')
-        if self.dataframe_units[x]:
-            xlabel = xlabel + ' (' + self.dataframe_units[x] + ')'
-        
-        ylabel = y.replace('_',' ')
-        if self.dataframe_units[y]:
-            ylabel = ylabel + ' (' + self.dataframe_units[y] + ')'
-        
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-        legend = ax.legend(loc=self.LegendLocationComboBox.currentText())
-        if legend:
-            legend.set_visible(self.LegendCheckBox.checkState())
-        self.canvas_scatter.draw()
+                # select data according to the legend variable selected            
+                df_plot = df.loc[df[legend]==label][[x,y]]           
+                
+                if len(df_plot) > 0:
+    
+                     # TODO: fix errors that appear when x = y
+                     df_plot.plot(x=x, y=y,
+                                  ax=ax,
+                                  kind=kind,
+                                  label=label, 
+                                  alpha=alpha, 
+                                  c=colour_dict[label],
+                                  marker='.',
+                                  markersize=50,
+                                  linestyle='None',
+                                  ) 
+            
+            ax.autoscale(enable=True, axis='both', tight='False')
+            ax.margins(0.1,0.1)
+                    
+            xlabel = x.replace('_',' ')
+            if x in self.dataframe_units.keys():
+                if self.dataframe_units[x]:
+                    xlabel = xlabel + ' (' + self.dataframe_units[x] + ')'
+            
+            ylabel = y.replace('_',' ')
+            if y in self.dataframe_units.keys():
+                if self.dataframe_units[y]:
+                    ylabel = ylabel + ' (' + self.dataframe_units[y] + ')'
+            
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            legend = ax.legend(loc=self.LegendLocationComboBox.currentText())
+            if legend:
+                legend.set_visible(self.LegendCheckBox.checkState())
+            self.canvas_scatter.draw()
         
             
     def plot_histogram(self):
         df = self.df_selected
         x = self.HistXComboBox.currentText()  
-        legend = self.ColourVariableComboBox.currentText()
+        legend = self.LegendVariableComboBox.currentText()
         cmap_name = self.CMapComboBox.currentText()
         alpha = self.TransparencyDoubleSpinBox.value()
         
@@ -674,7 +628,6 @@ class DataBaseGUI(QtGui.QMainWindow):
         try:
             bins = np.linspace(min(df[x]), max(df[x]), 20)
             histogram = True
-            # TODO: what if it's start_time, daytime, or weekday?
         except:
             # TODO: try/except is a temporary solution: fix it
             print "Cannot generate histogram.\n"
@@ -696,8 +649,9 @@ class DataBaseGUI(QtGui.QMainWindow):
                             
         
         xlabel = x.replace('_',' ')
-        if self.dataframe_units[x]:
-            xlabel = xlabel + ' (' + self.dataframe_units[x] + ')'        
+        if x in self.dataframe_units.keys():
+            if self.dataframe_units[x]:
+                xlabel = xlabel + ' (' + self.dataframe_units[x] + ')'        
         
         if histogram:
             ax.set_xlabel(xlabel)
@@ -708,14 +662,14 @@ class DataBaseGUI(QtGui.QMainWindow):
             self.canvas_hist.draw()
 
         
-    def populate_plot_options(self, kind, alpha, cmap_name, df=pd.DataFrame(), index=False, column=False):
+    def populate_plot_options(self, kind, alpha, cmap_name, df=pd.DataFrame(), index=False, legend=False):
         plot_options = dict()   
         plot_options['kind'] = kind    
         plot_options['alpha'] = alpha
 
         if not df.empty:
-            colour_dict = self.generate_colours(df, column, cmap_name)
-            label = df.loc[index,column]
+            colour_dict = self.generate_colours(df, legend, cmap_name)
+            label = df.loc[index,legend]
             plot_options['c'] = colour_dict[label]
             plot_options['label'] = str(label)
         else:
@@ -741,7 +695,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         summary_category_list = [self.SummaryCategory1ComboBox.itemText(i) for i in range(self.SummaryCategory1ComboBox.count())]
         summary_list = np.unique(summary_category_list + summary_quantity_list)
 
-        # TODO: fix this temporary solution
+        # TODO: fix this temporary solution. The intersection should be done before filling the combobox.
         summary_list = list(set(summary_list) & set(self.df_selected.columns))
         
         df = self.df_selected[summary_list]        
@@ -777,8 +731,9 @@ class DataBaseGUI(QtGui.QMainWindow):
         legend.set_visible(self.LegendCheckBox.checkState())
         
         label = quantity.replace('_',' ')
-        if self.dataframe_units[quantity]:
-            label = label + ' (' + self.dataframe_units[quantity] + ')' 
+        if quantity in self.dataframe_units.keys():
+            if self.dataframe_units[quantity]:
+                label = label + ' (' + self.dataframe_units[quantity] + ')' 
         if kind == 'barh':
             ax.set_xlabel(label)
         else:
@@ -788,7 +743,15 @@ class DataBaseGUI(QtGui.QMainWindow):
         
         
         
-    def fill_table(self, df, table, max_rows=50):    
+    def fill_table(self, df, table, max_rows=50):   
+        # TODO: threading
+        # TODO: display nan as blank cell
+    
+        # read indices of currently selected rows
+        selected_indexes = table.selectedIndexes()
+        selected_rows = []
+        for item in selected_indexes:
+            selected_rows.append(item.row())
         
         # initialise the GUI table columns
         table.clear()
@@ -809,6 +772,15 @@ class DataBaseGUI(QtGui.QMainWindow):
         # enable table sorting by columns
         table.setSortingEnabled(True)
         # TODO: fix number sorting as it currently does: 1, 13, 24, 33, 356, 4, ...
+        
+        # temporarily set MultiSelection
+        table.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+        # reselect the prevously selected rows
+        # TODO: reselect by filename instead of table row number
+        for row in selected_rows:
+            table.selectRow(row)            
+        # revert MultiSelection to ExtendedSelection
+        table.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     
     def read_table(self, table, rows=[]):
         # read GUI table size
@@ -865,9 +837,8 @@ class DataBaseGUI(QtGui.QMainWindow):
 #            if not 'Unnamed' in item:
 #                self.records_columns_to_save.append(item)
         
-        df['elapsed_time'] = ElapsedTime(df['timestamp'], units_t=self.dataframe_units['elapsed_time'])
+        df['elapsed_time'] = ElapsedTime(df['timestamp'], units_t='s')
         
-                # TODO: these options are wrong, fix it
         self.populate_combobox(np.sort(df.columns), self.TraceTopXComboBox.currentText(),
                           [self.TraceTopXComboBox])
         self.populate_combobox(np.sort(df.columns), self.TraceTopYComboBox.currentText(),
@@ -875,9 +846,9 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.populate_combobox(np.sort(df.columns), self.TraceBottomXComboBox.currentText(),
                           [self.TraceBottomXComboBox])
         self.populate_combobox(np.sort(df.columns), self.TraceBottomYComboBox.currentText(),
-                          [self.TraceBottomYComboBox])  
+                          [self.TraceBottomYComboBox]) 
                           
-        return df
+        return df # output in SI units
         
     def select_times(self, df):
         start_time = self.StartTimeDoubleSpinBox.value()
@@ -909,18 +880,12 @@ class DataBaseGUI(QtGui.QMainWindow):
         # read data from Table 1
         df_widget = self.read_table(self.Table1Widget)
         # combine df_widget with the rest of the activities not shown in Table 1
-#        print self.df.head()
-#        print df_widget.head()
         df_save = self.merge_dataframes(self.df, df_widget, 'start_time_local')
         # TODO: merge by file_name instead of start_time_local
-        self.df = df_save.copy()
-        # TODO: check wether this is causing issues from the data formats        
+        self.df = df_save.copy()       
         
         # convert to SI units before saving
-        df_save = self.convert_units(df_save, self.current_units, to_SI=True)
-        # TODO: fix issues with unit conversions when saving the data
-        # the function convert_units changes the current_units dictionary and we don't want this
-        
+        df_save, useless_units = self.convert_units(df_save, self.dataframe_units, self.current_units, to_SI=True)      
         
         # save database
         df_save.to_csv(file_path, sep=',', header=True, index=False, columns=self.database_columns_to_save)
@@ -945,11 +910,12 @@ class DataBaseGUI(QtGui.QMainWindow):
         print 'Record files saved! \n'
         
     
-    def generate_map(self):    
+    def generate_map(self):   
+        # TODO: what if records do not have GPS data?
         number_of_activities = self.MapActivitiesSpinBox.value()  
-        column = self.ColourVariableComboBox.currentText()
+        legend = self.LegendVariableComboBox.currentText()
         cmap_name = self.CMapComboBox.currentText()  
-        colour_dict = self.generate_colours(self.df_selected, column, cmap_name)           
+        colour_dict = self.generate_colours(self.df_selected, legend, cmap_name)           
         
         self.figure_map.clear()
         ax = self.figure_map.add_subplot(111)
@@ -964,11 +930,11 @@ class DataBaseGUI(QtGui.QMainWindow):
             file_path = self.records_directory + str(file_number) + '_record.csv'
             # read the csv file
             df = self.read_records(file_path)  
-            df = self.convert_units(df, self.current_units)
+            df, self.dataframe_units = self.convert_units(df, self.dataframe_units, self.current_units)
             # Extract location information, remove missing data, convert to degrees
             self.map_data[file_number] = df.loc[:,['position_lat','position_long']].dropna()
 #            self.map_colours[file_number] = 'k'
-            self.map_colours[file_number] = colour_dict[self.df_selected.loc[index,column]]
+            self.map_colours[file_number] = colour_dict[self.df_selected.loc[index,legend]]
             
             avg_long.append(self.map_data[file_number]['position_long'].mean())
             avg_lat.append(self.map_data[file_number]['position_lat'].mean())
@@ -1018,6 +984,8 @@ class DataBaseGUI(QtGui.QMainWindow):
 #        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled        
         
         for key in self.map_data:             
+#            print self.map_data[key].head()
+            
             # Add a line plot to the gmap object which will be save to an .html file
             # Use line instead of scatter plot for faster speed and smaller file size
             
@@ -1041,6 +1009,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         print "Finished HTML map!"
             
     def select_and_plot_trace(self):
+        # TODO: threading
         print "Starting trace plots..."
         self.df_trace = self.read_selected_table_rows(self.Table1Widget)
     
@@ -1067,6 +1036,8 @@ class DataBaseGUI(QtGui.QMainWindow):
             file_path = self.records_directory + str(file_number) + '_record.csv'
             # read the csv file
             df = self.read_records(file_path)
+            # conver to current_units
+            df, self.dataframe_units = self.convert_units(df, self.dataframe_units, self.current_units, to_SI=False)
             # select data based on start and end values of elapsed_time
             df = self.select_times(df)
 
@@ -1079,7 +1050,7 @@ class DataBaseGUI(QtGui.QMainWindow):
             if self.TraceTopCheckBox.checkState():
                 trace_top_plot_options = self.populate_plot_options(df=self.df_trace,
                         index=index,
-                        column=self.ColourVariableComboBox.currentText(),
+                        legend=self.LegendVariableComboBox.currentText(),
                         cmap_name=self.CMapComboBox.currentText(),
                         kind=self.TraceTopKindComboBox.currentText(), 
                         alpha=self.TransparencyDoubleSpinBox.value())
@@ -1087,15 +1058,16 @@ class DataBaseGUI(QtGui.QMainWindow):
                 df.plot(x=x1, y=y1, 
                         ax=ax1, 
                         **trace_top_plot_options)
-                # TODO: fix errors that appear when plotting timestamps - see plot_scatter()
                         
                 xlabel = x1.replace('_',' ')
-                if self.dataframe_units[x1]:
-                    xlabel = xlabel + ' (' + self.dataframe_units[x1] + ')'
+                if x1 in self.dataframe_units.keys():
+                    if self.dataframe_units[x1]:
+                        xlabel = xlabel + ' (' + self.dataframe_units[x1] + ')'
                 
                 ylabel = y1.replace('_',' ')
-                if self.dataframe_units[y1]:
-                    ylabel = ylabel + ' (' + self.dataframe_units[y1] + ')'
+                if y1 in self.dataframe_units.keys():
+                    if self.dataframe_units[y1]:
+                        ylabel = ylabel + ' (' + self.dataframe_units[y1] + ')'
                 
                 if self.TraceTopAxesEqualCheckBox.checkState():
                     # set x and y axis to have the same spacing - good for GPS coordinates
@@ -1112,7 +1084,7 @@ class DataBaseGUI(QtGui.QMainWindow):
             if self.TraceBottomCheckBox.checkState():
                 trace_bottom_plot_options = self.populate_plot_options(df=self.df_trace,
                         index=index,
-                        column=self.ColourVariableComboBox.currentText(),
+                        legend=self.LegendVariableComboBox.currentText(),
                         cmap_name=self.CMapComboBox.currentText(),
                         kind=self.TraceBottomKindComboBox.currentText(), 
                         alpha=self.TransparencyDoubleSpinBox.value())
@@ -1122,12 +1094,14 @@ class DataBaseGUI(QtGui.QMainWindow):
                         **trace_bottom_plot_options)
         
                 xlabel = x2.replace('_',' ')
-                if self.dataframe_units[x2]:
-                    xlabel = xlabel + ' (' + self.dataframe_units[x2] + ')'
+                if x2 in self.dataframe_units.keys():
+                    if self.dataframe_units[x2]:
+                        xlabel = xlabel + ' (' + self.dataframe_units[x2] + ')'
                 
                 ylabel = y2.replace('_',' ')
-                if self.dataframe_units[y2]:
-                    ylabel = ylabel + ' (' + self.dataframe_units[y2] + ')'
+                if y2 in self.dataframe_units.keys():
+                    if self.dataframe_units[y2]:
+                        ylabel = ylabel + ' (' + self.dataframe_units[y2] + ')'
                 
                 if self.TraceBottomAxesEqualCheckBox.checkState():
                     # set x and y axis to have the same spacing - good for GPS coordinates
@@ -1145,8 +1119,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         
             
     def recalculate_statistics(self,df,file_number):
-        # TODO: take into account non SI units!!!
-        print "WARNING: do not recalculate statistics with non SI units!"
+        # df is the records dataframe
     
         row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
         
@@ -1157,59 +1130,74 @@ class DataBaseGUI(QtGui.QMainWindow):
             column_dict[column_name] = column
                
         if 'speed' in df.columns:
-            avg_speed = df['speed'].mean()
-            self.Table1Widget.setItem(row, column_dict['avg_speed'], 
-                                      QtGui.QTableWidgetItem(format(avg_speed,'.3f')))
-        
-        if 'heart_rate' in df.columns:                                                           
-            avg_heart_rate = df['heart_rate'].mean()
-            self.Table1Widget.setItem(row, column_dict['avg_heart_rate'], 
-                                      QtGui.QTableWidgetItem(format(avg_heart_rate,'.0f')))
-                      
-        if 'max_heart_rate' in df.columns:
-            max_heart_rate = df['heart_rate'].max()
-            self.Table1Widget.setItem(row, column_dict['max_heart_rate'], 
-                                      QtGui.QTableWidgetItem(format(max_heart_rate,'.0f')))
-                                  
-        # TODO: fix the mean cadence calculation because it decreases drastically for no apparent reason
-#        avg_cadence = df['cadence'].mean()
-#        self.Table1Widget.setItem(row, column_dict['avg_cadence'], 
-#                                  QtGui.QTableWidgetItem(format(avg_cadence,'.1f')))
-                                 
-        if 'max_cadence' in df.columns:
-            max_cadence = df['cadence'].max()
-            self.Table1Widget.setItem(row, column_dict['max_cadence'], 
-                                      QtGui.QTableWidgetItem(format(max_cadence,'.1f')))
-        
-        if 'start_position_lat' in df.columns:
-            start_position_lat = df['position_lat'].dropna().iloc[0]
-            self.Table1Widget.setItem(row, column_dict['start_position_lat'], 
-                                      QtGui.QTableWidgetItem(format(start_position_lat,'.0f')))
+            if 'avg_speed' in column_dict.keys():
+                value = df['speed'].mean()
+                self.Table1Widget.setItem(row, column_dict['avg_speed'], 
+                                          QtGui.QTableWidgetItem(format(value,'.3f')))
+            if 'max_speed' in column_dict.keys():
+                value = df['speed'].max()
+                self.Table1Widget.setItem(row, column_dict['max_speed'], 
+                                          QtGui.QTableWidgetItem(format(value,'.3f')))
+                                          
+        if 'heart_rate' in df.columns:
+            if 'avg_heart_rate' in column_dict.keys():
+                value = df['heart_rate'].mean()
+                self.Table1Widget.setItem(row, column_dict['avg_heart_rate'], 
+                                          QtGui.QTableWidgetItem(format(value,'.2f')))
+            if 'max_heart_rate' in column_dict.keys():
+                value = df['heart_rate'].max()
+                self.Table1Widget.setItem(row, column_dict['max_heart_rate'], 
+                                          QtGui.QTableWidgetItem(format(value,'.2f')))
+                                          
+        if 'cadence' in df.columns:
+            if 'avg_cadence' in column_dict.keys():
+                # remove zeros, which are like missing cadence data
+                value = df[df['cadence']!=0]['cadence'].dropna().mean()
+                self.Table1Widget.setItem(row, column_dict['avg_cadence'], 
+                                          QtGui.QTableWidgetItem(format(value,'.2f')))
+            if 'max_cadence' in column_dict.keys():
+                value = df['cadence'].max()
+                self.Table1Widget.setItem(row, column_dict['max_cadence'], 
+                                          QtGui.QTableWidgetItem(format(value,'.2f')))
 
-        if 'start_position_long' in df.columns:
-            start_position_long = df['position_long'].dropna().iloc[0]
-            self.Table1Widget.setItem(row, column_dict['start_position_long'], 
-                                      QtGui.QTableWidgetItem(format(start_position_long,'.0f')))    
-                                  
-        if 'end_position_lat' in df.columns:
-            end_position_lat = df['position_lat'].dropna().iloc[-1]
-            self.Table1Widget.setItem(row, column_dict['end_position_lat'], 
-                                      QtGui.QTableWidgetItem(format(end_position_lat,'.0f')))
-
-        if 'end_position_long' in df.columns:
-            end_position_long = df['position_long'].dropna().iloc[-1]
-            self.Table1Widget.setItem(row, column_dict['end_position_long'], 
-                                      QtGui.QTableWidgetItem(format(end_position_long,'.0f')))        
-        
-        if 'total_distance' in df.columns:
-            total_distance = df.loc[df.index[-1],'distance'] - df.loc[df.index[0],'distance']
-            self.Table1Widget.setItem(row, column_dict['total_distance'], 
-                                      QtGui.QTableWidgetItem(format(total_distance,'.2f')))        
-
-        if 'total_elapsed_time' in df.columns:
-            total_elapsed_time = df.loc[df.index[-1],'elapsed_time'] - df.loc[df.index[0],'elapsed_time']
-            self.Table1Widget.setItem(row, column_dict['total_elapsed_time'], 
-                                      QtGui.QTableWidgetItem(format(total_elapsed_time,'.3f')))        
+        if 'position_lat' in df.columns:
+            if 'start_position_lat' in column_dict.keys():
+                position = df['position_lat'].dropna()
+                if not position.empty:
+                    value = position.iloc[0]
+                    self.Table1Widget.setItem(row, column_dict['start_position_lat'], 
+                                              QtGui.QTableWidgetItem(format(value,'.4f')))
+            if 'end_position_lat' in column_dict.keys():
+                position = df['position_lat'].dropna()
+                if not position.empty:
+                    value = position.iloc[-1]
+                    self.Table1Widget.setItem(row, column_dict['end_position_lat'], 
+                                              QtGui.QTableWidgetItem(format(value,'.4f')))
+                                          
+        if 'position_long' in df.columns:
+            if 'start_position_long' in column_dict.keys():
+                position = df['position_long'].dropna()
+                if not position.empty:
+                    value = position.iloc[0]
+                    self.Table1Widget.setItem(row, column_dict['start_position_long'], 
+                                              QtGui.QTableWidgetItem(format(value,'.4f')))
+            if 'end_position_long' in column_dict.keys():
+                position = df['position_long'].dropna()
+                if not position.empty:
+                    value = position.iloc[-1]
+                    self.Table1Widget.setItem(row, column_dict['end_position_long'], 
+                                              QtGui.QTableWidgetItem(format(value,'.4f')))   
+                                          
+        if 'distance' in df.columns:
+            if 'total_distance' in column_dict.keys():
+                value = df.loc[df.index[-1],'distance'] - df.loc[df.index[0],'distance']
+                self.Table1Widget.setItem(row, column_dict['total_distance'], 
+                                          QtGui.QTableWidgetItem(format(value,'.4f')))
+        if 'elapsed_time' in df.columns:
+            if 'total_elapsed_time' in column_dict.keys():
+                value = df.loc[df.index[-1],'elapsed_time'] - df.loc[df.index[0],'elapsed_time']
+                self.Table1Widget.setItem(row, column_dict['total_elapsed_time'], 
+                                          QtGui.QTableWidgetItem(format(value,'.4f')))
         
                    
 def ElapsedTime(timestamp, units_t='sec', mode='start'):    
