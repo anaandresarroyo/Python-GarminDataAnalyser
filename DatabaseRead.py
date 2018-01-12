@@ -28,7 +28,7 @@ class DataBaseGUI(QtGui.QMainWindow):
         uic.loadUi(ui_file, self)    
         
         # Maximise GUI window
-        self.showMaximized()
+#        self.showMaximized()
         
         # Set initial splitter sizes
         self.splitter.setSizes([50,6000])
@@ -133,6 +133,7 @@ class DataBaseGUI(QtGui.QMainWindow):
                                 'year_week':None,
                                 'year_month':None,
                                 'year_month_day':None,                                
+                                'comments':None, 
                                 }            
         
         # Connect GUI elements
@@ -220,8 +221,6 @@ class DataBaseGUI(QtGui.QMainWindow):
                           [self.ScatterXComboBox]) 
         self.populate_combobox(['avg_heart_rate'], 'avg_heart_rate',
                           [self.ScatterYComboBox]) 
-        self.populate_combobox(['constant'], 'constant',
-                          [self.ScatterSizeComboBox]) 
                           
         self.populate_combobox(self.time_units.keys(), 's',
                           [self.TimeUnitsComboBox])
@@ -231,21 +230,12 @@ class DataBaseGUI(QtGui.QMainWindow):
                           [self.DistanceUnitsComboBox])
         self.populate_combobox(self.speed_units.keys(), 'm/s',
                           [self.SpeedUnitsComboBox])
-        
-        # TODO: make sure this intersects with the existing database columns
-        summary_category_list = ['sport','activity','gear','weekday',
-                          'weekday_name',
-                          'week','month','year',
-                          'year_week','year_month', 'year_month_day',
-                          ]
-        self.populate_combobox(summary_category_list, 'sport',
-                          [self.SummaryCategory1ComboBox])
-        self.populate_combobox(summary_category_list, 'activity',
-                          [self.SummaryCategory2ComboBox])
                           
-        # TODO: make sure this intersects with the existing database columns
-        summary_quantity_list = ['total_distance','total_elapsed_time', 'avg_speed', 'avg_heart_rate']
-        self.populate_combobox(summary_quantity_list, 'total_distance',
+        self.populate_combobox(['sport'], 'sport',
+                          [self.SummaryCategory1ComboBox])
+        self.populate_combobox(['activity'], 'activity',
+                          [self.SummaryCategory2ComboBox])
+        self.populate_combobox(['total_distance'], 'total_distance',
                           [self.SummaryQuantityComboBox])
                           
         summary_measure_list = ['sum','mean','count']
@@ -284,6 +274,21 @@ class DataBaseGUI(QtGui.QMainWindow):
             self.ReadDatabasePathWidget.insert(self.file_path)
             self.SaveDatabasePathWidget.insert(self.file_path)
             self.read_database()      
+            
+            summary_category_list = ['sport','activity','gear','weekday',
+                                     'weekday_name',
+                                     'week','month','year',
+                                     'year_week','year_month', 'year_month_day',
+                                     ]
+            self.populate_combobox(np.sort(list(set(summary_category_list) & set(self.df.columns))), 
+                                   'sport', [self.SummaryCategory1ComboBox])
+            self.populate_combobox(np.sort(list(set(summary_category_list) & set(self.df.columns))), 
+                                   'activity', [self.SummaryCategory2ComboBox])
+                              
+            summary_quantity_list = ['total_distance','total_elapsed_time', 'avg_speed', 'avg_heart_rate']
+            self.populate_combobox(np.sort(list(set(summary_quantity_list) & set(self.df.columns))), 
+                                   'total_distance', [self.SummaryQuantityComboBox])
+                          
             # make a copy so the current_units can be modified independently from the SI_units
             self.current_units = dict(self.SI_units) 
             self.update_units() # includes self.filter_and_plot_database()
@@ -327,30 +332,44 @@ class DataBaseGUI(QtGui.QMainWindow):
         self.gear = self.populate_list('gear', self.GearListWidget)
            
 
-        scatter_plot_variables = self.df.columns
+#        plot_variables = self.df.columns
         # TODO: disable unwanted options
-        
-        self.populate_combobox(np.sort(scatter_plot_variables), 
-                               self.HistXComboBox.currentText(), 
-                               [self.HistXComboBox])
-        self.populate_combobox(np.sort(scatter_plot_variables), 
+
+        plot_variables = []
+        # 'start_daytime_local' is not a datetime or numeric but it does work in the plot so i manually add it
+        plot_variables.append('start_daytime_local')
+        for column in self.df.columns:
+#            print column
+#            print self.df[column].dtype
+            if self.df[column].dtype in ['float64', 'int64', 'datetime64[ns]']:
+                plot_variables.append(column)
+                
+        self.populate_combobox(np.sort(plot_variables), 
                                self.ScatterXComboBox.currentText(), 
                                [self.ScatterXComboBox])
-        self.populate_combobox(np.sort(scatter_plot_variables), 
+                               
+        plot_variables = []
+        for column in self.df.columns:
+            if self.df[column].dtype in ['float64', 'int64']:
+                plot_variables.append(column)
+                
+        self.populate_combobox(np.sort(plot_variables), 
+                               self.HistXComboBox.currentText(), 
+                               [self.HistXComboBox])
+
+        self.populate_combobox(np.sort(plot_variables), 
                                self.ScatterYComboBox.currentText(), 
                                [self.ScatterYComboBox])
-        self.temp = np.sort(scatter_plot_variables)
-        self.populate_combobox(np.insert(np.sort(scatter_plot_variables),0,'constant'), 
-                               self.ScatterSizeComboBox.currentText(), 
-                               [self.ScatterSizeComboBox])
         
     def calculate_new_columns(self, df): 
         # take into account the timezone        
         temp =  df['start_time'] + df['timezone']
 #        df['start_time_local'] = pd.to_datetime(temp.values)
         # TODO: what if there is no timezone?       
-        df['start_time_local'] = temp.values        
-        df['start_daytime_local'] = temp.dt.time.values
+#        df['start_time_local'] = temp.values
+        df['start_time_local'] = temp
+#        df['start_daytime_local'] = temp.dt.time.values
+        df['start_daytime_local'] = temp.dt.time
         # TODO: add end_daytime info when it's added in DatabaseWrite.py
         df['weekday'] = temp.dt.weekday+1 # numeric        
         df['weekday_name'] = (temp.dt.weekday+1).apply(str) + ': ' + temp.dt.weekday_name # string
@@ -573,42 +592,59 @@ class DataBaseGUI(QtGui.QMainWindow):
         df = self.df_selected        
         x = self.ScatterXComboBox.currentText()
         y = self.ScatterYComboBox.currentText()
-        size = self.ScatterSizeComboBox.currentText()
-        column = self.ColourVariableComboBox.currentText()
-        cmap_name = self.CMapComboBox.currentText()       
+        cmap_name = self.CMapComboBox.currentText()   
+        alpha = self.TransparencyDoubleSpinBox.value()
+        legend = self.ColourVariableComboBox.currentText()
+        kind = 'line'
                
         self.figure_scatter.clear()
         ax = self.figure_scatter.add_subplot(111)
         
-        colour_dict = self.generate_colours(df, column, cmap_name)
+        colour_dict = self.generate_colours(df, legend, cmap_name)
         for label in np.sort(colour_dict.keys()):
             
             # select data according to the legend variable selected            
-            df_plot = df.loc[df[column]==label]
+            df_plot = df.loc[df[legend]==label][[x,y]]
+#            df_plot.set_index(x, inplace=True)
             
-            # generate size array
-            if size == 'constant':
-                size_data = 1
-            else:
-                size_data = df_plot[size]
-                
-            size_data = size_data - np.min(size_data)*0.8
-            size_data = size_data / np.max(size_data)*600
+#        df_plot = df.groupby([x,legend])
+#        self.temp = df_plot
+#        df_plot = df.groupby([legend])[[x,y]].set_index(x)
+#        plot_options = self.populate_plot_options(kind=kind, alpha=alpha, cmap_name=cmap_name)
+#        df_plot[y].unstack(level=1).plot(ax=ax, **plot_options)
+#        df_plot.plot(ax=ax, **plot_options)
+            
             
             if len(df_plot) > 0:
-                # scatter plot
-#                df_plot.plot(kind='scatter', x=x, y=y, s = size_data, ax=ax,
-                # convert .tolist() in order to plot timestamps
-                ax.scatter(x=df_plot[x].tolist(), y=df_plot[y].tolist(), s = size_data,
-                             color = [colour_dict[label],] * len(df_plot),
-                             # the RGB colour array is duplidated for every data points
-                             # otherwise when having just 4 data points it gets confused
-                             # due to a bug in matplotlib
-                             label = label, 
-                             alpha = self.TransparencyDoubleSpinBox.value(), 
-                             edgecolors = 'face',
-                             )                
+                 # convert .tolist() in order to plot timestamps
+#                 ax.scatter(x=df_plot[x].tolist(), y=df_plot[y].tolist(), s = 400,
+#                             color = [colour_dict[label],] * len(df_plot),
+#                             # the RGB colour array is duplidated for every data points
+#                             # otherwise when having just 4 data points it gets confused
+#                             # due to a bug in matplotlib
+#                             label = label, 
+#                             alpha = alpha, 
+#                             edgecolors = 'face',
+#                             )   
+
+                 # TODO: fix errors that appear when x = y
+                 df_plot.plot(x=x, y=y,
+                              ax=ax,
+                              kind=kind,
+#                 ax.plot(df_plot[x], df_plot[y],
+                              label=label, 
+                              alpha=alpha, 
+                              c=colour_dict[label],
+#                              s=400,
+#                              edgecolors='face',
+                              marker='.',
+                              markersize=50,
+                              linestyle='None',
+                              ) 
         
+        ax.autoscale(enable=True, axis='both', tight='False')
+        ax.margins(0.1,0.1)
+                
         xlabel = x.replace('_',' ')
         if self.dataframe_units[x]:
             xlabel = xlabel + ' (' + self.dataframe_units[x] + ')'
@@ -640,6 +676,7 @@ class DataBaseGUI(QtGui.QMainWindow):
             histogram = True
             # TODO: what if it's start_time, daytime, or weekday?
         except:
+            # TODO: try/except is a temporary solution: fix it
             print "Cannot generate histogram.\n"
             histogram = False
             
@@ -673,7 +710,8 @@ class DataBaseGUI(QtGui.QMainWindow):
         
     def populate_plot_options(self, kind, alpha, cmap_name, df=pd.DataFrame(), index=False, column=False):
         plot_options = dict()   
-        plot_options['kind'] = kind        
+        plot_options['kind'] = kind    
+        plot_options['alpha'] = alpha
 
         if not df.empty:
             colour_dict = self.generate_colours(df, column, cmap_name)
@@ -689,13 +727,11 @@ class DataBaseGUI(QtGui.QMainWindow):
             # TODO: move default marker size to MatplotlibSettings.py
             
         elif kind == 'scatter':
-            plot_options['alpha'] = alpha
             plot_options['edgecolors'] = 'face'
             plot_options['s'] = 20
 
         elif 'bar' in kind:
             plot_options['stacked'] = True
-            plot_options['alpha'] = alpha
             plot_options['edgecolor'] = 'none'                
         
         return plot_options   
@@ -764,7 +800,7 @@ class DataBaseGUI(QtGui.QMainWindow):
             
         # fill the GUI table
         row = 0
-        while row < min(max_rows,len(df.index)-1):
+        while row <= min(max_rows-1,len(df.index)-1):
             table.setRowCount(row+1)
             for col in range(len(df.columns)):                
                 table.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
