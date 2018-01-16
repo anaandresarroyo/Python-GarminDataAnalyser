@@ -8,13 +8,24 @@ import pandas as pd
 import os
 from fitparse import FitFile
 
+#current_gear = {
+#                'cycling':'Trek FX2 Hybrid Bike', # Ana
+#                'running':'Nike Black Sneakers',
+#                'training':'Nike Blue Sneakers',
+#                'walking':'Decathlon Hiking Shoes',
+#                }
+#                
 current_gear = {
-                'cycling':'Trek FX2 Hybrid Bike', # Ana
-#                'cycling':'Genesis Day One Bike', # John
-                'running':'Nike Black Sneakers',
-                'training':'Nike Blue Sneakers',
-                'walking':'Decathlon Hiking Shoes',
+                'cycling':'Genesis Day One Bike', # John
                 }
+                
+#current_gear = {
+#                'cycling':'Unknown Bike', # Jason
+#                'running':'Unknown Running Sneakers',
+#                'training':'Unknown Training Sneakers',
+#                'walking':'Unknown Walking Shoes',
+#                }
+                
 activity_type = {'cycling':'Transportation',
                 'running':'Training',
                 'training':'Fitness',
@@ -71,29 +82,38 @@ def FitToDataFrame(file_path, desired_message='record', verbose=True):
 
 if __name__ == '__main__':
     # TODO: ask the user for the directories
+    existing_database_path = False
 
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107.csv'
-    # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
-    # Directory to save .csv files in
-    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
-
-#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171118.csv'
-#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208.csv'
+#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107-4.csv'
+#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180112.csv'
 #    # Directory to read .fit files from
-#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
 #    # Directory to save .csv files in
-#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
+#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
+
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208-1.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-180115.csv'
+    # Directory to read .fit files from
+    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+    # Directory to save .csv files in
+    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
+
+#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-171118.csv'
+#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-180115.csv'
+#    # Directory to read .fit files from
+#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Jason/fit new/'
+#    # Directory to save .csv files in
+#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Jason/csv/'
         
-    df_database = pd.read_csv(existing_database_path)
+    if existing_database_path:
+        df_database = pd.read_csv(existing_database_path)
     
     for ifn, file_name in enumerate(os.listdir(fit_path_read)):   
         
         if 'df_database' in locals():
             # Check wether this file is already in the database
-            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
-#            mask = df_database['file_name'] == file_name[:-4] # John
+#            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
+            mask = df_database['file_name'] == file_name[:-4] # John
             mask = mask.any()
         else:
             mask = False
@@ -149,9 +169,11 @@ if __name__ == '__main__':
             except:
                 print "No GPS data."
             # Add the timezone offset in hours
-            df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False)           
-            df_session['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp'] # Ana
-#            df_session['timezone'] = df_activity.loc[0,'timestamp']-df_activity.loc[0,'timestamp'] # John
+            df_activity = FitToDataFrame(file_path, desired_message='activity', verbose=False) 
+            if 'local_timestamp' in df_activity.columns:
+                df_session['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp']
+            else:
+                df_session['timezone'] = df_activity.loc[0,'timestamp']-df_activity.loc[0,'timestamp']
     
             if 'df_database' in locals():
                 # Add row to the database
@@ -182,11 +204,20 @@ if __name__ == '__main__':
                            'timezone', 
                            'file_name',
                            'start_time',
+                           'total_ascent',
+                           'total_descent',
                            ]
                            
+        # Do not save "unknown" columns
+        known_columns = []
+        for column in df_database.columns:
+            if not "unknown" in column:
+                known_columns.append(column)
+                
         # Find intersection between desired_columns and columns in the database
-        # Order intersection based on the order of desired_columns                                      
-        saving_columns = sorted(set(desired_columns) & set(df_database.columns), key = desired_columns.index)
+        # Order intersection based on the order of desired_columns  
+#        saving_columns = known_columns                                    
+        saving_columns = sorted(set(desired_columns) & set(known_columns), key = desired_columns.index)
         
         # Save the database to a .csv file
         df_database.to_csv(new_database_path, sep=',', header=True, index=False,

@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Ana's GPS DataBase</string>
+   <string>Ana's DataBase</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -30,6 +30,17 @@
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <layout class="QGridLayout" name="gridLayout_18">
+          <item row="0" column="1">
+           <widget class="QDateEdit" name="StartDateEdit">
+            <property name="date">
+             <date>
+              <year>2017</year>
+              <month>1</month>
+              <day>1</day>
+             </date>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="3">
            <widget class="QDateEdit" name="EndDateEdit">
             <property name="date">
@@ -67,17 +78,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDateEdit" name="StartDateEdit">
-            <property name="date">
-             <date>
-              <year>2017</year>
-              <month>1</month>
-              <day>1</day>
-             </date>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -103,9 +103,9 @@
         <item>
          <widget class="QTabWidget" name="DatabaseTabsWidget">
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
-          <widget class="QWidget" name="tab_4">
+          <widget class="QWidget" name="DatabaseTab">
            <attribute name="title">
             <string>Database</string>
            </attribute>
@@ -262,204 +262,250 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_3">
+          <widget class="QWidget" name="FiltersTab">
            <attribute name="title">
             <string>Filters</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
+           <layout class="QVBoxLayout" name="verticalLayout_14">
             <item>
-             <layout class="QGridLayout" name="gridLayout_3">
-              <item row="1" column="0">
-               <widget class="QListWidget" name="SportsListWidget">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
-                </property>
-                <property name="horizontalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QListWidget" name="GearListWidget">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
-                </property>
-                <property name="horizontalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QListWidget" name="ActivitiesListWidget">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
-                </property>
-                <property name="horizontalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="ActivitiesLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Activities:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="SportsLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Sports:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLabel" name="GearLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Gear:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="Line" name="line_2">
+             <widget class="QSplitter" name="SummarySplitter_2">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Vertical</enum>
               </property>
+              <widget class="QFrame" name="frame_3">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_15">
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_3">
+                  <item row="1" column="0">
+                   <widget class="QListWidget" name="SportsListWidget">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="horizontalScrollBarPolicy">
+                     <enum>Qt::ScrollBarAsNeeded</enum>
+                    </property>
+                    <property name="selectionMode">
+                     <enum>QAbstractItemView::ExtendedSelection</enum>
+                    </property>
+                    <property name="horizontalScrollMode">
+                     <enum>QAbstractItemView::ScrollPerPixel</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QListWidget" name="GearListWidget">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="horizontalScrollBarPolicy">
+                     <enum>Qt::ScrollBarAsNeeded</enum>
+                    </property>
+                    <property name="selectionMode">
+                     <enum>QAbstractItemView::ExtendedSelection</enum>
+                    </property>
+                    <property name="horizontalScrollMode">
+                     <enum>QAbstractItemView::ScrollPerPixel</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QListWidget" name="ActivitiesListWidget">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="horizontalScrollBarPolicy">
+                     <enum>Qt::ScrollBarAsNeeded</enum>
+                    </property>
+                    <property name="selectionMode">
+                     <enum>QAbstractItemView::ExtendedSelection</enum>
+                    </property>
+                    <property name="horizontalScrollMode">
+                     <enum>QAbstractItemView::ScrollPerPixel</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QLabel" name="ActivitiesLabel">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Activities:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="SportsLabel">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Sports:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QLabel" name="GearLabel">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Gear:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QFrame" name="frame_4">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>300</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_18">
+                <item>
+                 <layout class="QVBoxLayout" name="PlotSummaryWidgetContainer_2">
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetMinimumSize</enum>
+                  </property>
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_7">
+                    <item row="2" column="2">
+                     <widget class="QLabel" name="EndLocationLabel">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>End Location:</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="2">
+                     <widget class="QListWidget" name="EndLocationListWidget">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAsNeeded</enum>
+                      </property>
+                      <property name="selectionMode">
+                       <enum>QAbstractItemView::ExtendedSelection</enum>
+                      </property>
+                      <property name="horizontalScrollMode">
+                       <enum>QAbstractItemView::ScrollPerPixel</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="StartLocationLabel">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Start Location:</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QListWidget" name="StartLocationListWidget">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAsNeeded</enum>
+                      </property>
+                      <property name="selectionMode">
+                       <enum>QAbstractItemView::ExtendedSelection</enum>
+                      </property>
+                      <property name="horizontalScrollMode">
+                       <enum>QAbstractItemView::ScrollPerPixel</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="LocationComboBox"/>
+                </item>
+               </layout>
+              </widget>
              </widget>
             </item>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_7">
-              <item row="2" column="2">
-               <widget class="QLabel" name="EndLocationLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>End Location:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <widget class="QListWidget" name="EndLocationListWidget">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
-                </property>
-                <property name="horizontalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="StartLocationLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Start Location:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QListWidget" name="StartLocationListWidget">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::ExtendedSelection</enum>
-                </property>
-                <property name="horizontalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
            </layout>
+           <zorder>widget_2</zorder>
+           <zorder>widget_3</zorder>
+           <zorder></zorder>
+           <zorder>SummarySplitter_2</zorder>
           </widget>
-          <widget class="QWidget" name="tab_5">
+          <widget class="QWidget" name="PlotOptionsTab">
            <attribute name="title">
             <string>Plot Options</string>
            </attribute>
@@ -475,7 +521,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Update database units</string>
+                 <string>Update units</string>
                 </property>
                </widget>
               </item>
@@ -488,7 +534,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Set database units to SI</string>
+                 <string>Set units to SI</string>
                 </property>
                </widget>
               </item>
@@ -568,7 +614,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Time: </string>
+                   <string>Elapsed time: </string>
                   </property>
                  </widget>
                 </item>
@@ -893,26 +939,8 @@
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_8">
-              <item row="2" column="0">
-               <widget class="QLabel" name="LegendLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Legend variable: </string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="LegendVariableComboBox">
+              <item row="1" column="1">
+               <widget class="QComboBox" name="CMapComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -932,6 +960,60 @@
                 </property>
                 <property name="duplicatesEnabled">
                  <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="StartTimeLabel_8">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Transparency:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="LegendLabel_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Legend location: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="LegendLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Legend variable: </string>
                 </property>
                </widget>
               </item>
@@ -976,26 +1058,8 @@
                 </item>
                </layout>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="LegendLabel_2">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Legend location: </string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="CMapComboBox">
+              <item row="2" column="1">
+               <widget class="QComboBox" name="LegendVariableComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1015,24 +1079,6 @@
                 </property>
                 <property name="duplicatesEnabled">
                  <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="StartTimeLabel_8">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Transparency:</string>
                 </property>
                </widget>
               </item>
@@ -1072,6 +1118,33 @@
                 </property>
                </widget>
               </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="LegendLabel_3">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Plot title: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLineEdit" name="PlotTitleTextWidget">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -1081,6 +1154,9 @@
        </layout>
       </widget>
       <widget class="QTabWidget" name="PlotTabsWidget">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -1099,9 +1175,9 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
-       <widget class="QWidget" name="Summary">
+       <widget class="QWidget" name="SummaryTab">
         <attribute name="title">
          <string>Summary</string>
         </attribute>
@@ -1136,21 +1212,19 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0">
+                 <item row="2" column="0">
                   <layout class="QGridLayout" name="gridLayout_10">
-                   <item row="1" column="1">
-                    <widget class="QComboBox" name="SummaryQuantityComboBox">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_5">
+                     <property name="text">
+                      <string>Measure: </string>
                      </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>300</width>
-                       <height>0</height>
-                      </size>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_3">
+                     <property name="text">
+                      <string>Quantity: </string>
                      </property>
                     </widget>
                    </item>
@@ -1167,54 +1241,8 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
-                    <widget class="QComboBox" name="SummaryCategory2ComboBox"/>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="label_2">
-                     <property name="text">
-                      <string>Category 2: </string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_3">
-                     <property name="text">
-                      <string>Quantity: </string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="2" column="1">
                     <widget class="QComboBox" name="SummaryCategory1ComboBox"/>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_5">
-                     <property name="text">
-                      <string>Measure: </string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QLabel" name="label_4">
-                     <property name="text">
-                      <string>Plot kind: </string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="1">
-                    <widget class="QComboBox" name="SummaryKindComboBox">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>8</pointsize>
-                      </font>
-                     </property>
-                    </widget>
                    </item>
                    <item row="0" column="1">
                     <widget class="QComboBox" name="SummaryMeasureComboBox">
@@ -1229,6 +1257,98 @@
                        <width>300</width>
                        <height>0</height>
                       </size>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QComboBox" name="SummaryQuantityComboBox">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>300</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QComboBox" name="SummaryCategory2ComboBox"/>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_2">
+                     <property name="text">
+                      <string>Category 2: </string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="2">
+                    <widget class="QLabel" name="label_7">
+                     <property name="text">
+                      <string>Stacked: </string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="3">
+                    <widget class="QComboBox" name="SummaryStackedComboBox">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>8</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLabel" name="label_6">
+                     <property name="text">
+                      <string>Sort by: </string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="3">
+                    <widget class="QComboBox" name="SummarySortComboBox">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>8</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="2">
+                    <widget class="QLabel" name="label_4">
+                     <property name="text">
+                      <string>Plot kind: </string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="3">
+                    <widget class="QComboBox" name="SummaryKindComboBox">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>8</pointsize>
+                      </font>
                      </property>
                     </widget>
                    </item>
@@ -1356,7 +1476,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="Scatter">
+       <widget class="QWidget" name="ScatterTab">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -1464,16 +1584,63 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="Histogram">
+       <widget class="QWidget" name="HistogramTab">
         <attribute name="title">
          <string>Histogram</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
-          <layout class="QGridLayout" name="gridLayout_20">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetDefaultConstraint</enum>
-           </property>
+          <layout class="QGridLayout" name="gridLayout_39">
+           <item row="0" column="4">
+            <widget class="QComboBox" name="HistYComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QComboBox" name="HistMeasureComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="XLabel1_15">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Y Axis: </string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="2">
             <widget class="QComboBox" name="HistXComboBox">
              <property name="sizePolicy">
@@ -1486,6 +1653,71 @@
               <font>
                <pointsize>8</pointsize>
               </font>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QComboBox" name="HistFrequencyComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLabel" name="XLabel1_14">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Measure: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="XLabel1_13">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Frequency: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="HistogramPushButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Update histogram plot</string>
              </property>
             </widget>
            </item>
@@ -1507,16 +1739,13 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="HistogramPushButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="HistogramBinsSheckBox">
              <property name="text">
-              <string>Update histogram plot</string>
+              <string>Automatic bins</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -1527,7 +1756,10 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="Map">
+       <widget class="QWidget" name="MapTab">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <attribute name="title">
          <string>Map</string>
         </attribute>
@@ -1638,7 +1870,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="Traces">
+       <widget class="QWidget" name="TracesTab">
         <attribute name="title">
          <string>Traces</string>
         </attribute>
@@ -1873,6 +2105,21 @@
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="2">
+            <widget class="QDoubleSpinBox" name="StartTimeDoubleSpinBox">
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="maximum">
+              <double>10000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QLabel" name="StartTimeLabel">
              <property name="sizePolicy">
@@ -1909,21 +2156,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QDoubleSpinBox" name="StartTimeDoubleSpinBox">
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="maximum">
-              <double>10000000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="4">
             <widget class="QDoubleSpinBox" name="EndTimeDoubleSpinBox">
              <property name="font">
@@ -1942,7 +2174,7 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="0" column="5">
             <widget class="QPushButton" name="PlotTracePushButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -1967,14 +2199,23 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="Records">
+       <widget class="QWidget" name="RecordsTab">
         <attribute name="title">
          <string>Records</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
           <layout class="QGridLayout" name="gridLayout_15">
-           <item row="0" column="0">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="RecordsPathWidget">
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
             <widget class="QPushButton" name="NewRecordsPathPushButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -1992,8 +2233,26 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="NewLocationsPathPushButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string> Select New Locations File: </string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="RecordsPathWidget">
+            <widget class="QLineEdit" name="LocationsPathWidget">
              <property name="font">
               <font>
                <pointsize>8</pointsize>
