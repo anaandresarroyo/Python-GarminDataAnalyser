@@ -39,7 +39,7 @@ class DatabaseGUI(QtGui.QMainWindow):
         
         # Set initial tabs to display
         self.DatabaseTabsWidget.setCurrentIndex(2)   
-        self.PlotTabsWidget.setCurrentIndex(1)
+        self.PlotTabsWidget.setCurrentIndex(0)
         self.SummaryTabsWidget.setCurrentIndex(0)
         
         # Connect GUI elements
@@ -77,7 +77,7 @@ class DatabaseGUI(QtGui.QMainWindow):
                                 'kind_summary':[self.SummaryKindComboBox],
                                 'stacked':[self.SummaryStackedComboBox],
                                 'measure':[self.SummaryMeasureComboBox, self.HistMeasureComboBox],
-                                'frequency':[self.HistFrequencyComboBox],
+                                'frequency':[self.HistFrequencyComboBox, self.SummaryFrequencyComboBox],
                                 'sort':[self.SummarySortComboBox],
                                 'location':[self.LocationComboBox]}
 
@@ -624,17 +624,17 @@ class DatabaseGUI(QtGui.QMainWindow):
         elif y == 'counts':
             normed = False
 
-        if self.HistogramBinsSheckBox.checkState():
-            bins = 'auto'
-            histogram = True
-        else:
-            try:
-                bins = np.linspace(min(df[x]), max(df[x]), 30)
-                histogram = True
-            except:
-                # TODO: try/except is a temporary solution: fix it
-                print "Cannot generate histogram.\n"
-                histogram = False
+#        if self.HistogramBinsSheckBox.checkState():
+#            bins = 'auto'
+#            histogram = True
+#        else:
+#            try:
+#                bins = np.linspace(min(df[x]), max(df[x]), 30)
+#                histogram = True
+#            except:
+#                # TODO: try/except is a temporary solution: fix it
+#                print "Cannot generate histogram.\n"
+#                histogram = False
             
         colour_dict = self.generate_colours(df, legend, cmap_name)
         for label in np.sort(colour_dict.keys()):                
@@ -651,6 +651,22 @@ class DatabaseGUI(QtGui.QMainWindow):
                     x_data = df_hist.set_index(self.column_date_local).resample(frequency).last().reset_index()
             else:
                 x_data = df_hist
+#            self.temp = x_data.dropna()
+            
+            if self.HistogramNanCheckBox.checkState():
+                x_data = x_data.fillna(0)
+                
+            if self.HistogramBinsCheckBox.checkState():
+                bins = 'auto'
+                histogram = True
+            else:
+                try:
+                    bins = np.linspace(min(x_data[x]), max(x_data[x]), 30)
+                    histogram = True
+                except:
+                    # TODO: try/except is a temporary solution: fix it
+                    print "Cannot generate histogram.\n"
+                    histogram = False
             
             if len(x_data) > 1:                
                 if histogram:
@@ -664,11 +680,11 @@ class DatabaseGUI(QtGui.QMainWindow):
                             
         
         xlabel = x.replace('_',' ')
-        if frequency != 'all':
-            xlabel = frequency + ' ' + measure + ' ' + xlabel
         if x in self.settings.units.keys():
             if self.settings.units[x]:
                 xlabel = xlabel + ' (' + self.settings.units[x] + ')'        
+        if frequency != 'all':
+            xlabel = measure + ' ' + xlabel + ' / ' + frequency
         
         if histogram:
             ax.set_xlabel(xlabel)
@@ -721,6 +737,7 @@ class DatabaseGUI(QtGui.QMainWindow):
         quantity = self.SummaryQuantityComboBox.currentText()
         category1 = self.SummaryCategory1ComboBox.currentText()
         category2 = self.SummaryCategory2ComboBox.currentText()
+        frequency = self.SummaryFrequencyComboBox.currentText()
         kind = self.SummaryKindComboBox.currentText()
         cmap_name = self.CMapComboBox.currentText()     
         alpha = self.TransparencyDoubleSpinBox.value()        
@@ -756,7 +773,12 @@ class DatabaseGUI(QtGui.QMainWindow):
         else:
             df_summary_plot = self.df_summary_double[quantity].unstack(level=1).loc[sorted_indices]
             self.fill_table(self.df_summary_double[quantity].reset_index(), self.SummaryDoubleTableWidget)
-        
+
+        if frequency != 'all':  
+            timedelta = self.df_selected[self.column_date_local].max() - self.df_selected[self.column_date_local].min()
+            # this is not very precise but it should be enough to get an idea
+            df_summary_plot = df_summary_plot / timedelta.days * self.settings.timedelta_factors[frequency]            
+            
         self.figure_summary.clear()
         ax = self.figure_summary.add_subplot(111)
 
@@ -772,6 +794,8 @@ class DatabaseGUI(QtGui.QMainWindow):
         if quantity in self.settings.units.keys():
             if self.settings.units[quantity]:
                 label_quantity = label_quantity + ' (' + self.settings.units[quantity] + ')' 
+        if frequency != 'all':
+            label_quantity = label_quantity + ' / ' + frequency
 
         label_category1 = category1.replace('_',' ')
         if category1 in self.settings.units.keys():
@@ -1031,7 +1055,11 @@ class DatabaseGUI(QtGui.QMainWindow):
 #        gmap = gmplot.GoogleMapPlotter(46.36, 14.09, 11) # Lake Bled        
         
         for key in self.map_data:             
-#            print self.map_data[key].head()
+            color = '#%02x%02x%02x' % (self.map_colours[key][0]*255, 
+                                       self.map_colours[key][1]*255, 
+                                       self.map_colours[key][2]*255),
+            if self.MapBlackCheckBox.checkState():
+                color = 'k'
             
             # Add a line plot to the gmap object which will be save to an .html file
             # Use line instead of scatter plot for faster speed and smaller file size
@@ -1040,8 +1068,7 @@ class DatabaseGUI(QtGui.QMainWindow):
             # so if there are nan, e.g. metro, separate the plots into several line plots
             gmap.plot(self.map_data[key]['position_lat'], 
                       self.map_data[key]['position_long'], 
-#                      color=self.map_colours[key],
-                      color='k', # TODO: it doesn't like RGB values, fix it
+                      color=color,                       
                       edge_width=3,
                       )
 #            gmap.scatter(self.map_data[key]['position_lat'][0:-1:5], 
@@ -1050,10 +1077,14 @@ class DatabaseGUI(QtGui.QMainWindow):
         
         file_path = self.MapFilePathWidget.text()
         file_path = QtGui.QFileDialog.getSaveFileName(self, 'Choose .html file to save map.', file_path, "HTML files (*.html)")
-        self.MapFilePathWidget.clear()
-        self.MapFilePathWidget.insert(file_path)        
-        gmap.draw(file_path)
-        print "Finished HTML map!"
+        if len(file_path):
+            self.MapFilePathWidget.clear()
+            self.MapFilePathWidget.insert(file_path)        
+            gmap.draw(file_path)
+            print "Finished HTML map!\n"
+        else:
+            print "WARNING: No .html path chosen. Choose another path to save the map.\n"  
+        
             
     def select_and_plot_trace(self):
         # TODO: threading

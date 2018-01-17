@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 16 11:48:06 2018
-
-@author: Ana Andres
+@author: Ana Andres-Arroyo
+Settings for DatabaseRead.py
 """
 import os
 
@@ -18,6 +17,8 @@ class DatabaseSettings():
         self.RecordsTab = True
         
         self.filters = None
+        
+###############################################################################
         
         # if a dataframe column is not listed here the figures will not display units
         self.units = {'elapsed_time':'s',
@@ -59,8 +60,7 @@ class DatabaseSettings():
                       'total_calories':'kcal',
                         
                       'Amount':'GBP',
-                      'Balance':'GBP',
-                      }
+                      'Balance':'GBP'}
                       
 ###############################################################################
                       
@@ -68,34 +68,37 @@ class DatabaseSettings():
         self.units_SI = {'elapsed_time':'s',
                          'position':'semicircles',                         
                          'distance':'m',
-                         'speed':'m/s',
-                         }  
+                         'speed':'m/s'}  
                          
         # unit options and conversion factors from SI units
         # multiply SI units by these factors to get these units
         # divide these units by these factors to get SI units
         time_factors = {'s':1,
                         'min':1./60,
-                        'h':1./60/60,
-                        }
+                        'h':1./60/60}
+                        
         position_factors = {'semicircles':1,
-                            'deg':0.00000008381903171539306640625, # 180/2**31
-                            }
+                            'deg':0.00000008381903171539306640625} # 180/2**31
+                            
         distance_factors = {'m':1,
                             'km':1e-3,
-                            'miles':0.000621371,
-                               }
+                            'miles':0.000621371}
+                            
         speed_factors = {'m/s':1,
                          'km/h':3.6,
                          'mph':2.23694,
                          'min/km':3.6,
-                         'min/mile':2.23694,
-                         }
+                         'min/mile':2.23694}
                             
         self.unit_factors = {'elapsed_time':time_factors,
                              'position':position_factors,
                              'distance':distance_factors,
                              'speed':speed_factors}
+                             
+        self.timedelta_factors = {'D':1,
+                                  'W':7,
+                                  'M':365/12, # this is not very precise but it should be enough to get an idea
+                                  'Y':365}
         
 ###############################################################################
         
@@ -116,7 +119,7 @@ class DatabaseSettings():
                                     'viridis','plasma','inferno',
                                     'CMRmap',
                                     'PiYG','PuOr','RdBu','RdYlBu','RdYlGn',
-                                    'Set1','Accent']
+                                    'Set1','Accent','Paired']
                                     
         self.default['kind_trace'] = 'line'
         self.options['kind_trace'] = ['line','scatter']
@@ -195,7 +198,9 @@ class DatabaseSettings():
             self.set_settings_gps()
         elif kind.lower() == 'expenses':
             self.set_settings_expenses()
-            
+
+###############################################################################            
+
     def set_settings_gps(self):
         self.database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/'
         self.records_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
@@ -220,6 +225,8 @@ class DatabaseSettings():
         self.trace_default['top_y'] = 'speed'
         self.trace_default['bottom_x'] = 'position_long'
         self.trace_default['bottom_y'] = 'position_lat' 
+        
+###############################################################################
         
     def set_settings_expenses(self):
         self.database_path = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/Contabilidad/'
