@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from PyQt4 import QtGui, QtCore, uic
 
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -20,12 +21,63 @@ import DatabaseSettings
 
 # matplotlib.rcParams.update({'font.size': 50})
 
+def fill_table(df, table, max_rows=50):   
+    # TODO: threading
+
+    # read indices of currently selected rows
+    selected_indexes = table.selectedIndexes()
+    selected_rows = []
+    for item in selected_indexes:
+        selected_rows.append(item.row())
+    
+    # initialise the GUI table columns
+    table.clear()
+    # disable sorting to solve issues with repopulating
+    table.setSortingEnabled(False)        
+    
+    number_of_rows = min(max_rows, len(df.index))
+    table.setRowCount(number_of_rows)
+    table.setColumnCount(len(df.columns))
+    table.setHorizontalHeaderLabels(df.columns)
+                
+    # fill the GUI table       
+    for col in range(len(df.columns)):
+        for row in range(number_of_rows):
+            data = df.iloc[row,col]  
+            item = QtGui.QTableWidgetItem()
+            if isinstance(data, (float, np.float64)):
+                # pad the floats so they'll be sorted correctly
+                formatted_data = '{:.3f}'.format(data).rjust(15)
+                item.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+            elif isinstance(data, (int, np.int64)):
+                # pad the integers so they'll be sorted correctly
+                formatted_data = '{:d}'.format(data).rjust(15)
+                item.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+            else:
+                formatted_data = str(data)
+            item.setData(QtCore.Qt.EditRole, formatted_data)
+            table.setItem(row, col, item)
+            table.resizeColumnToContents(col)
+
+    # enable table sorting by columns
+    table.setSortingEnabled(True)
+    
+    # temporarily set MultiSelection
+    table.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+    # reselect the prevously selected rows
+    # TODO: reselect by filename instead of table row number
+    for row in selected_rows:
+        table.selectRow(row)            
+    # revert MultiSelection to ExtendedSelection
+    table.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+
 class DatabaseGUI(QtGui.QMainWindow):
     """
     GUI which analyses and plots GPS and fitness data.
     """
-    def __init__(self, parent=None, kind='gps'):
-        super(self.__class__, self).__init__(parent)
+    def __init__(self, kind='gps', file_path=None):
+        super(self.__class__, self).__init__()
+
         # Load GUI design
         ui_file = 'DatabaseGUIdesign.ui'
         uic.loadUi(ui_file, self)    
@@ -102,7 +154,8 @@ class DatabaseGUI(QtGui.QMainWindow):
                                 'start_location':self.StartLocationListWidget,
                                 'end_location':self.EndLocationListWidget,
                                 'Account':self.StartLocationListWidget,
-                                'Category':self.EndLocationListWidget}        
+                                'Category':self.EndLocationListWidget,
+                                'category':self.StartLocationListWidget}        
                                 
         self.filters_labels = {'sport':self.SportsLabel,
                                'activity':self.ActivitiesLabel,
@@ -110,7 +163,8 @@ class DatabaseGUI(QtGui.QMainWindow):
                                'start_location':self.StartLocationLabel,
                                'end_location':self.EndLocationLabel,
                                'Account':self.StartLocationLabel,
-                               'Category':self.EndLocationLabel}  
+                               'Category':self.EndLocationLabel,
+                               'category':self.StartLocationLabel}  
              
 
         # TODO: create function for making the figures
@@ -148,7 +202,7 @@ class DatabaseGUI(QtGui.QMainWindow):
         self.ReadDatabasePathWidget.insert(self.settings.database_path)
         
         # Read file      
-        self.new_database()
+        self.new_database(file_path=file_path)
         
     def populate_combobox(self, items_list, item_default, combobox_list):
         # populate comboboxes
@@ -160,7 +214,7 @@ class DatabaseGUI(QtGui.QMainWindow):
                 index = combobox.findText(item_default)
             else:
                 index = 0                
-            combobox.setCurrentIndex(index)                               
+            combobox.setCurrentIndex(index)                       
                                
 
     def populate_comboboxes(self):    
@@ -197,13 +251,19 @@ class DatabaseGUI(QtGui.QMainWindow):
             self.populate_combobox([self.settings.trace_default[key]], 
                                    self.settings.trace_default[key], 
                                    self.trace_comboboxes[key])
+        
+        trace_modes = ['Single sport', 'Multi sport']
+        self.populate_combobox(trace_modes,
+                               'Single sport',
+                               [self.TraceModeComboBox])
                           
 
-    def new_database(self):
+    def new_database(self, file_path=None):
         """Select a new Garmin DataBase CSV file and locations file.""" 
-        
-        file_path = self.ReadDatabasePathWidget.text()
-        file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
+        if not file_path:
+            file_path = self.ReadDatabasePathWidget.text()
+            file_path = QtGui.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path, "CSV files (*.csv)")
+            
         if len(file_path):
             self.file_path = file_path
             self.ReadDatabasePathWidget.clear()
@@ -223,7 +283,7 @@ class DatabaseGUI(QtGui.QMainWindow):
                 self.records_path = self.settings.records_path
                 self.RecordsPathWidget.insert(self.records_path)
             if self.MapTab.isEnabled():
-                self.MapFilePathWidget.insert(self.settings.map_path)                
+                self.MapFilePathWidget.insert(self.settings.map_path)     
 
             self.populate_dates()
             self.populate_comboboxes()            
@@ -263,10 +323,17 @@ class DatabaseGUI(QtGui.QMainWindow):
         elif 'Date' in self.df.columns:
             self.column_date = 'Date'
             self.settings = DatabaseSettings.DatabaseSettings(kind='expenses')
+        elif 'meeting_time' in self.df.columns:
+            self.column_date = 'meeting_time'
+            self.settings = DatabaseSettings.DatabaseSettings(kind='late')
         else:
             self.column_date = False        
         
-        # reformat the date column        
+        # reformat the file_name column
+        if 'file_name' in self.df.columns:
+            self.df['file_name'] = self.df['file_name'].apply(str)
+            
+        # reformat the date column    
         if self.column_date in self.df.columns:
             self.df[self.column_date] = pd.to_datetime(self.df[self.column_date], dayfirst=True)        
                 
@@ -530,13 +597,13 @@ class DatabaseGUI(QtGui.QMainWindow):
     def filter_and_plot_database(self):
         self.filter_database()
         self.DatabaseSizeSpinBox.setValue(len(self.df_selected))
-        self.fill_table(self.df_selected, self.Table1Widget, self.DatabaseRowsSpinBox.value())
+        fill_table(self.df_selected, self.Table1Widget, self.DatabaseRowsSpinBox.value())
         
         print "Updating figures (summary, scatter, histogram, map)..."
         self.plot_summary()
         self.plot_scatter()
         self.plot_histogram()        
-        if self.MapCheckBox.checkState():
+        if self.MapCheckBox.checkState() and self.MapCheckBox.isEnabled():
             self.generate_map()
         print "Figures updated!\n"
         
@@ -651,7 +718,6 @@ class DatabaseGUI(QtGui.QMainWindow):
                     x_data = df_hist.set_index(self.column_date_local).resample(frequency).last().reset_index()
             else:
                 x_data = df_hist
-#            self.temp = x_data.dropna()
             
             if self.HistogramNanCheckBox.checkState():
                 x_data = x_data.fillna(0)
@@ -766,13 +832,12 @@ class DatabaseGUI(QtGui.QMainWindow):
         if self.SummarySortComboBox.currentText() == 'quantity':
             sorted_indices = self.df_summary_single.sort_values(quantity).index
             
-            
-        self.fill_table(self.df_summary_single[quantity].reset_index(), self.SummarySingleTableWidget)
+        fill_table(self.df_summary_single[quantity].reset_index(), self.SummarySingleTableWidget)
         if category1 == category2:
             df_summary_plot = self.df_summary_single[quantity].loc[sorted_indices]
         else:
             df_summary_plot = self.df_summary_double[quantity].unstack(level=1).loc[sorted_indices]
-            self.fill_table(self.df_summary_double[quantity].reset_index(), self.SummaryDoubleTableWidget)
+            fill_table(self.df_summary_double[quantity].reset_index(), self.SummaryDoubleTableWidget)
 
         if frequency != 'all':  
             timedelta = self.df_selected[self.column_date_local].max() - self.df_selected[self.column_date_local].min()
@@ -812,45 +877,6 @@ class DatabaseGUI(QtGui.QMainWindow):
         ax.set_title(self.PlotTitleTextWidget.text())
         self.canvas_summary.draw() 
                 
-        
-    def fill_table(self, df, table, max_rows=50):   
-        # TODO: threading
-        # TODO: display nan as blank cell
-    
-        # read indices of currently selected rows
-        selected_indexes = table.selectedIndexes()
-        selected_rows = []
-        for item in selected_indexes:
-            selected_rows.append(item.row())
-        
-        # initialise the GUI table columns
-        table.clear()
-        # disable sorting to solve issues with repopulating
-        table.setSortingEnabled(False)        
-        
-        table.setColumnCount(len(df.columns))
-        table.setHorizontalHeaderLabels(df.columns)
-            
-        # fill the GUI table
-        row = 0
-        while row <= min(max_rows-1,len(df.index)-1):
-            table.setRowCount(row+1)
-            for col in range(len(df.columns)):                
-                table.setItem(row,col,QtGui.QTableWidgetItem(str(df.iloc[row,col])))
-                table.resizeColumnToContents(col)
-            row = row + 1
-        # enable table sorting by columns
-        table.setSortingEnabled(True)
-        # TODO: fix number sorting as it currently does: 1, 13, 24, 33, 356, 4, ...
-        
-        # temporarily set MultiSelection
-        table.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
-        # reselect the prevously selected rows
-        # TODO: reselect by filename instead of table row number
-        for row in selected_rows:
-            table.selectRow(row)            
-        # revert MultiSelection to ExtendedSelection
-        table.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     
     def read_table(self, table, rows=[]):
         # read GUI table size
@@ -881,8 +907,8 @@ class DatabaseGUI(QtGui.QMainWindow):
             elif 'position' in column_name:
                 df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
             # change strings to numbers
-            elif column_name != 'file_name':
-                df[column_name] = pd.to_numeric(df[column_name], errors='ignore')        
+#            elif column_name != 'file_name':
+#                df[column_name] = pd.to_numeric(df[column_name], errors='ignore')        
         
         return df            
 
@@ -965,9 +991,9 @@ class DatabaseGUI(QtGui.QMainWindow):
         self.df_trace = self.read_selected_table_rows(self.Table1Widget)
         print 'Saving record files...'
         for index in self.df_trace.index:
-            file_number = self.df_trace.loc[index,'file_name']
+            file_name = self.df_trace.loc[index,'file_name']
             # read records file
-            file_path = self.records_path + str(file_number) + '_record.csv'
+            file_path = self.records_path + str(file_name) + '_record.csv'
             df = self.read_records(file_path)
             # crop records by time
             # TODO: crop by database time and not start and end time from the GUI
@@ -995,29 +1021,29 @@ class DatabaseGUI(QtGui.QMainWindow):
         avg_lat = []
         avg_long = []
         for index in self.df_selected.iloc[0:number_of_activities].index:
-            file_number = self.df_selected.loc[index,'file_name']
+            file_name = self.df_selected.loc[index,'file_name']
             
-            file_path = self.records_path + str(file_number) + '_record.csv'
+            file_path = self.records_path + str(file_name) + '_record.csv'
             # read the csv file
             df = self.read_records(file_path)  
             df, self.settings.units = self.convert_units(df, self.settings.units, self.current_units)
             # Extract location information, remove missing data, convert to degrees
-            self.map_data[file_number] = df.loc[:,['position_lat','position_long']].dropna()
-#            self.map_colours[file_number] = 'k'
-            self.map_colours[file_number] = colour_dict[self.df_selected.loc[index,legend]]
+            self.map_data[file_name] = df.loc[:,['position_lat','position_long']].dropna()
+#            self.map_colours[file_name] = 'k'
+            self.map_colours[file_name] = colour_dict[self.df_selected.loc[index,legend]]
             
-            avg_long.append(self.map_data[file_number]['position_long'].mean())
-            avg_lat.append(self.map_data[file_number]['position_lat'].mean())
+            avg_long.append(self.map_data[file_name]['position_long'].mean())
+            avg_lat.append(self.map_data[file_name]['position_lat'].mean())
             
             # TODO: user option: line (faster) or scatter (better if many nan) plot
-            ax.plot(self.map_data[file_number]['position_long'], 
-                    self.map_data[file_number]['position_lat'],
-                    label = file_number,
-                    c=self.map_colours[file_number],
+            ax.plot(self.map_data[file_name]['position_long'], 
+                    self.map_data[file_name]['position_lat'],
+                    label = file_name,
+                    c=self.map_colours[file_name],
                     )     
-#            ax.scatter(self.map_data[file_number]['position_long'], 
-#                       self.map_data[file_number]['position_lat'],
-#                       label = file_number,
+#            ax.scatter(self.map_data[file_name]['position_long'], 
+#                       self.map_data[file_name]['position_lat'],
+#                       label = file_name,
 #                       )     
                 
               
@@ -1108,8 +1134,8 @@ class DatabaseGUI(QtGui.QMainWindow):
             print "WARNING: " + str(len(self.df_trace)) + " trace plots might take a long time!"
             
         for index in self.df_trace.index:
-            file_number = self.df_trace.loc[index,'file_name']
-            file_path = self.records_path + str(file_number) + '_record.csv'
+            file_name = self.df_trace.loc[index,'file_name']
+            file_path = self.records_path + str(file_name) + '_record.csv'
             # read the csv file
             df = self.read_records(file_path)
             # conver to current_units
@@ -1118,10 +1144,10 @@ class DatabaseGUI(QtGui.QMainWindow):
             df = self.select_times(df)
 
             # recalculate mean and max values (heart_rate, speed, ...) and update Table 1
-            self.recalculate_statistics(df,file_number)
+            self.recalculate_statistics(df,file_name)
             
             if index == self.df_trace.index[0]:
-                self.fill_table(df, self.Table2Widget)   
+                fill_table(df, self.Table2Widget)   
 
             x1 = self.TraceTopXComboBox.currentText()
             y1 = self.TraceTopYComboBox.currentText()
@@ -1200,10 +1226,10 @@ class DatabaseGUI(QtGui.QMainWindow):
         print "Finished trace plots!\n"
         
             
-    def recalculate_statistics(self,df,file_number):
+    def recalculate_statistics(self,df,file_name):
         # df is the records dataframe
     
-        row = self.Table1Widget.findItems(str(file_number),QtCore.Qt.MatchExactly)[0].row()
+        row = self.Table1Widget.findItems(str(file_name),QtCore.Qt.MatchExactly)[0].row()
         
         number_of_columns = self.Table1Widget.columnCount()
         column_dict = {}
@@ -1282,7 +1308,7 @@ class DatabaseGUI(QtGui.QMainWindow):
                                           QtGui.QTableWidgetItem(format(value,'.4f')))
         
                    
-def ElapsedTime(timestamp, units_t='sec', mode='start'):    
+def ElapsedTime(timestamp, units_t='sec', mode='start', fixed_timestamp=None):    
     """Calculate the elapsed time from a timestamp pandas Series.
         
     Arguments:
@@ -1293,7 +1319,9 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
     mode : string
         If 'start' calculate the elapsed time between all points of the array and the first point.
         If 'previous' calculate the elapsed time between all points of the array the previous point.
-    
+        If 'fixed' calculate the elapsed time between all points of the array the fixed_timestamp.
+    fixed_timestamp : one timestamp value
+        Fixed timestamp value to be used as a reference to calculate the elapsed time.
     Output:
     elapsed_time: float pandas Series
         Contains the calculated elapsed time in units of units_t
@@ -1309,6 +1337,9 @@ def ElapsedTime(timestamp, units_t='sec', mode='start'):
         origin_time[0] = timestamp[0]
         for i, time in enumerate(timestamp[0:-1]):
             origin_time[i+1] = time
+            # TODO: change to origin_time.append(time)
+    elif mode == 'fixed':
+        origin_time[:] = fixed_timestamp
             
     else:
         raise ValueError('Unable to recognise the mode.')  
@@ -1412,8 +1443,22 @@ def Distance(longitude, latitude, units_gps='semicircles', units_d='m',
 
     return distance
     
+#class QCustomTableWidgetItem (QtGui.QTableWidgetItem):
+#    def __init__ (self, value):
+##        super(QCustomTableWidgetItem, self).__init__(QtCore.QString('%s' % value))
+#        super(QCustomTableWidgetItem, self).__init__(str('%s' % value))
+#
+#    def __lt__ (self, other):
+#        if (isinstance(other, QCustomTableWidgetItem)):
+#            selfDataValue  = float(self.data(QtCore.Qt.EditRole).toString())
+#            otherDataValue = float(other.data(QtCore.Qt.EditRole).toString())
+#            return selfDataValue < otherDataValue
+#        else:
+#            return QtGui.QTableWidgetItem.__lt__(self, other)
+    
 if __name__ == '__main__':
     app = QtGui.QApplication([])
-    gui = DatabaseGUI(kind='gps')
+    file_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180226-1.csv'
+    gui = DatabaseGUI(kind='gps', file_path=file_path)
     gui.show()
     

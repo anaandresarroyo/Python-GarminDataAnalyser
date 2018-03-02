@@ -17,6 +17,7 @@ class DatabaseSettings():
         self.RecordsTab = True
         
         self.filters = None
+        # TODO: fix errors that appear if filters = None
         
 ###############################################################################
         
@@ -60,7 +61,9 @@ class DatabaseSettings():
                       'total_calories':'kcal',
                         
                       'Amount':'GBP',
-                      'Balance':'GBP'}
+                      'Balance':'GBP',
+                      
+                      'delay':'min'}
                       
 ###############################################################################
                       
@@ -153,7 +156,8 @@ class DatabaseSettings():
                                             'Category','Account',
                                             'weekday_name',
                                             'week','month','year',
-                                            'year_week','year_month', 'year_month_day']
+                                            'year_week','year_month', 'year_month_day',
+                                            'category']
                                             
         self.column_default['category2'] = None
         self.column_options['category2'] = self.column_options['category1']
@@ -161,14 +165,16 @@ class DatabaseSettings():
         self.column_default['quantity'] = None
         self.column_options['quantity'] = ['total_distance','total_elapsed_time',
                                            'avg_speed', 'avg_heart_rate',
-                                           'Amount','Balance']
+                                           'Amount','Balance',
+                                           'delay']
                                            
         self.column_default['legend_variable'] = None
         self.column_options['legend_variable'] = ['sport','activity','gear','file_name',
                                                   'weekday_name',
 #                                                  'month', 'year', # TODO: fix error: 'numpy.int64' object is not iterable
                                                   'year_month',
-                                                  'Category','Account']        
+                                                  'Category','Account',
+                                                  'category']        
         
 ###############################################################################
         
@@ -198,6 +204,8 @@ class DatabaseSettings():
             self.set_settings_gps()
         elif kind.lower() == 'expenses':
             self.set_settings_expenses()
+        elif kind.lower() == 'late':
+            self.set_settings_late()
 
 ###############################################################################            
 
@@ -248,4 +256,23 @@ class DatabaseSettings():
         self.numeric_default['scatter_y'] = 'Amount'
         self.numeric_default['histogram_x'] = 'Amount'
 
+    def set_settings_late(self):
+        self.database_path = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana/'
+        
+        self.MapTab = False
+        self.TracesTab = False
+        self.RecordsTab = False
+        
+        self.filters = ['category']
+        
+        self.default['kind_summary'] = 'bar'
+        
+        self.column_default['category1'] = 'category'
+        self.column_default['category2'] = 'category'
+        self.column_default['quantity'] = 'delay'
+        self.column_default['legend_variable'] = 'category'
+        
+        self.numeric_default['scatter_x'] = 'meeting_time'
+        self.numeric_default['scatter_y'] = 'delay'
+        self.numeric_default['histogram_x'] = 'delay'
         

@@ -8,16 +8,16 @@ import pandas as pd
 import os
 from fitparse import FitFile
 
-#current_gear = {
-#                'cycling':'Trek FX2 Hybrid Bike', # Ana
-#                'running':'Nike Black Sneakers',
-#                'training':'Nike Blue Sneakers',
-#                'walking':'Decathlon Hiking Shoes',
-#                }
-#                
 current_gear = {
-                'cycling':'Genesis Day One Bike', # John
+                'cycling':'Trek FX2 Hybrid Bike', # Ana
+                'running':'Nike Black Sneakers',
+                'training':'Unknown',
+                'walking':'Unknown',
                 }
+                
+#current_gear = {
+#                'cycling':'Genesis Day One Bike', # John
+#                }
                 
 #current_gear = {
 #                'cycling':'Unknown Bike', # Jason
@@ -29,7 +29,7 @@ current_gear = {
 activity_type = {'cycling':'Transportation',
                 'running':'Training',
                 'training':'Fitness',
-                'walking':'Recreation',
+                'walking':'Transportation',
                 }
                 
 def FitToDataFrame(file_path, desired_message='record', verbose=True):
@@ -84,19 +84,19 @@ if __name__ == '__main__':
     # TODO: ask the user for the directories
     existing_database_path = False
 
-#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180107-4.csv'
-#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180112.csv'
-#    # Directory to read .fit files from
-#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
-#    # Directory to save .csv files in
-#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
-
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208-1.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-180115.csv'
+    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180226.csv'
+    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180226.csv'
     # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
     # Directory to save .csv files in
-    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
+    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
+
+#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208-1.csv'
+#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-180115.csv'
+#    # Directory to read .fit files from
+#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
+#    # Directory to save .csv files in
+#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
 
 #    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-171118.csv'
 #    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-180115.csv'
@@ -112,8 +112,8 @@ if __name__ == '__main__':
         
         if 'df_database' in locals():
             # Check wether this file is already in the database
-#            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
-            mask = df_database['file_name'] == file_name[:-4] # John
+            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
+#            mask = df_database['file_name'] == file_name[:-4] # John
             mask = mask.any()
         else:
             mask = False
