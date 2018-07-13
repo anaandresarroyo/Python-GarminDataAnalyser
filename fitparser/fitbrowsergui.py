@@ -14,8 +14,8 @@ class FitBrowserGUI(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(FitBrowserGUI, self).__init__(parent)
-        ui_file = 'FitBrowserGUIdesign.ui'
-        uic.loadUi(ui_file, self)
+        ui_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'FitBrowserGUIdesign.ui')
+        uic.loadUi(ui_file_path, self)
 
         self.fit_file = None
         self.message_counter = None
