@@ -107,7 +107,7 @@ def AutoStop(df, mode='std', threshold=15, correction=False):
     for ip in df.index:
         # Calculate the standard deviation in the position from index ip until the end
         df.loc[ip,'position_std'] = np.std(df.loc[ip:,'position'])
-#    df['position_std']=df['position_std']/ElapsedTime(df['timestamp'], units_t='sec', mode='previous')
+#    df['position_std']=df['position_std']/calculate_elapsed_time(df['timestamp'], units_t='sec', mode='previous')
     # Calculate the index at which the user stopped moving
     index_stop = df.index[df['position_std']<=threshold][0]
 #    print df['timestamp'][0]
@@ -307,7 +307,7 @@ if __name__ == '__main__':
 #        df['distance_new'] = np.cumsum(Distance(df['position_long'], df['position_lat'], mode='previous'))
 #        df['position'] = Distance(df['position_long'], df['position_lat'], mode='start', units_d='m')
 #        df['speed_new'] = Distance(df['position_long'], df['position_lat'], mode='previous', units_d='m') \
-#                / ElapsedTime(df['timestamp'], units_t='sec', mode='previous')
+#                / calculate_elapsed_time(df['timestamp'], units_t='sec', mode='previous')
 #        
 #        df = AutoStop(df, threshold=0)
 ##        

@@ -210,10 +210,10 @@ class DatabaseSettings():
 ###############################################################################            
 
     def set_settings_gps(self):
-        self.database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/'
-        self.records_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
-        self.map_path = 'C:/Users/Ana Andres/Dropbox/Dropbox-Ana\Garmin\Ana - maps\mymap.html'
-        self.locations_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Locations.csv'
+        self.database_path = os.path.abspath(os.path.join('data', 'Ana', 'database'))
+        self.records_path = os.path.abspath(os.path.join('data', 'Ana', 'csv'))
+        self.map_path = os.path.abspath(os.path.join('data', 'Ana', 'maps', 'mymap.html'))
+        self.locations_path = os.path.abspath(os.path.join('data', 'Ana', 'database', 'Garmin-Locations.csv'))
         
         self.filters = ['sport','activity','gear']
         
