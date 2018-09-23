@@ -58,7 +58,7 @@ class FitBrowserGUI(QtWidgets.QMainWindow):
         print("Reading message types.")
         for message in self.fit_file.get_messages():
             # Update the message_counter
-            self.message_counter[message.name] += 1
+            self.message_counter[message.name.replace('_', ' ')] += 1
 
         self.Table1Widget.clear()
         self.FileContentsTableWidget.clear()
@@ -96,7 +96,7 @@ class FitBrowserGUI(QtWidgets.QMainWindow):
                 for row, message_data in enumerate(message):
 
                     self.Table1Widget.setRowCount(row + 1)
-                    self.Table1Widget.setItem(row, 0, QtWidgets.QTableWidgetItem(message_data.name))
+                    self.Table1Widget.setItem(row, 0, QtWidgets.QTableWidgetItem(message_data.name.replace('_', ' ')))
                     self.Table1Widget.setItem(row, 1, QtWidgets.QTableWidgetItem(str(message_data.value)))
 
                     if message_data.units:
