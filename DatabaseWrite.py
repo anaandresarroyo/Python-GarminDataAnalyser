@@ -1,227 +1,135 @@
 import pandas as pd
 import os
-from fitparse import FitFile
+import configparser
 
-current_gear = {
-                'cycling':'Trek FX2 Hybrid Bike', # Ana
-                'running':'Nike Black Sneakers',
-                'training':'Unknown',
-                'walking':'Unknown',
-                }
-                
-#current_gear = {
-#                'cycling':'Genesis Day One Bike', # John
-#                }
-                
-#current_gear = {
-#                'cycling':'Unknown Bike', # Jason
-#                'running':'Unknown Running Sneakers',
-#                'training':'Unknown Training Sneakers',
-#                'walking':'Unknown Walking Shoes',
-#                }
-                
-activity_type = {'cycling':'Transportation',
-                'running':'Training',
-                'training':'Fitness',
-                'walking':'Transportation',
-                }
-
-
-def create_dataframe_from_fit_file(file_path, desired_message='record', verbose=True):
-    """Reads all the data of the desired_message type
-    from the .fit file and returns a pandas DataFrame 
-        
-    Arguments:
-    file_paths : string
-        The file path to read.
-    desired_message : string (optional)
-        The type of messages to read.
-    verbose : bool (optional)
-        If True (default), print(progress)
-    
-    Output:
-    df: pandas DataFrame
-        Contain the data of the desired_message type read from of the .fit file
-        
-    """
-    
-    if verbose:
-        (directory_path,file_name) = os.path.split(file_path)
-        print("Reading file: " + file_name)
-        print("Message type: " + desired_message + '\n')
-        
-    fitfile = FitFile(file_path)    
-    # Get all data messages that are of type desired_message
-    for im, message in enumerate(fitfile.get_messages(desired_message)):
-            data_dict = {}
-            units_dict = {}
-            for message_data in message:                        
-                data_dict[message_data.name] = message_data.value
-                units_dict[message_data.name] = message_data.units    
-                
-            # Build a pandas DataFrame with all the recorded data
-            if im == 0:
-                df = pd.DataFrame(data_dict, index=[im])       
-            else:
-                df.loc[im] = data_dict  
-                               
-    if verbose:
-        print('Done!\n')
-    
-    try:        
-        return df
-    except: 
-        print("Could not return DataFrame.")
-        print("Check that the specified desired_message type exists.")
-        raise
+from fitness.time import auto_crop_records
+from fitparser import tools as fit_tools
 
 if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    config.read('user_config.ini')
+
     # TODO: ask the user for the directories
-    existing_database_path = False
-
-    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180226.csv'
-    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Ana/database/Garmin-Ana-180226.csv'
-    # Directory to read .fit files from
-    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Ana/fit new/'        
-    # Directory to save .csv files in
-    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Ana/csv/'
-
-#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-171208-1.csv'
-#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/John/database/Garmin-John-180115.csv'
-#    # Directory to read .fit files from
-#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/John/fit new/'
-#    # Directory to save .csv files in
-#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/John/csv/'
-
-#    existing_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-171118.csv'
-#    new_database_path = 'C:/Users/Ana Andres/Documents/Garmin/Jason/database/Garmin-Jason-180115.csv'
-#    # Directory to read .fit files from
-#    fit_path_read = 'C:/Users/Ana Andres/Documents/Garmin/Jason/fit new/'
-#    # Directory to save .csv files in
-#    fit_path_save = 'C:/Users/Ana Andres/Documents/Garmin/Jason/csv/'
+    database_path = os.path.join(config['DIRECTORIES']['database'],
+                                 config['FILE NAMES']['database'])
+    fit_path_read = os.path.join(config['DIRECTORIES']['fit files'])
+    csv_path_save = os.path.join(config['DIRECTORIES']['csv files'])
+    overwrite_csv = os.path.join(config['CSV OPTIONS']['overwrite existing files'])
+    overwrite_values = os.path.join(config['DATABASE OPTIONS']['overwrite existing values'])
         
-    if existing_database_path:
-        df_database = pd.read_csv(existing_database_path)
+    if os.path.exists(database_path):
+        print('The database already exists.')
+        print('Reading the database.')
+        df_database = pd.read_csv(database_path)
+        df_database['file name'] = df_database['file name'].astype(str)
+        df_database.set_index('file name', inplace=True)
+    else:
+        print('The database does not exist yet.')
+        print('Creating and empty database...')
+        df_database = pd.DataFrame()
+        df_database.index.name = 'file name'
+
+    fit_file_names = [f for f in os.listdir(fit_path_read) if '.fit' in f]
     
-    for ifn, file_name in enumerate(os.listdir(fit_path_read)):   
-        
-        if 'df_database' in locals():
-            # Check wether this file is already in the database
-            mask = df_database['file_name'] == int(file_name[:-4]) # Ana
-#            mask = df_database['file_name'] == file_name[:-4] # John
-            mask = mask.any()
-        else:
-            mask = False
+    for ifn, fit_file_name in enumerate(fit_file_names):
+        print("\nFile %s / %s: %s" % (ifn + 1, len(fit_file_names), fit_file_name))
 
-        print("\r%s / %s: %s\r" % (ifn + 1, len(os.listdir(fit_path_read)), file_name))
-        if mask:
-            print("Already in database. SKIPPED.")
-            # If the file is in the database we will skip in because it is likely
-            # that it's values have been modified to correct for errors such as
-            # forgetting to turn the GPS off at the end of the activity
+        df_records = pd.DataFrame()
+
+        fit_file_path = fit_path_read + fit_file_name
+        index = fit_file_name.replace('.fit', '')
+        csv_file_name = fit_file_name.replace('.fit', '_record.csv')
+        csv_file_path = os.path.join(csv_path_save, csv_file_name)
+
+        if index in df_database.index.astype(str):
+            print('This file is already in the database.')
+            if overwrite_values.lower() == 'no':
+                print('The database will not be updated.')
+                edit_database = False
+            else:
+                print('The values in the database will be updated.')
+                edit_database = True
         else:
-            print("Adding NEW activity...")
-            file_path = fit_path_read + file_name                        
-            
-            # Read data from the Garmin 'record' message type
-            df_record = create_dataframe_from_fit_file(file_path, 'record', verbose=False)
-        
-            # Save the Pandas DataFrame as a .csv file        
-            file_path_save = fit_path_save + file_name[:-4] + '_record.csv'            
-            overwrite = False
-            save = True
-            if os.path.exists(file_path_save):
-                # TODO: ask for user input to overwrite or not
-                if overwrite:
-                    print("Overwriting file " + file_name)
-                else:
-                    print('Record .csv file already exists!')
-                    save = False
-            if save:
-                df_record.to_csv(file_path_save, sep=',', header=True, index=False)
-        
+            print('This file is not in the database yet.')
+            edit_database = True
+
+
+        if os.path.exists(csv_file_path):
+            print('The csv records file already exists.')
+            if overwrite_csv.lower() == 'yes':
+                print("The csv records file will be overwritten.")
+            else:
+                print('The csv records file will not be overwritten.')
+                save_csv = False
+        else:
+            print('The csv records file does not exist yet.')
+            save_csv = True
+
+        if save_csv:
+            if df_records.empty:
+                print('Reading the records from the fit file...')
+                df_records = fit_tools.create_dataframe_from_fit_file(fit_file_path, 'record')
+                df_records = auto_crop_records(df_records)
+            print('Saving the csv records file...')
+            df_records.to_csv(csv_file_path, sep=',', header=True, index=False)
+
+        if edit_database:
+            if df_records.empty:
+                print('Reading the records from the fit file...')
+                df_records = fit_tools.create_dataframe_from_fit_file(fit_file_path, 'record')
+                df_records = auto_crop_records(df_records)
+
+            print("Editing the database...")
             # Read data from the Garmin 'session' message type
-            df_session = create_dataframe_from_fit_file(file_path, desired_message='session', verbose=False)
+            df_session = fit_tools.create_dataframe_from_fit_file(fit_file_path, 'session')
             # Rename the running cadence to share a column with the walking cadence
-            df_session = df_session.rename(columns = {'avg_running_cadence':'avg_cadence',
-                                      'max_running_cadence':'max_cadence'})
-            # Add the file name to the dataframe
-            df_session['file_name'] = os.path.basename(file_path)[:-4]
-            # Add the gear used, it will need to be edited later
-            df_session['gear'] = current_gear[df_session.get_value(0,'sport')]
-            # Add the type of activity, it will need to be edited later
-            df_session['activity'] = activity_type[df_session.get_value(0,'sport')]
-            # Add comments columns to be filled later
-            df_session['comments'] = ''
+            df_session = df_session.rename(columns={'avg running cadence': 'avg cadence',
+                                                    'max running cadence': 'max cadence'})
+            for column in df_session.columns:
+                df_database.loc[index, column] = df_session[column][0]
 
-            # TODO: add end_time  information
-            # TODO: add max_speed information
-            
-            # Add end position information
-            try:
-                df_session['end_position_lat'] = df_record['position_lat'].dropna().iloc[-1]
-                df_session['end_position_long'] = df_record['position_long'].dropna().iloc[-1]
-            except:
-                print("No GPS data.")
-            # Add the timezone offset in hours
-            df_activity = create_dataframe_from_fit_file(file_path, desired_message='activity', verbose=False)
-            if 'local_timestamp' in df_activity.columns:
-                df_session['timezone'] = df_activity.loc[0,'local_timestamp']-df_activity.loc[0,'timestamp']
+            sport = df_database.loc[index, 'sport']
+            # TODO: automatically determine the sport based on avg speed, cadence, heart rate...
+
+            gear = None
+            if sport in config.options('DEFAULT GEAR'):
+                gear = config['DEFAULT GEAR'][sport]
+            df_database.loc[index, 'gear'] = gear
+
+            activity = None
+            if sport in config.options('DEFAULT ACTIVITY TYPE'):
+                activity = config['DEFAULT ACTIVITY TYPE'][sport]
+            df_database.loc[index, 'activity'] = activity
+
+            df_database.loc[index, 'comments'] = ''
+
+            fit_tools.edit_database_from_records(index, df_database, df_records)
+
+            df_activity = fit_tools.create_dataframe_from_fit_file(fit_file_path, 'activity')
+            if 'local timestamps' in df_activity.columns:
+                df_database.loc[index, 'timezone'] = df_activity['local timestamp'][0] - df_activity['timestamp'][0]
             else:
-                df_session['timezone'] = df_activity.loc[0,'timestamp']-df_activity.loc[0,'timestamp']
-    
-            if 'df_database' in locals():
-                # Add row to the database
-                df_database = pd.concat([df_database,df_session])
-            else:
-                # Initialise the database
-                df_database = df_session
-           
-        desired_columns = ['sport',
-                           'activity',
-                           'gear',
-                           'comments',
-                           'avg_speed',
-                           'max_speed', # John
-                           'total_ascent', # John
-                           'total_descent', # John
-                           'total_distance',
-                           'total_elapsed_time',
-                           'avg_heart_rate', # Ana
-                           'max_heart_rate', # Ana
-                           'avg_cadence', # Ana
-                           'max_cadence', # Ana
-                           'start_position_long',
-                           'start_position_lat',                       
-                           'end_position_long',
-                           'end_position_lat',                       
-                           'total_calories',
-                           'timezone', 
-                           'file_name',
-                           'start_time',
-                           'total_ascent',
-                           'total_descent',
-                           ]
+                df_database.loc[index, 'timezone'] = None
                            
         # Do not save "unknown" columns
         known_columns = []
         for column in df_database.columns:
-            if not "unknown" in column:
+            if "unknown" not in column:
                 known_columns.append(column)
-                
-        # Find intersection between desired_columns and columns in the database
-        # Order intersection based on the order of desired_columns  
-#        saving_columns = known_columns                                    
-        saving_columns = sorted(set(desired_columns) & set(known_columns), key = desired_columns.index)
-        
-        # Save the database to a .csv file
-        df_database.to_csv(new_database_path, sep=',', header=True, index=False,
-                      columns=saving_columns)    
+
+        # Get the list of desired columns from the configuration file
+        desired_columns = list(filter(None, [x.strip() for x in
+                                             config['DATABASE OPTIONS']['desired columns'].splitlines()]))
+
+        # Find intersection between desired_columns and known columns in the database
+        # Order intersection based on the order of desired_columns
+        saving_columns = sorted(set(desired_columns) & set(known_columns), key=desired_columns.index)
+
+        df_database.sort_index(inplace=True)
+
+        print('Saving the database...')
+        df_database.to_csv(database_path, sep=',', header=True, index=True, columns=saving_columns)
     
-    
-    # TODO: sort dataframe by file name
-    # TODO: ask the user wether to overwrite the file if it already exists
-    # TODO: add end location information
-    # TODO: use global or local start_time?
-    
-    print("\nDone!")
+    print("\nThe end!")
+
+    # TODO: use logging instead of printing
