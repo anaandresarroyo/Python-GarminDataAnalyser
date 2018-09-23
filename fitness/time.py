@@ -64,3 +64,14 @@ def select_times(StartTimeDoubleSpinBox, EndTimeDoubleSpinBox, df):
     mask_start = df['elapsed_time'] >= start_time
     mask_end = df['elapsed_time'] <= end_time
     return df.loc[mask_start & mask_end]
+
+
+def auto_crop_records(df):
+    """
+    Crops the records dataframe.
+    :param df:  pandas dataframe
+    :return: cropped_df: pandas dataframe
+    """
+    # TODO: write this function
+    cropped_df = df.copy()
+    return cropped_df
