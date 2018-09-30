@@ -219,8 +219,10 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             if self.RecordsTab.isEnabled():
                 locations_path = os.path.join(self.config['DIRECTORIES']['locations'],
                                               self.config['FILE NAMES']['locations'])
+                self.LocationsPathWidget.clear()
                 self.LocationsPathWidget.insert(locations_path)
                 records_path = os.path.abspath(self.config['DIRECTORIES']['csv files'])
+                self.RecordsPathWidget.clear()
                 self.RecordsPathWidget.insert(records_path)
             if self.MapTab.isEnabled():
                 self.MapFilePathWidget.insert(os.path.join(self.config['DIRECTORIES']['map'],
