@@ -3,9 +3,6 @@ from collections import Counter
 import os
 from PyQt5 import QtWidgets, uic
 
-# TODO: without this the GUI doesn't load properly. fix it.
-import matplotlib
-
 
 class FitBrowserGUI(QtWidgets.QMainWindow):
     """
@@ -111,3 +108,4 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     gui = FitBrowserGUI()
     gui.show()
+    app.exec_()
