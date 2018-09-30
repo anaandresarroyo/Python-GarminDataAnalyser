@@ -12,9 +12,15 @@ def convert_units(config, df, dataframe_units, desired_units, to_SI=False):
     else:
         factor = 1.
 
-    # TODO: automate this more
+    quantities_with_units = list()
+    sections = config.sections()
+    for section in sections:
+        if 'UNIT FACTORS' in section:
+            quantity = section.replace(' UNIT FACTORS', '').lower()
+            quantities_with_units.append(quantity)
+
     for column_name in df.columns:
-        for quantity in ['elapsed time', 'position', 'distance', 'speed']:
+        for quantity in quantities_with_units:
             if quantity in column_name:
                 dataframe_units[column_name] = desired_units[quantity]
                 df[column_name] = df[column_name] * (
