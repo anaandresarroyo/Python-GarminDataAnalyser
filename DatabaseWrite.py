@@ -107,7 +107,7 @@ if __name__ == '__main__':
             fit_tools.edit_database_from_records(index, df_database, df_records)
 
             df_activity = fit_tools.create_dataframe_from_fit_file(fit_file_path, 'activity')
-            if 'local timestamps' in df_activity.columns:
+            if 'local timestamp' in df_activity.columns:
                 df_database.loc[index, 'timezone'] = df_activity['local timestamp'][0] - df_activity['timestamp'][0]
             else:
                 df_database.loc[index, 'timezone'] = None
