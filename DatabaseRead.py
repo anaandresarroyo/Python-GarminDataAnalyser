@@ -240,9 +240,9 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def new_records(self):
         file_path = self.RecordsPathWidget.text()
-        file_path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose directory containing .csv record files.',
+        file_path = QtWidgets.QFileDialog.getExistingDirectory(self,
+                                                               'Choose directory containing .csv record files.',
                                                                file_path)
-        # file_path = file_path + '\\'
         if len(file_path):
             self.RecordsPathWidget.clear()
             self.RecordsPathWidget.insert(file_path)
@@ -985,6 +985,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def recalculate_statistics(self, df, file_name):
         # TODO: instead of placing the values in the table, place the values in the df then update the table
+        # TODO: move this fuction to a different file
         # df is the records dataframe
 
         row = self.Table1Widget.findItems(str(file_name), QtCore.Qt.MatchExactly)[0].row()
