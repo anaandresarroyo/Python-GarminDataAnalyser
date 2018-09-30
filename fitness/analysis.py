@@ -58,10 +58,6 @@ def location_mask(df_locations, current_units, config, df, when, selected_option
                                               current_units['position']] / 0.00000008381903171539306640625,
                                           fixed_lat=lat_deg * config['POSITION UNIT FACTORS'][
                                               current_units['position']] / 0.00000008381903171539306640625,
-                                          # fixed_lon=lon_deg * settings.unit_factors['position'][
-                                          #     current_units['position']] / 0.00000008381903171539306640625,
-                                          # fixed_lat=lat_deg * settings.unit_factors['position'][
-                                          #     current_units['position']] / 0.00000008381903171539306640625,
                                           )
             option_mask = distance.abs() <= radius
             mask = mask | option_mask

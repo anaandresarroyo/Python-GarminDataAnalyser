@@ -93,11 +93,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                       'enhanced avg speed': 'm/s',
 
                       'total calories': 'kcal',
-
-                      'Amount': 'GBP',
-                      'Balance': 'GBP',
-
-                      'delay': 'min'}
+                      }
 
         # group widgets into dictionaries: comboboxes, lists, labels
         self.units_labels = {'elapsed time': self.CurrentTimeUnitsLabel,
@@ -378,8 +374,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 # TODO: choose the one with value 1, in case it's not the first
                 units_SI[quantity] = list(self.config.items(section))[0][0]
 
-        print(units_SI.keys())
-        print(self.units_comboboxes.keys())
         for key in self.units_comboboxes.keys():
             index = self.units_comboboxes[key].findText(units_SI[key])
             self.units_comboboxes[key].setCurrentIndex(index)
@@ -1064,9 +1058,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    # file_path = os.path.abspath(os.path.join('data', 'Ana', 'database', 'Garmin-Ana-180226-1.csv'))
-    # file_path = os.path.abspath(os.path.join('data', 'Ana', 'tests', 'running', 'database.csv'))
-    # print(file_path)
     gui = DatabaseGUI()
     gui.show()
     app.exec_()
