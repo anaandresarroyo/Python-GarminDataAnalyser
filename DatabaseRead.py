@@ -59,13 +59,13 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.SIUnitsPushButton.clicked.connect(self.set_SI_units)
 
         # group widgets into dictionaries: comboboxes, lists, labels
-        self.units_labels = {'elapsed_time': self.CurrentTimeUnitsLabel,
+        self.units_labels = {'elapsed time': self.CurrentTimeUnitsLabel,
                              'position': self.CurrentPositionUnitsLabel,
                              'distance': self.CurrentDistanceUnitsLabel,
                              'speed': self.CurrentSpeedUnitsLabel,
                              }
 
-        self.units_comboboxes = {'elapsed_time': self.TimeUnitsComboBox,
+        self.units_comboboxes = {'elapsed time': self.TimeUnitsComboBox,
                                  'position': self.PositionUnitsComboBox,
                                  'distance': self.DistanceUnitsComboBox,
                                  'speed': self.SpeedUnitsComboBox,
@@ -100,8 +100,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.filters_widgets = {'sport': self.SportsListWidget,
                                 'activity': self.ActivitiesListWidget,
                                 'gear': self.GearListWidget,
-                                'start_location': self.StartLocationListWidget,
-                                'end_location': self.EndLocationListWidget,
+                                'start location': self.StartLocationListWidget,
+                                'end location': self.EndLocationListWidget,
                                 'Account': self.StartLocationListWidget,
                                 'Category': self.EndLocationListWidget,
                                 'category': self.StartLocationListWidget}
@@ -109,8 +109,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.filters_labels = {'sport': self.SportsLabel,
                                'activity': self.ActivitiesLabel,
                                'gear': self.GearLabel,
-                               'start_location': self.StartLocationLabel,
-                               'end_location': self.EndLocationLabel,
+                               'start location': self.StartLocationLabel,
+                               'end location': self.EndLocationLabel,
                                'Account': self.StartLocationLabel,
                                'Category': self.EndLocationLabel,
                                'category': self.StartLocationLabel}
@@ -215,21 +215,21 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         # rename columns to ignore white spaces at the start and end of the string
         self.df.rename(columns=lambda x: x.strip(), inplace=True)
 
-        if 'start_time' in self.df.columns:
-            self.column_date = 'start_time'
+        if 'start time' in self.df.columns:
+            self.column_date = 'start time'
             self.settings = DatabaseSettings.DatabaseSettings(kind='gps')
         elif 'Date' in self.df.columns:
             self.column_date = 'Date'
             self.settings = DatabaseSettings.DatabaseSettings(kind='expenses')
-        elif 'meeting_time' in self.df.columns:
-            self.column_date = 'meeting_time'
+        elif 'meeting time' in self.df.columns:
+            self.column_date = 'meeting time'
             self.settings = DatabaseSettings.DatabaseSettings(kind='late')
         else:
             self.column_date = False
 
             # reformat the file_name column
-        if 'file_name' in self.df.columns:
-            self.df['file_name'] = self.df['file_name'].apply(str)
+        if 'file name' in self.df.columns:
+            self.df['file name'] = self.df['file name'].apply(str)
 
         # reformat the date column    
         if self.column_date in self.df.columns:
@@ -256,7 +256,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 self.filters_labels[item].setText('')
                 self.filters_widgets[item].clear()
 
-        if 'start_position_long' in self.df.columns:
+        if 'start position long' in self.df.columns:
             self.populate_locations()
 
     def new_locations(self):
@@ -297,13 +297,17 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         if self.column_date in df.columns:
             if 'timezone' in df.columns:
-                # take into account the timezone        
+                # take into account the timezone
                 self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
+                # TODO: fix errors when timezone is blank
                 temp = df[self.column_date] + df['timezone']
-                df[self.column_date + '_local'] = temp
+                print(self.column_date)
+                print(df[self.column_date])
+                print(temp)
+                df[self.column_date + ' local'] = temp
 
-                df['start_daytime_local'] = temp.dt.time
-                self.column_date_local = 'start_time_local'
+                df['start daytime local'] = temp.dt.time
+                self.column_date_local = 'start time local'
                 # TODO: automate the self.column_date_local column name
             else:
                 temp = df[self.column_date]
@@ -312,12 +316,12 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
             # TODO: add end_daytime and end_time_local info when it's added in DatabaseWrite.py
             df['weekday'] = temp.dt.weekday + 1  # numeric: 1 = Monday, 7 = Sunday
-            df['weekday_name'] = (temp.dt.weekday + 1).apply(str) + ': ' + temp.dt.weekday_name  # string
+            df['weekday week'] = (temp.dt.weekday + 1).apply(str) + ': ' + temp.dt.weekday_name  # string
             df['week'] = temp.dt.week
-            df['year_week'] = temp.dt.year.apply(str) + '-' + temp.dt.week.apply(str).str.pad(2, fillchar='0')
+            df['year week'] = temp.dt.year.apply(str) + '-' + temp.dt.week.apply(str).str.pad(2, fillchar='0')
             df['month'] = temp.dt.month
-            df['year_month'] = temp.dt.year.apply(str) + '-' + temp.dt.month.apply(str).str.pad(2, fillchar='0')
-            df['year_month_day'] = df['year_month'] + '-' + temp.dt.day.apply(str).str.pad(2, fillchar='0')
+            df['year month'] = temp.dt.year.apply(str) + '-' + temp.dt.month.apply(str).str.pad(2, fillchar='0')
+            df['year month day'] = df['year month'] + '-' + temp.dt.day.apply(str).str.pad(2, fillchar='0')
             df['year'] = temp.dt.year
 
         if 'Amount' in df.columns:
@@ -374,7 +378,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 total_mask = total_mask & mask
 
                 # filtering by start and end location
-        if 'start_position_long' in self.df.columns:
+        if 'start position long' in self.df.columns:
             selected_items = list_selection(self.StartLocationListWidget)
             mask_start = location_mask(self.df_locations, self.current_units, self.settings, df_dates, 'start',
                                        selected_items)
@@ -648,7 +652,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         #            if not 'Unnamed' in item:
         #                self.records_columns_to_save.append(item)
 
-        df['elapsed_time'] = calculate_elapsed_time(df['timestamp'], units_t='s')
+        df['elapsed time'] = calculate_elapsed_time(df['timestamp'], units_t='s')
 
         populate_combobox(sorted(df.columns), self.TraceTopXComboBox.currentText(),
                           [self.TraceTopXComboBox])
@@ -684,7 +688,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         # read data from Table 1
         df_widget = read_table(self.Table1Widget)
         # combine df_widget with the rest of the activities not shown in Table 1
-        df_save = self.merge_dataframes(self.df, df_widget, 'start_time_local')
+        df_save = self.merge_dataframes(self.df, df_widget, 'start time local')
         # TODO: merge by file_name instead of start_time_local
         self.df = df_save.copy()
 
@@ -700,7 +704,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.df_trace = read_selected_table_rows(self.Table1Widget)
         print('Saving record files...')
         for index in self.df_trace.index:
-            file_name = self.df_trace.loc[index, 'file_name']
+            file_name = self.df_trace.loc[index, 'file name']
             # read records file
             file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
             df = self.read_records(file_path)
@@ -709,7 +713,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             df = select_times(self.StartTimeDoubleSpinBox, self.EndTimeDoubleSpinBox, df)
             # recalculate distance
             df['distance'] = df['distance'] - df.loc[df.index[0], 'distance']
-            #            df = df.drop('elapsed_time', axis=1)
+            #            df = df.drop('elapsed time', axis=1)
             # save records
             df.to_csv(file_path, sep=',', header=True, index=False, columns=self.records_columns_to_save)
         print('Record files saved! \n')
@@ -729,28 +733,28 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         avg_lat = []
         avg_long = []
         for index in self.df_selected.iloc[0:number_of_activities].index:
-            file_name = self.df_selected.loc[index, 'file_name']
+            file_name = self.df_selected.loc[index, 'file name']
 
             file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
             # read the csv file
             df = self.read_records(file_path)
             df, self.settings.units = convert_units(self.settings, df, self.settings.units, self.current_units)
             # Extract location information, remove missing data, convert to degrees
-            self.map_data[file_name] = df.loc[:, ['position_lat', 'position_long']].dropna()
+            self.map_data[file_name] = df.loc[:, ['position lat', 'position long']].dropna()
             #            self.map_colours[file_name] = 'k'
             self.map_colours[file_name] = colour_dict[self.df_selected.loc[index, legend]]
 
-            avg_long.append(self.map_data[file_name]['position_long'].mean())
-            avg_lat.append(self.map_data[file_name]['position_lat'].mean())
+            avg_long.append(self.map_data[file_name]['position long'].mean())
+            avg_lat.append(self.map_data[file_name]['position lat'].mean())
 
             # TODO: user option: line (faster) or scatter (better if many nan) plot
-            ax.plot(self.map_data[file_name]['position_long'],
-                    self.map_data[file_name]['position_lat'],
+            ax.plot(self.map_data[file_name]['position long'],
+                    self.map_data[file_name]['position lat'],
                     label=file_name,
                     c=self.map_colours[file_name],
                     )
-        #            ax.scatter(self.map_data[file_name]['position_long'],
-        #                       self.map_data[file_name]['position_lat'],
+        #            ax.scatter(self.map_data[file_name]['position long'],
+        #                       self.map_data[file_name]['position lat'],
         #                       label = file_name,
         #                       )
 
@@ -758,8 +762,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         ax.axis('equal')
 
         # label axes        
-        xlabel = 'position_long (' + self.settings.units['position_long'] + ')'
-        ylabel = 'position_lat (' + self.settings.units['position_lat'] + ')'
+        xlabel = 'position_long (' + self.settings.units['position long'] + ')'
+        ylabel = 'position_lat (' + self.settings.units['position lat'] + ')'
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
@@ -798,13 +802,13 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
             # TODO: user option: line (faster) or scatter (very very slow) plot
             # so if there are nan, e.g. metro, separate the plots into several line plots
-            gmap.plot(self.map_data[key]['position_lat'],
-                      self.map_data[key]['position_long'],
+            gmap.plot(self.map_data[key]['position lat'],
+                      self.map_data[key]['position long'],
                       color=color,
                       edge_width=3,
                       )
-        #            gmap.scatter(self.map_data[key]['position_lat'][0:-1:5],
-        #                         self.map_data[key]['position_long'][0:-1:5],
+        #            gmap.scatter(self.map_data[key]['position lat'][0:-1:5],
+        #                         self.map_data[key]['position long'][0:-1:5],
         #                         color=self.map_colours[key], size=10, marker=False)
 
         file_path = self.MapFilePathWidget.text()
@@ -840,14 +844,14 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             print("WARNING: " + str(len(self.df_trace)) + " trace plots might take a long time!")
 
         for index in self.df_trace.index:
-            file_name = self.df_trace.loc[index, 'file_name']
+            file_name = self.df_trace.loc[index, 'file name']
             file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
             # read the csv file
             df = self.read_records(file_path)
             # conver to current_units
             df, self.settings.units = convert_units(self.settings, df, self.settings.units, self.current_units,
                                                     to_SI=False)
-            # select data based on start and end values of elapsed_time
+            # select data based on start and end values of elapsed time
             df = select_times(self.StartTimeDoubleSpinBox, self.EndTimeDoubleSpinBox, df)
 
             # recalculate mean and max values (heart_rate, speed, ...) and update Table 1
@@ -944,79 +948,81 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             column_dict[column_name] = column
 
         if 'speed' in df.columns:
-            if 'avg_speed' in column_dict.keys():
+            if 'avg speed' in column_dict.keys():
                 value = df['speed'].mean()
-                self.Table1Widget.setItem(row, column_dict['avg_speed'],
+                self.Table1Widget.setItem(row, column_dict['avg speed'],
                                           QtWidgets.QTableWidgetItem(format(value, '.3f')))
-            if 'max_speed' in column_dict.keys():
+            if 'max speed' in column_dict.keys():
                 value = df['speed'].max()
-                self.Table1Widget.setItem(row, column_dict['max_speed'],
+                self.Table1Widget.setItem(row, column_dict['max speed'],
                                           QtWidgets.QTableWidgetItem(format(value, '.3f')))
 
-        if 'heart_rate' in df.columns:
-            if 'avg_heart_rate' in column_dict.keys():
-                value = df['heart_rate'].mean()
-                self.Table1Widget.setItem(row, column_dict['avg_heart_rate'],
+        if 'heart rate' in df.columns:
+            if 'avg heart rate' in column_dict.keys():
+                value = df['heart rate'].mean()
+                self.Table1Widget.setItem(row, column_dict['avg heart rate'],
                                           QtWidgets.QTableWidgetItem(format(value, '.2f')))
-            if 'max_heart_rate' in column_dict.keys():
-                value = df['heart_rate'].max()
-                self.Table1Widget.setItem(row, column_dict['max_heart_rate'],
+            if 'max heart rate' in column_dict.keys():
+                value = df['heart rate'].max()
+                self.Table1Widget.setItem(row, column_dict['max heart rate'],
                                           QtWidgets.QTableWidgetItem(format(value, '.2f')))
 
         if 'cadence' in df.columns:
-            if 'avg_cadence' in column_dict.keys():
+            if 'avg cadence' in column_dict.keys():
                 # remove zeros, which are like missing cadence data
                 value = df[df['cadence'] != 0]['cadence'].dropna().mean()
-                self.Table1Widget.setItem(row, column_dict['avg_cadence'],
+                self.Table1Widget.setItem(row, column_dict['avg cadence'],
                                           QtWidgets.QTableWidgetItem(format(value, '.2f')))
-            if 'max_cadence' in column_dict.keys():
+            if 'max cadence' in column_dict.keys():
                 value = df['cadence'].max()
-                self.Table1Widget.setItem(row, column_dict['max_cadence'],
+                self.Table1Widget.setItem(row, column_dict['max cadence'],
                                           QtWidgets.QTableWidgetItem(format(value, '.2f')))
 
-        if 'position_lat' in df.columns:
-            if 'start_position_lat' in column_dict.keys():
-                position = df['position_lat'].dropna()
+        if 'position lat' in df.columns:
+            if 'start position lat' in column_dict.keys():
+                position = df['position lat'].dropna()
                 if not position.empty:
                     value = position.iloc[0]
-                    self.Table1Widget.setItem(row, column_dict['start_position_lat'],
+                    self.Table1Widget.setItem(row, column_dict['start position lat'],
                                               QtWidgets.QTableWidgetItem(format(value, '.4f')))
-            if 'end_position_lat' in column_dict.keys():
-                position = df['position_lat'].dropna()
+            if 'end position lat' in column_dict.keys():
+                position = df['position lat'].dropna()
                 if not position.empty:
                     value = position.iloc[-1]
-                    self.Table1Widget.setItem(row, column_dict['end_position_lat'],
+                    self.Table1Widget.setItem(row, column_dict['end position lat'],
                                               QtWidgets.QTableWidgetItem(format(value, '.4f')))
 
-        if 'position_long' in df.columns:
-            if 'start_position_long' in column_dict.keys():
-                position = df['position_long'].dropna()
+        if 'position long' in df.columns:
+            if 'start position long' in column_dict.keys():
+                position = df['position long'].dropna()
                 if not position.empty:
                     value = position.iloc[0]
-                    self.Table1Widget.setItem(row, column_dict['start_position_long'],
+                    self.Table1Widget.setItem(row, column_dict['start position long'],
                                               QtWidgets.QTableWidgetItem(format(value, '.4f')))
-            if 'end_position_long' in column_dict.keys():
-                position = df['position_long'].dropna()
+            if 'end position long' in column_dict.keys():
+                position = df['position long'].dropna()
                 if not position.empty:
                     value = position.iloc[-1]
-                    self.Table1Widget.setItem(row, column_dict['end_position_long'],
+                    self.Table1Widget.setItem(row, column_dict['end position long'],
                                               QtWidgets.QTableWidgetItem(format(value, '.4f')))
 
         if 'distance' in df.columns:
-            if 'total_distance' in column_dict.keys():
+            if 'total distance' in column_dict.keys():
                 value = df.loc[df.index[-1], 'distance'] - df.loc[df.index[0], 'distance']
-                self.Table1Widget.setItem(row, column_dict['total_distance'],
+                self.Table1Widget.setItem(row, column_dict['total distance'],
                                           QtWidgets.QTableWidgetItem(format(value, '.4f')))
-        if 'elapsed_time' in df.columns:
-            if 'total_elapsed_time' in column_dict.keys():
-                value = df.loc[df.index[-1], 'elapsed_time'] - df.loc[df.index[0], 'elapsed_time']
-                self.Table1Widget.setItem(row, column_dict['total_elapsed_time'],
+        if 'elapsed time' in df.columns:
+            if 'total elapsed time' in column_dict.keys():
+                value = df.loc[df.index[-1], 'elapsed time'] - df.loc[df.index[0], 'elapsed time']
+                self.Table1Widget.setItem(row, column_dict['total elapsed time'],
                                           QtWidgets.QTableWidgetItem(format(value, '.4f')))
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    file_path = os.path.abspath(os.path.join('data', 'Ana', 'database', 'Garmin-Ana-180226-1.csv'))
+    # file_path = os.path.abspath(os.path.join('data', 'Ana', 'database', 'Garmin-Ana-180226-1.csv'))
+    file_path = os.path.abspath(os.path.join('data', 'Ana', 'tests', 'running', 'database.csv'))
     # print(file_path)
     gui = DatabaseGUI(kind='gps', file_path=file_path)
     gui.show()
+    app.exec_()

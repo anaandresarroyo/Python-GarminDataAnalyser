@@ -13,10 +13,10 @@ def convert_units(settings, df, dataframe_units, desired_units, to_SI=False):
 
     # TODO: automate this more
     for column_name in df.columns:
-        if 'elapsed_time' in column_name:
-            dataframe_units[column_name] = desired_units['elapsed_time']
+        if 'elapsed time' in column_name:
+            dataframe_units[column_name] = desired_units['elapsed time']
             df[column_name] = df[column_name] * (
-                    settings.unit_factors['elapsed_time'][desired_units['elapsed_time']] ** factor)
+                    settings.unit_factors['elapsed time'][desired_units['elapsed time']] ** factor)
         if 'position' in column_name:
             dataframe_units[column_name] = desired_units['position']
             df[column_name] = df[column_name] * (settings.unit_factors['position'][desired_units['position']] ** factor)

@@ -61,8 +61,8 @@ def select_times(StartTimeDoubleSpinBox, EndTimeDoubleSpinBox, df):
     # TODO: use pandas time indexing
     start_time = StartTimeDoubleSpinBox.value()
     end_time = EndTimeDoubleSpinBox.value()
-    mask_start = df['elapsed_time'] >= start_time
-    mask_end = df['elapsed_time'] <= end_time
+    mask_start = df['elapsed time'] >= start_time
+    mask_end = df['elapsed time'] <= end_time
     return df.loc[mask_start & mask_end]
 
 

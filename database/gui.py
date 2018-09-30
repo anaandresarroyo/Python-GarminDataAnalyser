@@ -168,7 +168,7 @@ def read_table(table, rows=None):
 
     # TODO: make this formatting more automatic
     # format data types
-    datetime_column_names = ['start_time', 'start_time_local', 'timesetamp']
+    datetime_column_names = ['start time', 'start time local', 'end time', 'end time local', 'timestamp']
     for column_name in column_names:
         # format dates
         if column_name in datetime_column_names:
