@@ -195,22 +195,23 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         # Read file      
         self.new_database(file_path=file_path)
-        # self.select_and_plot_trace()
 
     def new_database(self, file_path=None):
         # TODO: fix errors that happen when selecting a new database
         """Select a new Garmin DataBase CSV file and locations file."""
-        if not file_path:
+        if file_path is None:
             file_path = self.ReadDatabasePathWidget.text()
-            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.', file_path,
-                                                              "CSV files (*.csv)")
-
-        if len(file_path):
-            self.file_path = file_path
+            print(file_path)
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose database .csv file to read.',
+                                                                 file_path, 'CSV files (*.csv)')
+            print(file_path)
             self.ReadDatabasePathWidget.clear()
             self.SaveDatabasePathWidget.clear()
-            self.ReadDatabasePathWidget.insert(self.file_path)
-            self.SaveDatabasePathWidget.insert(self.file_path)
+            self.ReadDatabasePathWidget.insert(file_path)
+            self.SaveDatabasePathWidget.insert(file_path)
+            print(self.ReadDatabasePathWidget.text())
+
+        if len(file_path):
             self.read_database()
 
             # disable some tabs
@@ -300,8 +301,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def new_locations(self):
         file_path = self.LocationsPathWidget.text()
-        file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path,
-                                                          "CSV files (*.csv)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.',
+                                                             file_path, "CSV files (*.csv)")
         if len(file_path):
             self.LocationsPathWidget.clear()
             self.LocationsPathWidget.insert(file_path)
