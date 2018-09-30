@@ -251,9 +251,10 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def read_database(self):
         """Read the CSV file."""
-        print(self.file_path + '\n')
+        file_path = self.ReadDatabasePathWidget.text()
+        print(file_path + '\n')
 
-        self.df = pd.read_csv(self.file_path, dayfirst=True)
+        self.df = pd.read_csv(file_path, dayfirst=True)
         # TODO: fix errors that appear when some activities have empty gear
 
         # rename columns to ignore white spaces at the start and end of the string
