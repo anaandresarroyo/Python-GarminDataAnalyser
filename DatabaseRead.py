@@ -11,7 +11,6 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 
 import DatabaseSettings
 
-# matplotlib.rcParams.update({'font.size': 50})
 from database.gui import fill_table, populate_combobox, populate_comboboxes, populate_dates, read_units, display_units, \
     list_selection, populate_list, read_table, read_selected_table_rows
 from database.plot import generate_colours, populate_plot_options
@@ -153,6 +152,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.new_database(file_path=file_path)
 
     def new_database(self, file_path=None):
+        # TODO: fix errors that happen when selecting a new database
         """Select a new Garmin DataBase CSV file and locations file."""
         if not file_path:
             file_path = self.ReadDatabasePathWidget.text()
@@ -442,7 +442,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                                  alpha=alpha,
                                  c=colour_dict[label],
                                  marker='.',
-                                 markersize=50,
+                                 markersize=12,
                                  linestyle='None',
                                  )
 
@@ -485,18 +485,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             density = True
         elif y == 'counts':
             density = False
-
-        #        if self.HistogramBinsSheckBox.checkState():
-        #            bins = 'auto'
-        #            histogram = True
-        #        else:
-        #            try:
-        #                bins = np.linspace(min(df[x]), max(df[x]), 30)
-        #                histogram = True
-        #            except:
-        #                # TODO: try/except is a temporary solution: fix it
-        #                print("Cannot generate histogram.\n")
-        #                histogram = False
 
         colour_dict = generate_colours(df, legend, cmap_name)
         for label in sorted(colour_dict.keys()):

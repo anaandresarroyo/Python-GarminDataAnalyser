@@ -27,13 +27,14 @@ def populate_plot_options(kind, alpha, cmap_name, df=pd.DataFrame(),
         plot_options['colormap'] = cmap_name
 
     if kind == 'line':
-        plot_options['marker'] = '.'
-        plot_options['markersize'] = 20
+        plot_options['linewidth'] = 2
+        # plot_options['marker'] = '.'
+        # plot_options['markersize'] = 12
         # TODO: move default marker size to MatplotlibSettings.py
 
     elif kind == 'scatter':
         plot_options['edgecolors'] = 'face'
-        plot_options['s'] = 20
+        plot_options['s'] = 12
 
     elif 'bar' in kind:
         plot_options['stacked'] = stacked
