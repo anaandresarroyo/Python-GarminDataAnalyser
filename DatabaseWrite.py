@@ -58,6 +58,7 @@ if __name__ == '__main__':
             print('The csv records file already exists.')
             if overwrite_csv.lower() == 'yes':
                 print("The csv records file will be overwritten.")
+                save_csv = True
             else:
                 print('The csv records file will not be overwritten.')
                 save_csv = False
