@@ -2,6 +2,7 @@ import os
 import gmplot
 import pandas as pd
 import numpy as np
+import configparser
 
 from PyQt5 import QtCore, uic, QtWidgets
 
@@ -9,10 +10,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
-import DatabaseSettings
-
-from database.gui import fill_table, populate_combobox, populate_comboboxes, populate_dates, read_units, display_units, \
-    list_selection, populate_list, read_table, read_selected_table_rows
+from database.gui import fill_table, populate_combobox, populate_comboboxes, populate_dates, read_units, set_labels_text, \
+    list_selection, populate_list, read_table, read_selected_table_rows, get_labels_text
 from database.plot import generate_colours, populate_plot_options
 from fitness.analysis import convert_units, select_dates, generate_mask, location_mask
 from fitness.time import calculate_elapsed_time, select_times
@@ -23,7 +22,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
     GUI which analyses and plots GPS and fitness data.
     """
 
-    def __init__(self, kind='gps', file_path=None):
+    def __init__(self):
         super(self.__class__, self).__init__()
 
         # Load GUI design
@@ -57,6 +56,49 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.UpdateUnitsPushButton.clicked.connect(self.update_units)
         self.SIUnitsPushButton.clicked.connect(self.set_SI_units)
 
+        self.units = {'elapsed time': 's',
+                      'total elapsed time': 's',
+                      'total timer time': 's',
+
+                      'timezone': 'h',
+                      'weekday': '1 = Monday, 7 = Sunday',
+
+                      'distance': 'm',
+                      'altitude': 'm',
+                      'total distance': 'm',
+                      'total ascent': 'm',
+                      'total descent': 'm',
+
+                      'position lat': 'semicircles',
+                      'position long': 'semicircles',
+                      'start position lat': 'semicircle',
+                      'start position long': 'semicircles',
+                      'end position lat': 'semicircle',
+                      'end position long': 'semicircles',
+
+                      'cadence': 'rpm',
+                      'avg cadence': 'rpm',
+                      'max cadence': 'rpm',
+
+                      'total strides': 'strides',
+
+                      'heart rate': 'bpm',
+                      'avg heart rate': 'bpm',
+                      'max heart rate': 'bpm',
+
+                      'speed': 'm/s',
+                      'avg speed': 'm/s',
+                      'max speed': 'm/s',
+                      'enhanced speed': 'm/s',
+                      'enhanced avg speed': 'm/s',
+
+                      'total calories': 'kcal',
+
+                      'Amount': 'GBP',
+                      'Balance': 'GBP',
+
+                      'delay': 'min'}
+
         # group widgets into dictionaries: comboboxes, lists, labels
         self.units_labels = {'elapsed time': self.CurrentTimeUnitsLabel,
                              'position': self.CurrentPositionUnitsLabel,
@@ -70,30 +112,30 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                                  'speed': self.SpeedUnitsComboBox,
                                  }
 
-        self.plot_comboboxes = {'histogram_y': [self.HistYComboBox],
-                                'legend_location': [self.LegendLocationComboBox],
-                                'colormap': [self.CMapComboBox],
-                                'kind_trace': [self.TraceTopKindComboBox, self.TraceBottomKindComboBox],
-                                'kind_summary': [self.SummaryKindComboBox],
-                                'stacked': [self.SummaryStackedComboBox],
-                                'measure': [self.SummaryMeasureComboBox, self.HistMeasureComboBox],
-                                'frequency': [self.HistFrequencyComboBox, self.SummaryFrequencyComboBox],
-                                'sort': [self.SummarySortComboBox],
-                                'location': [self.LocationComboBox]}
+        self.comboboxes = {'histogram y': [self.HistYComboBox],
+                           'legend location': [self.LegendLocationComboBox],
+                           'colormap': [self.CMapComboBox],
+                           'kind trace': [self.TraceTopKindComboBox, self.TraceBottomKindComboBox],
+                           'kind summary': [self.SummaryKindComboBox],
+                           'stacked': [self.SummaryStackedComboBox],
+                           'measure': [self.SummaryMeasureComboBox, self.HistMeasureComboBox],
+                           'frequency': [self.HistFrequencyComboBox, self.SummaryFrequencyComboBox],
+                           'sort': [self.SummarySortComboBox],
+                           'location': [self.LocationComboBox],
+                           'category 1': [self.SummaryCategory1ComboBox],
+                           'category 2': [self.SummaryCategory2ComboBox],
+                           'quantity': [self.SummaryQuantityComboBox],
+                           'legend variable': [self.LegendVariableComboBox],
+                           'trace mode': [self.TraceModeComboBox]}
 
-        self.column_comboboxes = {'category1': [self.SummaryCategory1ComboBox],
-                                  'category2': [self.SummaryCategory2ComboBox],
-                                  'quantity': [self.SummaryQuantityComboBox],
-                                  'legend_variable': [self.LegendVariableComboBox]}
+        self.numeric_comboboxes = {'histogram x': [self.HistXComboBox],
+                                   'scatter x': [self.ScatterXComboBox],
+                                   'scatter y': [self.ScatterYComboBox]}
 
-        self.numeric_comboboxes = {'histogram_x': [self.HistXComboBox],
-                                   'scatter_x': [self.ScatterXComboBox],
-                                   'scatter_y': [self.ScatterYComboBox]}
-
-        self.trace_comboboxes = {'top_x': [self.TraceTopXComboBox],
-                                 'top_y': [self.TraceTopYComboBox],
-                                 'bottom_x': [self.TraceBottomXComboBox],
-                                 'bottom_y': [self.TraceBottomYComboBox]}
+        self.trace_comboboxes = {'top x': [self.TraceTopXComboBox],
+                                 'top y': [self.TraceTopYComboBox],
+                                 'bottom x': [self.TraceBottomXComboBox],
+                                 'bottom y': [self.TraceBottomYComboBox]}
 
         # TODO: change filter widgets and labels to more generic names                
         self.filters_widgets = {'sport': self.SportsListWidget,
@@ -145,11 +187,15 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.PlotSummaryWidgetContainer.addWidget(self.toolbar_summary)
         self.PlotSummaryWidgetContainer.addWidget(self.canvas_summary)
 
-        self.settings = DatabaseSettings.DatabaseSettings(kind=kind)
-        self.ReadDatabasePathWidget.insert(self.settings.database_path)
+        self.config = configparser.ConfigParser()
+        self.config.read('user_config.ini')
+        file_path = os.path.join(self.config['DIRECTORIES']['database'],
+                                 self.config['FILE NAMES']['database'])
+        self.ReadDatabasePathWidget.insert(file_path)
 
         # Read file      
         self.new_database(file_path=file_path)
+        # self.select_and_plot_trace()
 
     def new_database(self, file_path=None):
         # TODO: fix errors that happen when selecting a new database
@@ -168,26 +214,26 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             self.read_database()
 
             # disable some tabs
-            self.RecordsTab.setEnabled(self.settings.RecordsTab)
-            self.MapTab.setEnabled(self.settings.MapTab)
-            self.TracesTab.setEnabled(self.settings.TracesTab)
+            # TODO: Turn the tabs into a dictionary
+            self.RecordsTab.setEnabled(self.config['GUI OPTIONS']['enable records tab'].lower() == 'yes')
+            self.MapTab.setEnabled(self.config['GUI OPTIONS']['enable map tab'].lower() == 'yes')
+            self.TracesTab.setEnabled(self.config['GUI OPTIONS']['enable traces tab'].lower() == 'yes')
 
             if self.RecordsTab.isEnabled():
-                self.locations_path = self.settings.locations_path
-                self.LocationsPathWidget.insert(self.locations_path)
-                self.records_path = self.settings.records_path
-                self.RecordsPathWidget.insert(self.records_path)
+                locations_path = os.path.join(self.config['DIRECTORIES']['locations'],
+                                              self.config['FILE NAMES']['locations'])
+                self.LocationsPathWidget.insert(locations_path)
+                records_path = os.path.abspath(self.config['DIRECTORIES']['csv files'])
+                self.RecordsPathWidget.insert(records_path)
             if self.MapTab.isEnabled():
-                self.MapFilePathWidget.insert(self.settings.map_path)
+                self.MapFilePathWidget.insert(os.path.join(self.config['DIRECTORIES']['map'],
+                                                           self.config['FILE NAMES']['map']))
 
             populate_dates(self.column_date_local, self.df, self.StartDateEdit, self.EndDateEdit)
-            populate_comboboxes(self.numeric_comboboxes, self.settings, self.df, self.units_comboboxes,
-                                self.plot_comboboxes, self.column_comboboxes, self.trace_comboboxes,
-                                self.TraceModeComboBox)
+            populate_comboboxes(self.config, self.df, self.numeric_comboboxes, self.units_comboboxes,
+                                self.trace_comboboxes, self.comboboxes)
             self.populate_filters()
 
-            # make a copy so the current_units can be modified independently from the SI_units
-            self.current_units = dict(self.settings.units_SI)
             self.update_units()  # includes self.filter_and_plot_database()
 
         else:
@@ -199,7 +245,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                                                                file_path)
         # file_path = file_path + '\\'
         if len(file_path):
-            self.records_path = file_path
             self.RecordsPathWidget.clear()
             self.RecordsPathWidget.insert(file_path)
         else:
@@ -217,13 +262,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         if 'start time' in self.df.columns:
             self.column_date = 'start time'
-            self.settings = DatabaseSettings.DatabaseSettings(kind='gps')
-        elif 'Date' in self.df.columns:
-            self.column_date = 'Date'
-            self.settings = DatabaseSettings.DatabaseSettings(kind='expenses')
-        elif 'meeting time' in self.df.columns:
-            self.column_date = 'meeting time'
-            self.settings = DatabaseSettings.DatabaseSettings(kind='late')
         else:
             self.column_date = False
 
@@ -231,11 +269,12 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         if 'file name' in self.df.columns:
             self.df['file name'] = self.df['file name'].apply(str)
 
-        # reformat the date column    
+        # reformat the date column
+        # TODO: what if there is more than one date column: convert them all to datetime
         if self.column_date in self.df.columns:
             self.df[self.column_date] = pd.to_datetime(self.df[self.column_date], dayfirst=True)
 
-            # create a variable with the column names to use when saving the database
+        # create a variable with the column names to use when saving the database
         self.database_columns_to_save = self.df.columns
 
         self.df = self.calculate_new_columns(self.df)
@@ -248,7 +287,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             self.filters_widgets[item].clear()
 
         # populate appropriate widgets and labels
-        for item in self.settings.filters:
+        for item in ['sport', 'activity', 'gear']:
             if item in self.df.columns:
                 populate_list(self.df, item, self.filters_widgets[item])
                 self.filters_labels[item].setText(item)
@@ -264,7 +303,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose .csv file with list of locations.', file_path,
                                                           "CSV files (*.csv)")
         if len(file_path):
-            self.locations_path = file_path
             self.LocationsPathWidget.clear()
             self.LocationsPathWidget.insert(file_path)
             self.populate_locations()
@@ -284,8 +322,9 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.EndLocationListWidget.addItem('any')
         self.EndLocationListWidget.setCurrentRow(0)
 
-        if len(self.locations_path):
-            self.df_locations = pd.read_csv(self.locations_path)
+        locations_path = self.LocationsPathWidget.text()
+        if len(locations_path):
+            self.df_locations = pd.read_csv(locations_path)
             for item in self.df_locations['name']:
                 self.StartLocationListWidget.addItem(item)
                 self.EndLocationListWidget.addItem(item)
@@ -301,9 +340,6 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 self.df['timezone'] = pd.to_timedelta(self.df['timezone'])
                 # TODO: fix errors when timezone is blank
                 temp = df[self.column_date] + df['timezone']
-                print(self.column_date)
-                print(df[self.column_date])
-                print(temp)
                 df[self.column_date + ' local'] = temp
 
                 df['start daytime local'] = temp.dt.time
@@ -332,8 +368,18 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def set_SI_units(self):
         print("Setting database units to SI...")
+        units_SI = dict()
+        sections = self.config.sections()
+        for section in sections:
+            if 'UNIT FACTORS' in section:
+                quantity = section.replace(' UNIT FACTORS', '').lower()
+                # TODO: choose the one with value 1, in case it's not the first
+                units_SI[quantity] = list(self.config.items(section))[0][0]
+
+        print(units_SI.keys())
+        print(self.units_comboboxes.keys())
         for key in self.units_comboboxes.keys():
-            index = self.units_comboboxes[key].findText(self.settings.units_SI[key])
+            index = self.units_comboboxes[key].findText(units_SI[key])
             self.units_comboboxes[key].setCurrentIndex(index)
             # update the units
         self.update_units()
@@ -342,22 +388,20 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         # dataframes to update: df, df_selected
         print("Updating database units...")
 
-        # convert from current_units to SI_units       
-        self.df, self.settings.units = convert_units(self.settings, self.df, self.settings.units, self.current_units,
-                                                     to_SI=True)
-        self.df_selected, self.settings.units = convert_units(self.settings, self.df_selected, self.settings.units,
-                                                              self.current_units, to_SI=True)
+        current_units = get_labels_text(self.units_labels)
 
-        # read desired units from the GUI into self.current_units
-        self.current_units = read_units(self.units_comboboxes)
+        # convert from current_units to SI_units       
+        self.df, self.units = convert_units(self.config, self.df, self.units, current_units, to_SI=True)
+        self.df_selected, self.units = convert_units(self.config, self.df_selected, self.units, current_units, to_SI=True)
+
+        # read desired units from the GUI into current_units
+        current_units = read_units(self.units_comboboxes)
 
         # convert from SI_units to current_units
-        self.df, self.settings.units = convert_units(self.settings, self.df, self.settings.units, self.current_units,
-                                                     to_SI=False)
-        self.df_selected, self.settings.units = convert_units(self.settings, self.df_selected, self.settings.units,
-                                                              self.current_units, to_SI=False)
+        self.df, self.units = convert_units(self.config, self.df, self.units, current_units, to_SI=False)
+        self.df_selected, self.units = convert_units(self.config, self.df_selected, self.units, current_units, to_SI=False)
 
-        display_units(self.units_labels, self.current_units)
+        set_labels_text(self.units_labels, current_units)
         print("Finished updating datatabase units!\n")
 
         # re-filter the database
@@ -365,6 +409,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
     def filter_database(self):
         print("Filtering database...")
+        current_units = get_labels_text(self.units_labels)
+
         if self.column_date_local:
             df_dates = select_dates(self.StartDateEdit, self.EndDateEdit, self.column_date_local, self.df)
         else:
@@ -380,11 +426,11 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 # filtering by start and end location
         if 'start position long' in self.df.columns:
             selected_items = list_selection(self.StartLocationListWidget)
-            mask_start = location_mask(self.df_locations, self.current_units, self.settings, df_dates, 'start',
+            mask_start = location_mask(self.df_locations, current_units, self.config, df_dates, 'start',
                                        selected_items)
 
             selected_items = list_selection(self.EndLocationListWidget)
-            mask_end = location_mask(self.df_locations, self.current_units, self.settings, df_dates, 'end',
+            mask_end = location_mask(self.df_locations, current_units, self.config, df_dates, 'end',
                                      selected_items)
 
             if self.LocationComboBox.currentText() == 'and':
@@ -409,6 +455,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.plot_histogram()
         if self.MapCheckBox.checkState() and self.MapCheckBox.isEnabled():
             self.generate_map()
+            # pass
         print("Figures updated!\n")
 
         self.StartTimeDoubleSpinBox.setValue(0)
@@ -450,14 +497,14 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             ax.margins(0.1, 0.1)
 
             xlabel = x.replace('_', ' ')
-            if x in self.settings.units.keys():
-                if self.settings.units[x]:
-                    xlabel = xlabel + ' (' + self.settings.units[x] + ')'
+            if x in self.units.keys():
+                if self.units[x]:
+                    xlabel = xlabel + ' (' + self.units[x] + ')'
 
             ylabel = y.replace('_', ' ')
-            if y in self.settings.units.keys():
-                if self.settings.units[y]:
-                    ylabel = ylabel + ' (' + self.settings.units[y] + ')'
+            if y in self.units.keys():
+                if self.units[y]:
+                    ylabel = ylabel + ' (' + self.units[y] + ')'
 
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
@@ -528,9 +575,9 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                             )
 
         xlabel = x.replace('_', ' ')
-        if x in self.settings.units.keys():
-            if self.settings.units[x]:
-                xlabel = xlabel + ' (' + self.settings.units[x] + ')'
+        if x in self.units.keys():
+            if self.units[x]:
+                xlabel = xlabel + ' (' + self.units[x] + ')'
         if frequency != 'all':
             xlabel = measure + ' ' + xlabel + ' / ' + frequency
 
@@ -594,8 +641,9 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         if frequency != 'all':
             timedelta = self.df_selected[self.column_date_local].max() - self.df_selected[self.column_date_local].min()
-            # this is not very precise but it should be enough to get an idea
-            df_summary_plot = df_summary_plot / timedelta.days * self.settings.timedelta_factors[frequency]
+            timedelta_factors = {'D': 1, 'W': 7, 'Y': 365,
+                                 'M': 365 / 12}  # this is not very precise but it should be enough to get an idea
+            df_summary_plot = df_summary_plot / timedelta.days * timedelta_factors[frequency]
 
         self.figure_summary.clear()
         ax = self.figure_summary.add_subplot(111)
@@ -609,16 +657,17 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         label_quantity = quantity.replace('_', ' ')
         label_quantity = measure + ' ' + label_quantity
-        if quantity in self.settings.units.keys():
-            if self.settings.units[quantity]:
-                label_quantity = label_quantity + ' (' + self.settings.units[quantity] + ')'
+
+        if quantity in self.units.keys():
+            if self.units[quantity]:
+                label_quantity = label_quantity + ' (' + self.units[quantity] + ')'
         if frequency != 'all':
             label_quantity = label_quantity + ' / ' + frequency
 
         label_category1 = category1.replace('_', ' ')
-        if category1 in self.settings.units.keys():
-            if self.settings.units[category1]:
-                label_category1 = label_category1 + ' (' + self.settings.units[category1] + ')'
+        if category1 in self.units.keys():
+            if self.units[category1]:
+                label_category1 = label_category1 + ' (' + self.units[category1] + ')'
 
         if kind == 'barh':
             ax.set_xlabel(label_quantity)
@@ -681,7 +730,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         self.df = df_save.copy()
 
         # convert to SI units before saving
-        df_save, useless_units = convert_units(self.settings, df_save, self.settings.units, self.current_units,
+        current_units = get_labels_text(self.units_labels)
+        df_save, useless_units = convert_units(self.config, df_save, self.units, current_units,
                                                to_SI=True)
 
         # save database
@@ -694,7 +744,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         for index in self.df_trace.index:
             file_name = self.df_trace.loc[index, 'file name']
             # read records file
-            file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
+            file_path = os.path.join(self.RecordsPathWidget.text(), str(file_name) + '_record.csv')
             df = self.read_records(file_path)
             # crop records by time
             # TODO: crop by database time and not start and end time from the GUI
@@ -712,6 +762,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         legend = self.LegendVariableComboBox.currentText()
         cmap_name = self.CMapComboBox.currentText()
         colour_dict = generate_colours(self.df_selected, legend, cmap_name)
+        current_units = get_labels_text(self.units_labels)
 
         self.figure_map.clear()
         ax = self.figure_map.add_subplot(111)
@@ -723,10 +774,10 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         for index in self.df_selected.iloc[0:number_of_activities].index:
             file_name = self.df_selected.loc[index, 'file name']
 
-            file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
+            file_path = os.path.join(self.RecordsPathWidget.text(), str(file_name) + '_record.csv')
             # read the csv file
             df = self.read_records(file_path)
-            df, self.settings.units = convert_units(self.settings, df, self.settings.units, self.current_units)
+            df, self.units = convert_units(self.config, df, self.units, current_units)
             # Extract location information, remove missing data, convert to degrees
             self.map_data[file_name] = df.loc[:, ['position lat', 'position long']].dropna()
             #            self.map_colours[file_name] = 'k'
@@ -750,8 +801,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         ax.axis('equal')
 
         # label axes        
-        xlabel = 'position_long (' + self.settings.units['position long'] + ')'
-        ylabel = 'position_lat (' + self.settings.units['position lat'] + ')'
+        xlabel = 'position_long (' + self.units['position long'] + ')'
+        ylabel = 'position_lat (' + self.units['position lat'] + ')'
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
@@ -813,6 +864,9 @@ class DatabaseGUI(QtWidgets.QMainWindow):
     def select_and_plot_trace(self):
         # TODO: threading
         print("Starting trace plots...")
+
+        current_units = get_labels_text(self.units_labels)
+
         self.df_trace = read_selected_table_rows(self.Table1Widget)
 
         self.figure_trace.clear()
@@ -833,11 +887,11 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
         for index in self.df_trace.index:
             file_name = self.df_trace.loc[index, 'file name']
-            file_path = os.path.join(self.records_path, str(file_name) + '_record.csv')
+            file_path = os.path.join(self.RecordsPathWidget.text(), str(file_name) + '_record.csv')
             # read the csv file
             df = self.read_records(file_path)
-            # conver to current_units
-            df, self.settings.units = convert_units(self.settings, df, self.settings.units, self.current_units,
+            # convert to current_units
+            df, self.units = convert_units(self.config, df, self.units, current_units,
                                                     to_SI=False)
             # select data based on start and end values of elapsed time
             df = select_times(self.StartTimeDoubleSpinBox, self.EndTimeDoubleSpinBox, df)
@@ -853,7 +907,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             x2 = self.TraceBottomXComboBox.currentText()
             y2 = self.TraceBottomYComboBox.currentText()
 
-            if self.TraceTopCheckBox.checkState():
+            if self.TraceTopCheckBox.checkState() and x1 != y1:
                 trace_top_plot_options = populate_plot_options(df=self.df_trace,
                                                                index=index,
                                                                legend=self.LegendVariableComboBox.currentText(),
@@ -866,14 +920,14 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                         **trace_top_plot_options)
 
                 xlabel = x1.replace('_', ' ')
-                if x1 in self.settings.units.keys():
-                    if self.settings.units[x1]:
-                        xlabel = xlabel + ' (' + self.settings.units[x1] + ')'
+                if x1 in self.units.keys():
+                    if self.units[x1]:
+                        xlabel = xlabel + ' (' + self.units[x1] + ')'
 
                 ylabel = y1.replace('_', ' ')
-                if y1 in self.settings.units.keys():
-                    if self.settings.units[y1]:
-                        ylabel = ylabel + ' (' + self.settings.units[y1] + ')'
+                if y1 in self.units.keys():
+                    if self.units[y1]:
+                        ylabel = ylabel + ' (' + self.units[y1] + ')'
 
                 if self.TraceTopAxesEqualCheckBox.checkState():
                     # set x and y axis to have the same spacing - good for GPS coordinates
@@ -886,7 +940,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 legend = ax1.legend(loc=self.LegendLocationComboBox.currentText())
                 legend.set_visible(self.LegendCheckBox.checkState())
 
-            if self.TraceBottomCheckBox.checkState():
+            if self.TraceBottomCheckBox.checkState() and x2 != y2:
                 trace_bottom_plot_options = populate_plot_options(df=self.df_trace,
                                                                   index=index,
                                                                   legend=self.LegendVariableComboBox.currentText(),
@@ -899,14 +953,14 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                         **trace_bottom_plot_options)
 
                 xlabel = x2.replace('_', ' ')
-                if x2 in self.settings.units.keys():
-                    if self.settings.units[x2]:
-                        xlabel = xlabel + ' (' + self.settings.units[x2] + ')'
+                if x2 in self.units.keys():
+                    if self.units[x2]:
+                        xlabel = xlabel + ' (' + self.units[x2] + ')'
 
                 ylabel = y2.replace('_', ' ')
-                if y2 in self.settings.units.keys():
-                    if self.settings.units[y2]:
-                        ylabel = ylabel + ' (' + self.settings.units[y2] + ')'
+                if y2 in self.units.keys():
+                    if self.units[y2]:
+                        ylabel = ylabel + ' (' + self.units[y2] + ')'
 
                 if self.TraceBottomAxesEqualCheckBox.checkState():
                     # set x and y axis to have the same spacing - good for GPS coordinates
@@ -1009,8 +1063,8 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     # file_path = os.path.abspath(os.path.join('data', 'Ana', 'database', 'Garmin-Ana-180226-1.csv'))
-    file_path = os.path.abspath(os.path.join('data', 'Ana', 'tests', 'running', 'database.csv'))
+    # file_path = os.path.abspath(os.path.join('data', 'Ana', 'tests', 'running', 'database.csv'))
     # print(file_path)
-    gui = DatabaseGUI(kind='gps', file_path=file_path)
+    gui = DatabaseGUI()
     gui.show()
     app.exec_()

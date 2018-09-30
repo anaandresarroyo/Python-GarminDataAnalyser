@@ -67,46 +67,44 @@ def populate_combobox(items_list, item_default, combobox_list):
         combobox.setCurrentIndex(index)
 
 
-def populate_comboboxes(numeric_comboboxes, settings, df, units_comboboxes, plot_comboboxes, column_comboboxes,
-                        trace_comboboxes, TraceModeComboBox):
-    # populate comboboxes based on the database columns DatabaseSettings.py
+def populate_comboboxes(config, df, numeric_comboboxes, units_comboboxes, trace_comboboxes, comboboxes):
+    default_value_keys = [x[0] for x in config.items('DEFAULT VALUES')]
 
-    for key in numeric_comboboxes.keys():
-        options = []
-        for item in settings.numeric_options[key]:
-            if item in df.columns:
-                options.append(item)
-        for column in df.columns:
-            if df[column].dtype in ['float64', 'int64', 'datetime64[ns]']:
-                options.append(column)
+    # TODO: also include datetime.time values
+    options = df.select_dtypes(include=['float64', 'int64', 'datetime64[ns]']).columns.values
+    for key, value in numeric_comboboxes.items():
+        if key in default_value_keys:
+            default_value = config['DEFAULT VALUES'][key]
+        else:
+            default_value = options[0]
         populate_combobox(sorted(np.unique(options)),
-                          settings.numeric_default[key],
-                          numeric_comboboxes[key])
+                          default_value,
+                          value)
 
-    for key in units_comboboxes.keys():
-        populate_combobox(sorted(settings.unit_factors[key].keys()),
-                          settings.units_SI[key],
-                          [units_comboboxes[key]])
+    for key, value in units_comboboxes.items():
+        options = [x[0] for x in config.items('%s UNIT FACTORS' % key.upper())]
+        populate_combobox(options,
+                          options[0],  # TODO: choose the one with value 1, in case it's not the first
+                          [value])
 
-    for key in plot_comboboxes.keys():
-        populate_combobox(settings.options[key],
-                          settings.default[key],
-                          plot_comboboxes[key])
+    for key, value in trace_comboboxes.items():
+        if key in default_value_keys:
+            default_value = config['DEFAULT VALUES'][key]
+        else:
+            default_value = None
+        populate_combobox([default_value],
+                          default_value,
+                          value)
 
-    for key in column_comboboxes.keys():
-        populate_combobox(sorted(list(set(settings.column_options[key]) & set(df.columns))),
-                          settings.column_default[key],
-                          column_comboboxes[key])
-
-    for key in trace_comboboxes.keys():
-        populate_combobox([settings.trace_default[key]],
-                          settings.trace_default[key],
-                          trace_comboboxes[key])
-
-    trace_modes = ['Single sport', 'Multi sport']
-    populate_combobox(trace_modes,
-                      'Single sport',
-                      [TraceModeComboBox])
+    for key, value in comboboxes.items():
+        options = list(filter(None, [x.strip() for x in config['GUI OPTIONS'][key].splitlines()]))
+        if key in default_value_keys:
+            default_value = config['DEFAULT VALUES'][key]
+        else:
+            default_value = options[0]
+        populate_combobox(options,
+                          default_value,
+                          value)
 
 
 def populate_dates(column_date_local, df, start_date_edit, end_date_edit):
@@ -123,10 +121,7 @@ def read_units(units_comboboxes):
     return units
 
 
-def display_units(units_labels, units):
-    """Display units on the GUI labels."""
-    for key in units_labels.keys():
-        units_labels[key].setText(units[key])
+
 
 
 def list_selection(widget):
@@ -191,3 +186,15 @@ def read_selected_table_rows(table):
     df = read_table(table, selected_rows)
     # return the dataframe
     return df
+
+
+def get_labels_text(labels):
+    text = dict()
+    for key, value in labels.items():
+        text[key] = value.text()
+    return text
+
+
+def set_labels_text(labels, text):
+    for key in labels.keys():
+        labels[key].setText(text[key])

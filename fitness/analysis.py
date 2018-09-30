@@ -3,9 +3,10 @@ import pandas as pd
 from fitness.gps import calculate_distance
 
 
-def convert_units(settings, df, dataframe_units, desired_units, to_SI=False):
+def convert_units(config, df, dataframe_units, desired_units, to_SI=False):
     # if to_SI = False: convert from SI_units to dataframe_units
     # if to_SI = True: convert from dataframe_units to SI_units
+
     if to_SI:
         factor = -1.
     else:
@@ -13,29 +14,11 @@ def convert_units(settings, df, dataframe_units, desired_units, to_SI=False):
 
     # TODO: automate this more
     for column_name in df.columns:
-        if 'elapsed time' in column_name:
-            dataframe_units[column_name] = desired_units['elapsed time']
-            df[column_name] = df[column_name] * (
-                    settings.unit_factors['elapsed time'][desired_units['elapsed time']] ** factor)
-        if 'position' in column_name:
-            dataframe_units[column_name] = desired_units['position']
-            df[column_name] = df[column_name] * (settings.unit_factors['position'][desired_units['position']] ** factor)
-        if 'distance' in column_name:
-            dataframe_units[column_name] = desired_units['distance']
-            df[column_name] = df[column_name] * (settings.unit_factors['distance'][desired_units['distance']] ** factor)
-        if 'speed' in column_name:
-            dataframe_units[column_name] = desired_units['speed']
-            if 'min/' in desired_units['speed']:
-                if to_SI:
-                    df[column_name] = 60 / df[column_name]
-                    df[column_name] = df[column_name] * (
-                            settings.unit_factors['speed'][desired_units['speed']] ** factor)
-                else:
-                    df[column_name] = df[column_name] * (
-                            settings.unit_factors['speed'][desired_units['speed']] ** factor)
-                    df[column_name] = 60 / df[column_name]
-            else:
-                df[column_name] = df[column_name] * (settings.unit_factors['speed'][desired_units['speed']] ** factor)
+        for quantity in ['elapsed time', 'position', 'distance', 'speed']:
+            if quantity in column_name:
+                dataframe_units[column_name] = desired_units[quantity]
+                df[column_name] = df[column_name] * (
+                        eval(config['%s UNIT FACTORS' % quantity.upper()][desired_units[quantity]]) ** factor)
     return df, dataframe_units
 
 
@@ -59,7 +42,7 @@ def generate_mask(df, column, selected_options):
     # TODO: allow several gear for the same activity - maybe?
 
 
-def location_mask(df_locations, current_units, settings, df, when, selected_options):
+def location_mask(df_locations, current_units, config, df, when, selected_options):
     # TODO: fix error with weird characters such as "ñ" in "Logroño"
     if 'any' in selected_options:
         mask = True
@@ -71,10 +54,14 @@ def location_mask(df_locations, current_units, settings, df, when, selected_opti
             lat_deg = df_locations.loc[df_locations['name'] == option, 'position_lat']
             distance = calculate_distance(df[when + '_position_long'], df[when + '_position_lat'],
                                           units_gps=current_units['position'], units_d='m', mode='fixed',
-                                          fixed_lon=lon_deg * settings.unit_factors['position'][
+                                          fixed_lon=lon_deg * config['POSITION UNIT FACTORS'][
                                               current_units['position']] / 0.00000008381903171539306640625,
-                                          fixed_lat=lat_deg * settings.unit_factors['position'][
+                                          fixed_lat=lat_deg * config['POSITION UNIT FACTORS'][
                                               current_units['position']] / 0.00000008381903171539306640625,
+                                          # fixed_lon=lon_deg * settings.unit_factors['position'][
+                                          #     current_units['position']] / 0.00000008381903171539306640625,
+                                          # fixed_lat=lat_deg * settings.unit_factors['position'][
+                                          #     current_units['position']] / 0.00000008381903171539306640625,
                                           )
             option_mask = distance.abs() <= radius
             mask = mask | option_mask
