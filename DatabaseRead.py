@@ -509,6 +509,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 legend.set_visible(self.LegendCheckBox.checkState())
 
             ax.set_title(self.PlotTitleTextWidget.text())
+            ax.grid(c='k', alpha=0.5)
             self.canvas_scatter.draw()
 
     def plot_histogram(self):
@@ -585,6 +586,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 legend.set_visible(self.LegendCheckBox.checkState())
 
             ax.set_title(self.PlotTitleTextWidget.text())
+            ax.grid(c='k', alpha=0.5)
             self.canvas_hist.draw()
 
     def plot_summary(self):
@@ -673,6 +675,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             ax.set_ylabel(label_quantity)
 
         ax.set_title(self.PlotTitleTextWidget.text())
+        ax.grid(c='k', alpha=0.5)
         self.canvas_summary.draw()
 
     def read_records(self, file_path):
@@ -797,12 +800,13 @@ class DatabaseGUI(QtWidgets.QMainWindow):
         ax.axis('equal')
 
         # label axes        
-        xlabel = 'position_long (' + self.units['position long'] + ')'
-        ylabel = 'position_lat (' + self.units['position lat'] + ')'
+        xlabel = 'position long (' + self.units['position long'] + ')'
+        ylabel = 'position lat (' + self.units['position lat'] + ')'
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
         ax.set_title(self.PlotTitleTextWidget.text())
+        ax.grid(c='k', alpha=0.5)
         self.canvas_map.draw()
 
         # TODO: calculate the required zoom too
@@ -931,10 +935,11 @@ class DatabaseGUI(QtWidgets.QMainWindow):
 
                 ax1.set_xlabel(xlabel)
                 ax1.set_ylabel(ylabel)
-                ax1.autoscale(enable=True, axis='both', tight='False')
+                ax1.autoscale(enable=True, axis='both', tight=False)
                 ax1.margins(0.1, 0.1)
                 legend = ax1.legend(loc=self.LegendLocationComboBox.currentText())
                 legend.set_visible(self.LegendCheckBox.checkState())
+                ax1.grid(c='k', alpha=0.5)
 
             if self.TraceBottomCheckBox.checkState() and x2 != y2:
                 trace_bottom_plot_options = populate_plot_options(df=self.df_trace,
@@ -968,8 +973,10 @@ class DatabaseGUI(QtWidgets.QMainWindow):
                 ax2.margins(0.1, 0.1)
                 legend = ax2.legend(loc=self.LegendLocationComboBox.currentText())
                 legend.set_visible(self.LegendCheckBox.checkState())
+                ax2.grid(c='k', alpha=0.5)
 
         ax.set_title(self.PlotTitleTextWidget.text())
+        ax.grid(c='k', alpha=0.5)
         self.canvas_trace.draw()
         print("Finished trace plots!\n")
 
