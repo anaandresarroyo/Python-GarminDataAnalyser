@@ -359,6 +359,7 @@ class DatabaseGUI(QtWidgets.QMainWindow):
             df['year month'] = temp.dt.year.apply(str) + '-' + temp.dt.month.apply(str).str.pad(2, fillchar='0')
             df['year month day'] = df['year month'] + '-' + temp.dt.day.apply(str).str.pad(2, fillchar='0')
             df['year'] = temp.dt.year
+            df['date'] = temp.dt.date
 
         if 'Amount' in df.columns:
             df.sort_values(self.column_date, inplace=True)
