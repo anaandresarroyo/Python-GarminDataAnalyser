@@ -7,7 +7,7 @@ Matplotlib settings for Surface Pro 4
 
 import matplotlib
 
-matplotlib.rcParams.update({'font.size': 30})
+# matplotlib.rcParams.update({'font.size': 30})
 
 matplotlib.rcParams.update({'lines.linewidth': 5})
 matplotlib.rcParams.update({'axes.grid': True})

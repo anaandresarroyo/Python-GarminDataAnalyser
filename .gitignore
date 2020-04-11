@@ -1,2 +1,6 @@
 DatabaseWrite.py
 DatabaseRead.py
+venv36/
+data/
+__pycache__/
+.idea/
